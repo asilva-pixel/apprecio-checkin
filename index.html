@@ -217,9 +217,21 @@
         <span class="badge badge-opt">Opcional</span>
       </div>
       <div class="bloque-body">
+        <div style="display:flex;gap:10px;margin-bottom:10px;">
+          <button class="destrabe-tipo-pill" id="btn-apoyo-rapido" onclick="agregarDestrabeRapido('apoyo')" style="flex:1;padding:12px 14px;text-align:left;border-radius:10px;">
+            <span style="display:block;font-size:18px;margin-bottom:4px;">🔧</span>
+            <strong style="font-size:12px;">Apoyo concreto</strong><br>
+            <span style="font-weight:400;font-size:11px;">El líder tiene que hacer o resolver algo</span>
+          </button>
+          <button class="destrabe-tipo-pill" id="btn-coaching-rapido" onclick="agregarDestrabeRapido('coaching')" style="flex:1;padding:12px 14px;text-align:left;border-radius:10px;">
+            <span style="display:block;font-size:18px;margin-bottom:4px;">💬</span>
+            <strong style="font-size:12px;">Espacio de conversación</strong><br>
+            <span style="font-weight:400;font-size:11px;">Necesito que me acompañes a pensar</span>
+          </button>
+        </div>
         <button class="destrabe-none" id="opt-ninguno" onclick="toggleNinguno()">Por ahora no necesito nada del líder</button>
         <div id="destrabres-container" style="margin-top:10px;"></div>
-        <button class="add-btn purple" id="btn-add-destrabe" onclick="agregarDestrabe()" style="margin-top:6px;">+ Agregar destrabe</button>
+        <button class="add-btn purple" id="btn-add-destrabe" onclick="agregarDestrabe()" style="margin-top:6px;display:none;">+ Agregar otro destrabe</button>
       </div>
     </div>
 
@@ -550,21 +562,22 @@ function toggleNinguno() {
   }
 }
 
-function agregarDestrabe() {
+function agregarDestrabeRapido(tipo) {
   ningunoActivo = false;
   document.getElementById('opt-ninguno').classList.remove('sel');
+  document.getElementById('btn-add-destrabe').style.display = 'flex';
   destrabeCount++;
   const idx = destrabeCount;
   const cont = document.getElementById('destrabres-container');
   const div = document.createElement('div');
   div.className = 'destrabe-item';
   div.id = 'destrabe-item-' + idx;
+  const tipoLabel = tipo === 'apoyo' ? '🔧 Apoyo concreto' : '💬 Espacio de conversación';
   div.innerHTML = `
     <button class="destrabe-remove" onclick="eliminarDestrabe(${idx})">✕</button>
-    <span class="field-label">Tipo</span>
-    <div class="destrabe-tipo-pills" id="dtipo-${idx}" style="margin-bottom:10px;">
-      <button class="destrabe-tipo-pill" onclick="setDestrabeTipo(this,'apoyo',${idx})">🔧 Apoyo concreto</button>
-      <button class="destrabe-tipo-pill" onclick="setDestrabeTipo(this,'coaching',${idx})">💬 Espacio de conversación</button>
+    <div class="destrabe-tipo-pills" id="dtipo-${idx}" data-tipo="${tipo}" style="margin-bottom:10px;">
+      <button class="destrabe-tipo-pill ${tipo === 'apoyo' ? 'sel-red' : 'sel-purple'}" onclick="setDestrabeTipo(this,'apoyo',${idx})">🔧 Apoyo concreto</button>
+      <button class="destrabe-tipo-pill ${tipo === 'coaching' ? 'sel-purple' : ''}" onclick="setDestrabeTipo(this,'coaching',${idx})">💬 Espacio de conversación</button>
     </div>
     <span class="field-label">¿Qué necesitas?</span>
     <textarea class="textarea destrabe-desc-input" rows="3" placeholder="Describe con claridad qué necesitas del líder..." style="margin-bottom:10px;"></textarea>
@@ -579,6 +592,11 @@ function agregarDestrabe() {
       </div>
     </div>`;
   cont.appendChild(div);
+}
+
+
+function agregarDestrabe() {
+  agregarDestrabeRapido('apoyo');
 }
 
 function setDestrabeTipo(btn, tipo, idx) {
