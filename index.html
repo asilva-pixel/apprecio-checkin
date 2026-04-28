@@ -480,7 +480,7 @@ function handleCredentialResponse(response) {
   usuarioActual = { email, nombre: payload.name, foto: payload.picture };
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
-  document.getElementById('user-name').textContent = payload.given_name;
+  document.getElementById('user-name').textContent = decodeURIComponent(escape(payload.given_name));
   iniciarApp();
 }
 
