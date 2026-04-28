@@ -71,14 +71,14 @@
   .tip-box { background: #fdf6f8; border-left: 3px solid var(--red); border-radius: 0 8px 8px 0; padding: 10px 14px; margin-top: 12px; font-size: 11px; color: var(--subtle); font-style: italic; line-height: 1.6; }
   .add-btn { font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 600; color: var(--red); background: none; border: none; cursor: pointer; padding: 6px 0; display: flex; align-items: center; gap: 6px; margin-top: 10px; }
   .add-btn.purple { color: var(--purple); }
-  .destrabe-opts { display: flex; gap: 10px; margin-bottom: 10px; }
-  .destrabe-opt { flex: 1; border: 0.5px solid var(--border); border-radius: 10px; padding: 12px 14px; cursor: pointer; font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 500; color: var(--subtle); background: var(--gray); text-align: left; }
-  .destrabe-opt.sel-red { border-color: var(--red); background: #fff5f7; color: var(--red); }
-  .destrabe-opt.sel-purple { border-color: var(--purple); background: #f5f4fc; color: var(--purple); }
-  .destrabe-opt-icon { font-size: 18px; margin-bottom: 5px; display: block; }
-  .destrabe-none { border: 0.5px dashed var(--border); border-radius: 10px; padding: 10px 14px; text-align: center; font-size: 12px; color: var(--subtle); cursor: pointer; background: none; font-family: 'Montserrat', sans-serif; font-weight: 500; width: 100%; }
+  .destrabe-item { background: var(--gray); border: 0.5px solid #e8e6f0; border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; position: relative; }
+  .destrabe-tipo-pills { display: flex; gap: 8px; margin-bottom: 10px; }
+  .destrabe-tipo-pill { padding: 6px 14px; border-radius: 20px; border: 0.5px solid var(--border); font-size: 11px; font-weight: 600; cursor: pointer; font-family: 'Montserrat', sans-serif; color: var(--subtle); background: white; }
+  .destrabe-tipo-pill.sel-red { border-color: var(--red); background: #fff5f7; color: var(--red); }
+  .destrabe-tipo-pill.sel-purple { border-color: var(--purple); background: #f5f4fc; color: var(--purple); }
+  .destrabe-none { border: 0.5px dashed var(--border); border-radius: 10px; padding: 10px 14px; text-align: center; font-size: 12px; color: var(--subtle); cursor: pointer; background: none; font-family: 'Montserrat', sans-serif; font-weight: 500; width: 100%; margin-bottom: 10px; }
   .destrabe-none.sel { border-style: solid; border-color: var(--purple); color: var(--purple); }
-  .destrabe-detail { margin-top: 12px; padding: 14px 16px; background: var(--gray); border-radius: 10px; border: 0.5px solid #e8e6f0; display: none; }
+  .destrabe-remove { position: absolute; top: 10px; right: 12px; background: none; border: none; cursor: pointer; font-size: 16px; color: var(--subtle); font-family: 'Montserrat', sans-serif; }
   .field-label { font-size: 10px; font-weight: 700; color: var(--subtle); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; display: block; }
   .textarea { font-family: 'Montserrat', sans-serif; font-size: 13px; padding: 10px 12px; border: 0.5px solid var(--border); border-radius: 8px; color: var(--dark); background: white; width: 100%; resize: none; line-height: 1.6; }
   .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--subtle); cursor: pointer; margin-top: 10px; }
@@ -217,35 +217,9 @@
         <span class="badge badge-opt">Opcional</span>
       </div>
       <div class="bloque-body">
-        <div class="destrabe-opts">
-          <button class="destrabe-opt" id="opt-apoyo" onclick="selectDestrabe('apoyo')">
-            <span class="destrabe-opt-icon">🔧</span>
-            <strong>Apoyo concreto</strong><br>
-            <span style="font-weight:400;font-size:11px;">El líder tiene que hacer o resolver algo</span>
-          </button>
-          <button class="destrabe-opt" id="opt-coaching" onclick="selectDestrabe('coaching')">
-            <span class="destrabe-opt-icon">💬</span>
-            <strong>Espacio de conversación</strong><br>
-            <span style="font-weight:400;font-size:11px;">Necesito que me acompañes a pensar</span>
-          </button>
-        </div>
-        <button class="destrabe-none" id="opt-ninguno" onclick="selectDestrabe('ninguno')">Por ahora no necesito nada del líder</button>
-        <div class="destrabe-detail" id="destrabe-detail">
-          <span class="field-label">¿Qué necesitas?</span>
-          <textarea class="textarea" id="destrabe-desc" rows="3" placeholder="Describe con claridad qué necesitas del líder..." style="margin-bottom:10px;"></textarea>
-          <div id="destrabe-ac-check" style="display:none;">
-            <label class="checkbox-row">
-              <input type="checkbox" id="check-destrabe-ac" onchange="toggleDestrabeAc()" />
-              <span>¿Esto se traduce en un accionable para el líder? (con fecha y seguimiento)</span>
-            </label>
-            <div id="destrabe-ac-row" style="display:none;margin-top:10px;">
-              <div style="display:grid;grid-template-columns:1fr 130px;gap:8px;">
-                <input class="ac-input" id="destrabe-ac-desc" placeholder="Describe el accionable del líder..." />
-                <input class="ac-input" id="destrabe-ac-fecha" type="date" />
-              </div>
-            </div>
-          </div>
-        </div>
+        <button class="destrabe-none" id="opt-ninguno" onclick="toggleNinguno()">Por ahora no necesito nada del líder</button>
+        <div id="destrabres-container" style="margin-top:10px;"></div>
+        <button class="add-btn purple" id="btn-add-destrabe" onclick="agregarDestrabe()" style="margin-top:6px;">+ Agregar destrabe</button>
       </div>
     </div>
 
@@ -557,29 +531,84 @@ function agregarBullet(btn) {
   bullets.insertBefore(row, btn);
 }
 
-function selectDestrabe(tipo) {
-  destrabeTipo = tipo;
-  document.getElementById('opt-apoyo').className = 'destrabe-opt';
-  document.getElementById('opt-coaching').className = 'destrabe-opt';
-  document.getElementById('opt-ninguno').className = 'destrabe-none';
-  if (tipo === 'ninguno') {
-    document.getElementById('destrabe-detail').style.display = 'none';
-    document.getElementById('opt-ninguno').classList.add('sel');
-    return;
-  }
-  document.getElementById('destrabe-detail').style.display = 'block';
-  if (tipo === 'apoyo') {
-    document.getElementById('opt-apoyo').classList.add('sel-red');
-    document.getElementById('destrabe-ac-check').style.display = 'block';
+let ningunoActivo = false;
+let destrabeCount = 0;
+
+function toggleNinguno() {
+  ningunoActivo = !ningunoActivo;
+  const btn = document.getElementById('opt-ninguno');
+  const cont = document.getElementById('destrabres-container');
+  const addBtn = document.getElementById('btn-add-destrabe');
+  if (ningunoActivo) {
+    btn.classList.add('sel');
+    cont.innerHTML = '';
+    addBtn.style.display = 'none';
+    destrabeCount = 0;
   } else {
-    document.getElementById('opt-coaching').classList.add('sel-purple');
-    document.getElementById('destrabe-ac-check').style.display = 'none';
-    document.getElementById('destrabe-ac-row').style.display = 'none';
+    btn.classList.remove('sel');
+    addBtn.style.display = 'flex';
   }
 }
 
-function toggleDestrabeAc() {
-  document.getElementById('destrabe-ac-row').style.display = document.getElementById('check-destrabe-ac').checked ? 'block' : 'none';
+function agregarDestrabe() {
+  ningunoActivo = false;
+  document.getElementById('opt-ninguno').classList.remove('sel');
+  destrabeCount++;
+  const idx = destrabeCount;
+  const cont = document.getElementById('destrabres-container');
+  const div = document.createElement('div');
+  div.className = 'destrabe-item';
+  div.id = 'destrabe-item-' + idx;
+  div.innerHTML = `
+    <button class="destrabe-remove" onclick="eliminarDestrabe(${idx})">✕</button>
+    <span class="field-label">Tipo</span>
+    <div class="destrabe-tipo-pills" id="dtipo-${idx}" style="margin-bottom:10px;">
+      <button class="destrabe-tipo-pill" onclick="setDestrabeTipo(this,'apoyo',${idx})">🔧 Apoyo concreto</button>
+      <button class="destrabe-tipo-pill" onclick="setDestrabeTipo(this,'coaching',${idx})">💬 Espacio de conversación</button>
+    </div>
+    <span class="field-label">¿Qué necesitas?</span>
+    <textarea class="textarea destrabe-desc-input" rows="3" placeholder="Describe con claridad qué necesitas del líder..." style="margin-bottom:10px;"></textarea>
+    <label class="checkbox-row">
+      <input type="checkbox" class="check-ac" onchange="toggleDestrabeAcItem(this,${idx})" />
+      <span>¿Esto se traduce en un accionable para el líder?</span>
+    </label>
+    <div id="destrabe-ac-row-${idx}" style="display:none;margin-top:10px;">
+      <div style="display:grid;grid-template-columns:1fr 130px;gap:8px;">
+        <input class="ac-input destrabe-ac-desc" placeholder="Describe el accionable del líder..." />
+        <input class="ac-input destrabe-ac-fecha" type="date" />
+      </div>
+    </div>`;
+  cont.appendChild(div);
+}
+
+function setDestrabeTipo(btn, tipo, idx) {
+  btn.closest('.destrabe-tipo-pills').querySelectorAll('.destrabe-tipo-pill').forEach(p => p.className = 'destrabe-tipo-pill');
+  btn.classList.add(tipo === 'apoyo' ? 'sel-red' : 'sel-purple');
+  document.getElementById('dtipo-' + idx).dataset.tipo = tipo;
+}
+
+function toggleDestrabeAcItem(cb, idx) {
+  document.getElementById('destrabe-ac-row-' + idx).style.display = cb.checked ? 'block' : 'none';
+}
+
+function eliminarDestrabe(idx) {
+  document.getElementById('destrabe-item-' + idx)?.remove();
+}
+
+function recolectarDestrabres() {
+  const destrabres = [];
+  if (ningunoActivo) return destrabres;
+  document.querySelectorAll('.destrabe-item').forEach(item => {
+    const tipoPills = item.querySelector('.destrabe-tipo-pills');
+    const tipo = tipoPills?.dataset.tipo || '';
+    const desc = item.querySelector('.destrabe-desc-input')?.value?.trim();
+    if (!desc) return;
+    const esAc = item.querySelector('.check-ac')?.checked || false;
+    const acDesc = item.querySelector('.destrabe-ac-desc')?.value?.trim() || '';
+    const acFecha = item.querySelector('.destrabe-ac-fecha')?.value || '';
+    destrabres.push({ tipo, descripcion: desc, es_accionable: esAc, accionable_descripcion: acDesc, accionable_fecha: acFecha });
+  });
+  return destrabres;
 }
 
 function setTipo(btn, tipo) {
@@ -686,13 +715,7 @@ async function enviarCheckin() {
     n2_rut: '', n3_rut: '', n4_rut: '', n5_rut: '',
     accionables_anteriores: accionablesAnteriores,
     focos: recolectarFocos(),
-    destrabe: {
-      tipo: destrabeTipo || 'ninguno',
-      descripcion: document.getElementById('destrabe-desc')?.value?.trim() || '',
-      es_accionable: document.getElementById('check-destrabe-ac')?.checked || false,
-      accionable_descripcion: document.getElementById('destrabe-ac-desc')?.value?.trim() || '',
-      accionable_fecha: document.getElementById('destrabe-ac-fecha')?.value || ''
-    },
+    destrabe: recolectarDestrabres(),
     pilares: recolectarPilares(),
     accionables_nuevos: recolectarAcNuevos()
   };
