@@ -5,30 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Check-in Mensual de Desempeño · Apprecio</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root {
-    --red: #FA345E;
-    --purple: #8B85D4;
-    --purple-light: #f0eef8;
-    --green: #1a8a45;
-    --green-light: #e6f9ee;
-    --yellow: #b07a00;
-    --yellow-light: #fff8e6;
-    --dark: #1a1a1a;
-    --gray: #f7f6f8;
-    --border: #e2e0e8;
-    --text: #444;
-    --subtle: #999;
+    --red: #FA345E; --purple: #8B85D4; --purple-light: #f0eef8;
+    --green: #1a8a45; --green-light: #e6f9ee; --yellow: #b07a00;
+    --yellow-light: #fff8e6; --dark: #1a1a1a; --gray: #f7f6f8;
+    --border: #e2e0e8; --text: #444; --subtle: #999;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Montserrat', sans-serif; background: var(--gray); min-height: 100vh; color: var(--dark); }
-  .header { background: var(--red); padding: 24px 32px 20px; position: relative; overflow: hidden; }
-  .header h1 { font-size: 20px; font-weight: 700; color: white; position: relative; z-index: 1; }
-  .header p { font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 4px; font-weight: 500; position: relative; z-index: 1; text-transform: uppercase; letter-spacing: 0.8px; }
-  .header-meta { margin-top: 16px; position: relative; z-index: 1; display: flex; align-items: center; gap: 12px; }
-  .header-meta label { font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 500; }
-  .mes-select { font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700; color: var(--red); background: white; border: none; border-radius: 8px; padding: 7px 14px; cursor: pointer; }
+  .login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; flex-direction: column; gap: 24px; padding: 20px; }
+  .login-card { background: white; border-radius: 16px; border: 0.5px solid var(--border); padding: 40px 36px; max-width: 400px; width: 100%; text-align: center; }
+  .login-logo { width: 48px; height: 48px; border-radius: 12px; background: var(--red); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; }
+  .login-logo svg { width: 24px; height: 24px; fill: white; }
+  .login-title { font-size: 18px; font-weight: 700; color: var(--dark); margin-bottom: 6px; }
+  .login-sub { font-size: 12px; color: var(--subtle); margin-bottom: 28px; line-height: 1.6; }
+  .login-error { background: #fff0f3; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--red); margin-top: 16px; display: none; }
+  .header { background: var(--red); padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; position: relative; overflow: hidden; }
   .header-orn { position: absolute; right: 0; top: 0; pointer-events: none; }
+  .header-left { position: relative; z-index: 1; }
+  .header-label { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.7); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+  .header-title { font-size: 18px; font-weight: 700; color: white; }
+  .header-user { position: relative; z-index: 1; display: flex; align-items: center; gap: 10px; }
+  .user-name { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.9); }
+  .logout-btn { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 600; color: var(--red); background: white; border: none; border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+  .mes-select { font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700; color: var(--red); background: white; border: none; border-radius: 8px; padding: 7px 14px; cursor: pointer; }
   .main { max-width: 740px; margin: 0 auto; padding: 24px 20px 80px; }
   .selector-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
   .selector-card { background: white; border-radius: 12px; border: 0.5px solid var(--border); padding: 16px 18px; }
@@ -115,263 +117,273 @@
   .success-screen h2 { font-size: 20px; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
   .success-screen p { font-size: 13px; color: var(--subtle); line-height: 1.6; }
   .btn-nuevo { margin-top: 24px; padding: 12px 24px; border-radius: 10px; border: 0.5px solid var(--border); background: white; font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); cursor: pointer; }
+  .btn-dashboard { margin-top: 12px; padding: 12px 24px; border-radius: 10px; border: none; background: var(--red); font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600; color: white; cursor: pointer; text-decoration: none; display: inline-block; }
   input[type="date"] { font-family: 'Montserrat', sans-serif; }
   @media (max-width: 600px) {
     .selector-grid { grid-template-columns: 1fr; }
     .conducta-grid { grid-template-columns: 1fr; }
     .ac-nuevo-grid { grid-template-columns: 1fr; }
-    .destrabe-opts { flex-direction: column; }
   }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-orn">
-    <svg width="120" height="80" viewBox="0 0 120 80" fill="none">
-      <rect x="80" width="40" height="40" fill="rgba(255,255,255,0.10)"/>
-      <rect x="40" width="40" height="40" fill="rgba(255,255,255,0.06)"/>
-      <rect x="80" y="40" width="40" height="40" fill="rgba(255,255,255,0.14)"/>
-      <rect x="40" y="40" width="40" height="40" fill="rgba(255,255,255,0.08)"/>
-    </svg>
-  </div>
-  <p>Feedback Continuo Apprecio</p>
-  <h1>Check-in Mensual de Desempeño</h1>
-  <div class="header-meta">
-    <label>Mes correspondiente:</label>
-    <select class="mes-select" id="mes-select"></select>
+<!-- LOGIN -->
+<div id="login-screen" class="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+    </div>
+    <div class="login-title">Sistema de Feedback Continuo</div>
+    <div class="login-sub">Inicia sesión con tu cuenta de Apprecio para acceder al formulario de check-in mensual.</div>
+    <div id="g_id_signin"></div>
+    <div class="login-error" id="login-error">Solo cuentas de Apprecio o Dcanje pueden acceder a este sistema.</div>
   </div>
 </div>
 
-<div class="main">
-
-  <div class="selector-grid" id="selector-grid">
-    <div class="selector-card">
-      <label>Líder</label>
-      <select id="lider-select" onchange="onLiderChange()">
-        <option value="">Cargando líderes...</option>
-      </select>
-      <div class="persona-info" id="lider-info"></div>
+<!-- APP -->
+<div id="app" style="display:none;">
+  <div class="header">
+    <div class="header-orn">
+      <svg width="120" height="80" viewBox="0 0 120 80" fill="none">
+        <rect x="80" width="40" height="40" fill="rgba(255,255,255,0.10)"/>
+        <rect x="40" width="40" height="40" fill="rgba(255,255,255,0.06)"/>
+        <rect x="80" y="40" width="40" height="40" fill="rgba(255,255,255,0.14)"/>
+        <rect x="40" y="40" width="40" height="40" fill="rgba(255,255,255,0.08)"/>
+      </svg>
     </div>
-    <div class="selector-card">
-      <label>Colaborador</label>
-      <select id="colab-select" onchange="onColabChange()" disabled>
-        <option value="">Selecciona un líder primero</option>
-      </select>
-      <div class="persona-info" id="colab-info"></div>
+    <div class="header-left">
+      <div class="header-label">Feedback Continuo Apprecio</div>
+      <div class="header-title">Check-in Mensual de Desempeño</div>
+    </div>
+    <div class="header-user">
+      <select class="mes-select" id="mes-select"></select>
+      <span class="user-name" id="user-name"></span>
+      <button class="logout-btn" onclick="logout()">Salir</button>
     </div>
   </div>
 
-  <div id="formulario" style="display:none;">
-
-    <!-- BLOQUE 0 -->
-    <div class="bloque" id="bloque-0">
-      <div class="bloque-header">
-        <div class="bloque-num">0</div>
-        <div>
-          <div class="bloque-titulo">Seguimiento de accionables anteriores</div>
-          <div class="bloque-sub">Accionables activos del check-in anterior</div>
-        </div>
-        <span class="badge badge-req">Obligatorio</span>
+  <div class="main">
+    <div class="selector-grid" id="selector-grid">
+      <div class="selector-card">
+        <label>Líder</label>
+        <select id="lider-select" onchange="onLiderChange()">
+          <option value="">Cargando líderes...</option>
+        </select>
+        <div class="persona-info" id="lider-info"></div>
       </div>
-      <div class="bloque-body">
-        <div id="ac-ant-container"><div class="loading">Cargando accionables...</div></div>
-      </div>
-    </div>
-
-    <!-- BLOQUE 1 -->
-    <div class="bloque" id="bloque-1">
-      <div class="bloque-header">
-        <div class="bloque-num">1</div>
-        <div>
-          <div class="bloque-titulo">Foco del mes</div>
-          <div class="bloque-sub">¿En qué está la persona? ¿Cuáles son sus prioridades?</div>
-        </div>
-        <span class="badge badge-req">Obligatorio</span>
-      </div>
-      <div class="bloque-body" id="focos-container">
-        <div class="foco-item">
-          <div class="foco-row">
-            <div class="foco-num">1</div>
-            <input class="foco-titulo-input" placeholder="Nombre del proyecto o área de foco..." />
-          </div>
-          <div class="foco-bullets">
-            <div class="foco-bullet-row"><div class="bullet-dot"></div><input class="bullet-input" placeholder="Prioridad, avance o contexto relevante..." /></div>
-            <div class="foco-bullet-row"><div class="bullet-dot"></div><input class="bullet-input" placeholder="Agrega otro punto..." /></div>
-            <button class="add-btn" style="font-size:11px;margin-left:13px;" onclick="agregarBullet(this)">+ Agregar punto</button>
-          </div>
-        </div>
-        <div class="tip-box">💡 <strong>Recomendación:</strong> idealmente no más de 4 focos por mes. El multifoco es un riesgo para la productividad y eventualmente una señal de que falta priorización.</div>
-        <button class="add-btn purple" style="margin-top:12px;" onclick="agregarFoco()">+ Agregar foco</button>
+      <div class="selector-card">
+        <label>Colaborador</label>
+        <select id="colab-select" onchange="onColabChange()" disabled>
+          <option value="">Selecciona un líder primero</option>
+        </select>
+        <div class="persona-info" id="colab-info"></div>
       </div>
     </div>
 
-    <!-- BLOQUE 2 -->
-    <div class="bloque" id="bloque-2">
-      <div class="bloque-header">
-        <div class="bloque-num">2</div>
-        <div>
-          <div class="bloque-titulo">Destrabe</div>
-          <div class="bloque-sub">¿Qué necesita del líder para avanzar?</div>
-        </div>
-        <span class="badge badge-opt">Opcional</span>
-      </div>
-      <div class="bloque-body">
-        <div style="display:flex;gap:10px;margin-bottom:10px;">
-          <button class="destrabe-tipo-pill" id="btn-apoyo-rapido" onclick="agregarDestrabeRapido('apoyo')" style="flex:1;padding:12px 14px;text-align:left;border-radius:10px;">
-            <span style="display:block;font-size:18px;margin-bottom:4px;">🔧</span>
-            <strong style="font-size:12px;">Apoyo concreto</strong><br>
-            <span style="font-weight:400;font-size:11px;">El líder tiene que hacer o resolver algo</span>
-          </button>
-          <button class="destrabe-tipo-pill" id="btn-coaching-rapido" onclick="agregarDestrabeRapido('coaching')" style="flex:1;padding:12px 14px;text-align:left;border-radius:10px;">
-            <span style="display:block;font-size:18px;margin-bottom:4px;">💬</span>
-            <strong style="font-size:12px;">Espacio de conversación</strong><br>
-            <span style="font-weight:400;font-size:11px;">Necesito que me acompañes a pensar</span>
-          </button>
-        </div>
-        <button class="destrabe-none" id="opt-ninguno" onclick="toggleNinguno()">Por ahora no necesito nada del líder</button>
-        <div id="destrabres-container" style="margin-top:10px;"></div>
-        <button class="add-btn purple" id="btn-add-destrabe" onclick="agregarDestrabe()" style="margin-top:6px;display:none;">+ Agregar otro destrabe</button>
-      </div>
-    </div>
+    <div id="formulario" style="display:none;">
 
-    <!-- BLOQUE 3 -->
-    <div class="bloque" id="bloque-3">
-      <div class="bloque-header">
-        <div class="bloque-num">3</div>
-        <div>
-          <div class="bloque-titulo">Feedback conductual apalancado en los pilares de Apprecio</div>
-          <div class="bloque-sub">Conducta observada e impacto concreto — clasifica cada observación</div>
+      <div class="bloque" id="bloque-0">
+        <div class="bloque-header">
+          <div class="bloque-num">0</div>
+          <div><div class="bloque-titulo">Seguimiento de accionables anteriores</div><div class="bloque-sub">Accionables activos del check-in anterior</div></div>
+          <span class="badge badge-req">Obligatorio</span>
         </div>
-        <span class="badge badge-req">Obligatorio</span>
+        <div class="bloque-body"><div id="ac-ant-container"><div class="loading">Cargando accionables...</div></div></div>
       </div>
-      <div class="bloque-body">
 
-        <div class="pilar-card">
-          <div class="pilar-header">
-            <div class="pilar-icon pi-acc">🎯</div>
-            <div><div class="pilar-name">Accountability</div><div class="pilar-desc">Cumple compromisos · Comunica riesgos a tiempo · Cierra temas · Dice la verdad</div></div>
-          </div>
-          <div class="pilar-body" id="pilar-acc">
-            <div class="conducta-bloque">
-              <div class="tipo-pills">
-                <button class="tipo-pill" onclick="setTipo(this,'fort')">Fortaleza</button>
-                <button class="tipo-pill" onclick="setTipo(this,'opor')">Oportunidad de mejora</button>
-              </div>
-              <div class="conducta-grid">
-                <div><span class="ctag ctag-c">Conducta observada</span><textarea class="textarea" rows="3" placeholder="¿Qué hizo o no hizo concretamente?"></textarea></div>
-                <div><span class="ctag ctag-i">Impacto generado</span><textarea class="textarea" rows="3" placeholder="¿Qué efecto tuvo?"></textarea></div>
-              </div>
+      <div class="bloque" id="bloque-1">
+        <div class="bloque-header">
+          <div class="bloque-num">1</div>
+          <div><div class="bloque-titulo">Foco del mes</div><div class="bloque-sub">¿En qué está la persona? ¿Cuáles son sus prioridades?</div></div>
+          <span class="badge badge-req">Obligatorio</span>
+        </div>
+        <div class="bloque-body" id="focos-container">
+          <div class="foco-item">
+            <div class="foco-row"><div class="foco-num">1</div><input class="foco-titulo-input" placeholder="Nombre del proyecto o área de foco..." /></div>
+            <div class="foco-bullets">
+              <div class="foco-bullet-row"><div class="bullet-dot"></div><input class="bullet-input" placeholder="Prioridad, avance o contexto relevante..." /></div>
+              <div class="foco-bullet-row"><div class="bullet-dot"></div><input class="bullet-input" placeholder="Agrega otro punto..." /></div>
+              <button class="add-btn" style="font-size:11px;margin-left:13px;" onclick="agregarBullet(this)">+ Agregar punto</button>
             </div>
-            <button class="add-conducta-btn" onclick="agregarConducta('pilar-acc')">+ Agregar otra observación en Accountability</button>
           </div>
+          <div class="tip-box">💡 <strong>Recomendación:</strong> idealmente no más de 4 focos por mes. El multifoco es un riesgo para la productividad.</div>
+          <button class="add-btn purple" style="margin-top:12px;" onclick="agregarFoco()">+ Agregar foco</button>
         </div>
+      </div>
 
-        <div class="pilar-card">
-          <div class="pilar-header">
-            <div class="pilar-icon pi-prod">⚡</div>
-            <div><div class="pilar-name">Productividad</div><div class="pilar-desc">Prioriza con foco · Cuida calidad y tiempo · Aporta valor · Mejora continua</div></div>
+      <div class="bloque" id="bloque-2">
+        <div class="bloque-header">
+          <div class="bloque-num">2</div>
+          <div><div class="bloque-titulo">Destrabe</div><div class="bloque-sub">¿Qué necesita del líder para avanzar?</div></div>
+          <span class="badge badge-opt">Opcional</span>
+        </div>
+        <div class="bloque-body">
+          <div style="display:flex;gap:10px;margin-bottom:10px;">
+            <button class="destrabe-tipo-pill" id="btn-apoyo-rapido" onclick="agregarDestrabeRapido('apoyo')" style="flex:1;padding:12px 14px;text-align:left;border-radius:10px;">
+              <span style="display:block;font-size:18px;margin-bottom:4px;">🔧</span>
+              <strong style="font-size:12px;">Apoyo concreto</strong><br>
+              <span style="font-weight:400;font-size:11px;">El líder tiene que hacer o resolver algo</span>
+            </button>
+            <button class="destrabe-tipo-pill" id="btn-coaching-rapido" onclick="agregarDestrabeRapido('coaching')" style="flex:1;padding:12px 14px;text-align:left;border-radius:10px;">
+              <span style="display:block;font-size:18px;margin-bottom:4px;">💬</span>
+              <strong style="font-size:12px;">Espacio de conversación</strong><br>
+              <span style="font-weight:400;font-size:11px;">Necesito que me acompañes a pensar</span>
+            </button>
           </div>
-          <div class="pilar-body" id="pilar-prod">
-            <div class="conducta-bloque">
-              <div class="tipo-pills">
-                <button class="tipo-pill" onclick="setTipo(this,'fort')">Fortaleza</button>
-                <button class="tipo-pill" onclick="setTipo(this,'opor')">Oportunidad de mejora</button>
+          <button class="destrabe-none" id="opt-ninguno" onclick="toggleNinguno()">Por ahora no necesito nada del líder</button>
+          <div id="destrabres-container" style="margin-top:10px;"></div>
+          <button class="add-btn purple" id="btn-add-destrabe" onclick="agregarDestrabe()" style="margin-top:6px;display:none;">+ Agregar otro destrabe</button>
+        </div>
+      </div>
+
+      <div class="bloque" id="bloque-3">
+        <div class="bloque-header">
+          <div class="bloque-num">3</div>
+          <div><div class="bloque-titulo">Feedback conductual apalancado en los pilares de Apprecio</div><div class="bloque-sub">Conducta observada e impacto concreto</div></div>
+          <span class="badge badge-req">Obligatorio</span>
+        </div>
+        <div class="bloque-body">
+          <div class="pilar-card">
+            <div class="pilar-header"><div class="pilar-icon pi-acc">🎯</div><div><div class="pilar-name">Accountability</div><div class="pilar-desc">Cumple compromisos · Comunica riesgos a tiempo · Cierra temas · Dice la verdad</div></div></div>
+            <div class="pilar-body" id="pilar-acc">
+              <div class="conducta-bloque">
+                <div class="tipo-pills"><button class="tipo-pill" onclick="setTipo(this,'fort')">Fortaleza</button><button class="tipo-pill" onclick="setTipo(this,'opor')">Oportunidad de mejora</button></div>
+                <div class="conducta-grid">
+                  <div><span class="ctag ctag-c">Conducta observada</span><textarea class="textarea" rows="3" placeholder="¿Qué hizo o no hizo concretamente?"></textarea></div>
+                  <div><span class="ctag ctag-i">Impacto generado</span><textarea class="textarea" rows="3" placeholder="¿Qué efecto tuvo?"></textarea></div>
+                </div>
               </div>
-              <div class="conducta-grid">
-                <div><span class="ctag ctag-c">Conducta observada</span><textarea class="textarea" rows="3" placeholder="¿Qué hizo o no hizo concretamente?"></textarea></div>
-                <div><span class="ctag ctag-i">Impacto generado</span><textarea class="textarea" rows="3" placeholder="¿Qué efecto tuvo?"></textarea></div>
-              </div>
+              <button class="add-conducta-btn" onclick="agregarConducta('pilar-acc')">+ Agregar otra observación en Accountability</button>
             </div>
-            <button class="add-conducta-btn" onclick="agregarConducta('pilar-prod')">+ Agregar otra observación en Productividad</button>
           </div>
-        </div>
-
-        <div class="pilar-card">
-          <div class="pilar-header">
-            <div class="pilar-icon pi-cc">🌟</div>
-            <div><div class="pilar-name">Customer Centricity</div><div class="pilar-desc">Conecta trabajo con el cliente · Actúa ante quiebres · Diseña experiencias simples</div></div>
-          </div>
-          <div class="pilar-body" id="pilar-cc">
-            <div class="conducta-bloque">
-              <div class="tipo-pills">
-                <button class="tipo-pill" onclick="setTipo(this,'fort')">Fortaleza</button>
-                <button class="tipo-pill" onclick="setTipo(this,'opor')">Oportunidad de mejora</button>
+          <div class="pilar-card">
+            <div class="pilar-header"><div class="pilar-icon pi-prod">⚡</div><div><div class="pilar-name">Productividad</div><div class="pilar-desc">Prioriza con foco · Cuida calidad y tiempo · Aporta valor · Mejora continua</div></div></div>
+            <div class="pilar-body" id="pilar-prod">
+              <div class="conducta-bloque">
+                <div class="tipo-pills"><button class="tipo-pill" onclick="setTipo(this,'fort')">Fortaleza</button><button class="tipo-pill" onclick="setTipo(this,'opor')">Oportunidad de mejora</button></div>
+                <div class="conducta-grid">
+                  <div><span class="ctag ctag-c">Conducta observada</span><textarea class="textarea" rows="3" placeholder="¿Qué hizo o no hizo concretamente?"></textarea></div>
+                  <div><span class="ctag ctag-i">Impacto generado</span><textarea class="textarea" rows="3" placeholder="¿Qué efecto tuvo?"></textarea></div>
+                </div>
               </div>
-              <div class="conducta-grid">
-                <div><span class="ctag ctag-c">Conducta observada</span><textarea class="textarea" rows="3" placeholder="¿Qué hizo o no hizo concretamente?"></textarea></div>
-                <div><span class="ctag ctag-i">Impacto generado</span><textarea class="textarea" rows="3" placeholder="¿Qué efecto tuvo?"></textarea></div>
-              </div>
+              <button class="add-conducta-btn" onclick="agregarConducta('pilar-prod')">+ Agregar otra observación en Productividad</button>
             </div>
-            <button class="add-conducta-btn" onclick="agregarConducta('pilar-cc')">+ Agregar otra observación en Customer Centricity</button>
+          </div>
+          <div class="pilar-card">
+            <div class="pilar-header"><div class="pilar-icon pi-cc">🌟</div><div><div class="pilar-name">Customer Centricity</div><div class="pilar-desc">Conecta trabajo con el cliente · Actúa ante quiebres · Diseña experiencias simples</div></div></div>
+            <div class="pilar-body" id="pilar-cc">
+              <div class="conducta-bloque">
+                <div class="tipo-pills"><button class="tipo-pill" onclick="setTipo(this,'fort')">Fortaleza</button><button class="tipo-pill" onclick="setTipo(this,'opor')">Oportunidad de mejora</button></div>
+                <div class="conducta-grid">
+                  <div><span class="ctag ctag-c">Conducta observada</span><textarea class="textarea" rows="3" placeholder="¿Qué hizo o no hizo concretamente?"></textarea></div>
+                  <div><span class="ctag ctag-i">Impacto generado</span><textarea class="textarea" rows="3" placeholder="¿Qué efecto tuvo?"></textarea></div>
+                </div>
+              </div>
+              <button class="add-conducta-btn" onclick="agregarConducta('pilar-cc')">+ Agregar otra observación en Customer Centricity</button>
+            </div>
           </div>
         </div>
-
       </div>
-    </div>
 
-    <!-- BLOQUE 4 -->
-    <div class="bloque" id="bloque-4">
-      <div class="bloque-header">
-        <div class="bloque-num">4</div>
-        <div>
-          <div class="bloque-titulo">Accionables post conversación</div>
-          <div class="bloque-sub">Con owner, fecha y seguimiento — aparecen en el próximo check-in</div>
+      <div class="bloque" id="bloque-4">
+        <div class="bloque-header">
+          <div class="bloque-num">4</div>
+          <div><div class="bloque-titulo">Accionables post conversación</div><div class="bloque-sub">Con owner, fecha y seguimiento</div></div>
+          <span class="badge badge-req">Obligatorio</span>
         </div>
-        <span class="badge badge-req">Obligatorio</span>
-      </div>
-      <div class="bloque-body" id="ac-nuevos-container">
-        <div class="ac-nuevo">
-          <div class="ac-nuevo-grid">
-            <div><span class="field-label">Accionable</span><input class="ac-input ac-desc" placeholder="¿Qué se va a hacer?" /></div>
-            <div><span class="field-label">Fecha</span><input class="ac-input ac-fecha" type="date" /></div>
+        <div class="bloque-body" id="ac-nuevos-container">
+          <div class="ac-nuevo">
+            <div class="ac-nuevo-grid">
+              <div><span class="field-label">Accionable</span><input class="ac-input ac-desc" placeholder="¿Qué se va a hacer?" /></div>
+              <div><span class="field-label">Fecha</span><input class="ac-input ac-fecha" type="date" /></div>
+            </div>
+            <div><span class="field-label">Owner</span><div class="owner-pills" id="owners-0"></div></div>
           </div>
-          <div><span class="field-label">Owner</span><div class="owner-pills" id="owners-0"></div></div>
+          <button class="add-btn purple" onclick="agregarAcNuevo()">+ Agregar accionable</button>
         </div>
-        <button class="add-btn purple" onclick="agregarAcNuevo()">+ Agregar accionable</button>
+      </div>
+
+      <div class="submit-area">
+        <button class="btn-primary" id="btn-submit" onclick="enviarCheckin()">Enviar check-in — notificar a ambos ✓</button>
       </div>
     </div>
 
-    <div class="submit-area">
-      <button class="btn-primary" id="btn-submit" onclick="enviarCheckin()">Enviar check-in — notificar a ambos ✓</button>
+    <div class="success-screen" id="success-screen">
+      <div class="success-icon">✓</div>
+      <h2>Check-in enviado correctamente</h2>
+      <p>El resumen fue enviado por email al líder y al colaborador.<br>Los accionables aparecerán en el próximo check-in.</p>
+      <br>
+      <button class="btn-nuevo" onclick="nuevoCheckin()">Hacer otro check-in</button>
+      <br>
+      <a class="btn-dashboard" href="dashboard.html">Ver dashboard de tu equipo →</a>
     </div>
-
   </div>
-
-  <div class="success-screen" id="success-screen">
-    <div class="success-icon">✓</div>
-    <h2>Check-in enviado correctamente</h2>
-    <p>El resumen fue enviado por email al líder y al colaborador.<br>Los accionables aparecerán en el próximo check-in.</p>
-    <button class="btn-nuevo" onclick="nuevoCheckin()">Hacer otro check-in</button>
-  </div>
-
 </div>
 
 <script>
+const CLIENT_ID = '589779415783-vomns28ralb0efttkj5no91ggo7rtoj3.apps.googleusercontent.com';
+const DOMINIOS_PERMITIDOS = ['apprecio.com', 'dcanje.com'];
 const WEBHOOK_CHECKIN = 'https://n8n.openip.cl/webhook/checkin-feedback';
 const WEBHOOK_LIDERES = 'https://n8n.openip.cl/webhook/get-lideres';
 const WEBHOOK_EQUIPO  = 'https://n8n.openip.cl/webhook/get-equipo';
 const WEBHOOK_ACCION  = 'https://n8n.openip.cl/webhook/get-accionables';
 
+let usuarioActual = null;
 let liderData = null, colabData = null;
 let accionablesAnteriores = [];
 let focoCount = 1, acNuevoCount = 0;
-let destrabeTipo = null;
+let ningunoActivo = false, destrabeCount = 0;
 
-// MES
-const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-const anio = new Date().getFullYear();
-const mesActual = new Date().getMonth();
-const selMes = document.getElementById('mes-select');
-meses.forEach((m, i) => {
-  const opt = document.createElement('option');
-  opt.value = m + ' ' + anio;
-  opt.textContent = m + ' ' + anio;
-  if (i === mesActual) opt.selected = true;
-  selMes.appendChild(opt);
-});
+// GOOGLE LOGIN
+window.onload = function() {
+  google.accounts.id.initialize({
+    client_id: CLIENT_ID,
+    callback: handleCredentialResponse,
+    auto_select: false
+  });
+  google.accounts.id.renderButton(
+    document.getElementById('g_id_signin'),
+    { theme: 'outline', size: 'large', text: 'signin_with', locale: 'es', width: 280 }
+  );
+};
 
-// CARGAR LÍDERES
+function handleCredentialResponse(response) {
+  const payload = JSON.parse(atob(response.credential.split('.')[1]));
+  const email = payload.email || '';
+  const dominio = email.split('@')[1] || '';
+  if (!DOMINIOS_PERMITIDOS.includes(dominio)) {
+    document.getElementById('login-error').style.display = 'block';
+    return;
+  }
+  usuarioActual = { email, nombre: payload.name, foto: payload.picture };
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('user-name').textContent = payload.given_name;
+  iniciarApp();
+}
+
+function logout() {
+  google.accounts.id.disableAutoSelect();
+  location.reload();
+}
+
+async function iniciarApp() {
+  // Mes selector
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const anio = new Date().getFullYear();
+  const mesActual = new Date().getMonth();
+  const selMes = document.getElementById('mes-select');
+  meses.forEach((m, i) => {
+    const opt = document.createElement('option');
+    opt.value = m + ' ' + anio;
+    opt.textContent = m + ' ' + anio;
+    if (i === mesActual) opt.selected = true;
+    selMes.appendChild(opt);
+  });
+  await cargarLideres();
+}
+
 async function cargarLideres() {
   try {
     const res = await fetch(WEBHOOK_LIDERES);
@@ -423,11 +435,7 @@ async function onColabChange() {
   actualizarOwnerPills();
   await cargarAccionablesAnteriores();
   document.getElementById('formulario').style.display = 'block';
-  setTimeout(() => {
-    document.querySelectorAll('.bloque').forEach((b, i) => {
-      setTimeout(() => b.classList.add('visible'), i * 80);
-    });
-  }, 50);
+  setTimeout(() => { document.querySelectorAll('.bloque').forEach((b, i) => { setTimeout(() => b.classList.add('visible'), i * 80); }); }, 50);
 }
 
 function resetColab() {
@@ -446,11 +454,8 @@ async function cargarAccionablesAnteriores() {
     const res = await fetch(WEBHOOK_ACCION + '?rut_colaborador=' + colabData.rut + '&rut_lider=' + liderData.rut);
     const data = await res.json();
     accionablesAnteriores = data.accionables || [];
-    if (accionablesAnteriores.length === 0) {
-      cont.innerHTML = '<div class="empty-state">No hay accionables activos del período anterior.</div>';
-      return;
-    }
-    let html = `<table class="ac-table"><thead><tr><th>Accionable</th><th>Owner</th><th>Fecha</th><th>Estatus</th></tr></thead><tbody>`;
+    if (accionablesAnteriores.length === 0) { cont.innerHTML = '<div class="empty-state">No hay accionables activos del período anterior.</div>'; return; }
+    let html = '<table class="ac-table"><thead><tr><th>Accionable</th><th>Owner</th><th>Fecha</th><th>Estatus</th></tr></thead><tbody>';
     accionablesAnteriores.forEach((ac, i) => {
       const fechaFmt = ac.fecha ? ac.fecha.split('-').reverse().join('-') : '—';
       html += `<tr><td>${ac.descripcion}</td><td>${ac.owner_nombre}</td><td>${fechaFmt}</td><td>
@@ -466,9 +471,7 @@ async function cargarAccionablesAnteriores() {
     });
     html += '</tbody></table><p style="font-size:11px;color:var(--subtle);font-style:italic;margin-top:8px;">Los accionables no cumplidos migrarán automáticamente al próximo check-in.</p>';
     cont.innerHTML = html;
-  } catch(e) {
-    cont.innerHTML = '<div class="empty-state">No se pudieron cargar los accionables.</div>';
-  }
+  } catch(e) { cont.innerHTML = '<div class="empty-state">No se pudieron cargar los accionables.</div>'; }
 }
 
 function onEstatusChange(sel, idx, fechaOrig) {
@@ -476,8 +479,7 @@ function onEstatusChange(sel, idx, fechaOrig) {
   const val = sel.value;
   accionablesAnteriores[idx] = { ...accionablesAnteriores[idx], estatus: val };
   if (val === 'no-cumplido' || val === 'postergado') {
-    div.innerHTML = `<div class="reprog-box">
-      <label>¿Se reprograma con nueva fecha?</label>
+    div.innerHTML = `<div class="reprog-box"><label>¿Se reprograma con nueva fecha?</label>
       <div class="reprog-btns">
         <button class="reprog-btn" onclick="mostrarNuevaFecha(this,${idx},'${fechaOrig}')">Sí, nueva fecha</button>
         <button class="reprog-btn" onclick="sinFecha(this,${idx},'${fechaOrig}')">No, queda pendiente</button>
@@ -509,8 +511,7 @@ function registrarNuevaFecha(idx, fo, nf) {
 
 function actualizarOwnerPills() {
   document.querySelectorAll('.owner-pills').forEach(cont => {
-    cont.innerHTML = `
-      <button class="owner-pill" data-tipo="lider" onclick="setOwner(this,'lider')">${liderData.nombre}</button>
+    cont.innerHTML = `<button class="owner-pill" data-tipo="lider" onclick="setOwner(this,'lider')">${liderData.nombre}</button>
       <button class="owner-pill" data-tipo="colab" onclick="setOwner(this,'colab')">${colabData.nombre}</button>`;
   });
 }
@@ -521,7 +522,7 @@ function setOwner(btn, tipo) {
 }
 
 function agregarFoco() {
-  if (focoCount >= 4) { alert('Máximo 4 focos por mes.\n\nEl multifoco es un riesgo para la productividad y eventualmente una señal de que falta priorización.'); return; }
+  if (focoCount >= 4) { alert('Máximo 4 focos por mes.'); return; }
   focoCount++;
   const cont = document.getElementById('focos-container');
   const tip = cont.querySelector('.tip-box');
@@ -543,23 +544,13 @@ function agregarBullet(btn) {
   bullets.insertBefore(row, btn);
 }
 
-let ningunoActivo = false;
-let destrabeCount = 0;
-
 function toggleNinguno() {
   ningunoActivo = !ningunoActivo;
   const btn = document.getElementById('opt-ninguno');
   const cont = document.getElementById('destrabres-container');
   const addBtn = document.getElementById('btn-add-destrabe');
-  if (ningunoActivo) {
-    btn.classList.add('sel');
-    cont.innerHTML = '';
-    addBtn.style.display = 'none';
-    destrabeCount = 0;
-  } else {
-    btn.classList.remove('sel');
-    addBtn.style.display = 'flex';
-  }
+  if (ningunoActivo) { btn.classList.add('sel'); cont.innerHTML = ''; addBtn.style.display = 'none'; destrabeCount = 0; }
+  else { btn.classList.remove('sel'); }
 }
 
 function agregarDestrabeRapido(tipo) {
@@ -572,12 +563,12 @@ function agregarDestrabeRapido(tipo) {
   const div = document.createElement('div');
   div.className = 'destrabe-item';
   div.id = 'destrabe-item-' + idx;
-  const tipoLabel = tipo === 'apoyo' ? '🔧 Apoyo concreto' : '💬 Espacio de conversación';
   div.innerHTML = `
     <button class="destrabe-remove" onclick="eliminarDestrabe(${idx})">✕</button>
+    <span class="field-label">Tipo</span>
     <div class="destrabe-tipo-pills" id="dtipo-${idx}" data-tipo="${tipo}" style="margin-bottom:10px;">
-      <button class="destrabe-tipo-pill ${tipo === 'apoyo' ? 'sel-red' : 'sel-purple'}" onclick="setDestrabeTipo(this,'apoyo',${idx})">🔧 Apoyo concreto</button>
-      <button class="destrabe-tipo-pill ${tipo === 'coaching' ? 'sel-purple' : ''}" onclick="setDestrabeTipo(this,'coaching',${idx})">💬 Espacio de conversación</button>
+      <button class="destrabe-tipo-pill ${tipo==='apoyo'?'sel-red':''}" onclick="setDestrabeTipo(this,'apoyo',${idx})">🔧 Apoyo concreto</button>
+      <button class="destrabe-tipo-pill ${tipo==='coaching'?'sel-purple':''}" onclick="setDestrabeTipo(this,'coaching',${idx})">💬 Espacio de conversación</button>
     </div>
     <span class="field-label">¿Qué necesitas?</span>
     <textarea class="textarea destrabe-desc-input" rows="3" placeholder="Describe con claridad qué necesitas del líder..." style="margin-bottom:10px;"></textarea>
@@ -594,10 +585,7 @@ function agregarDestrabeRapido(tipo) {
   cont.appendChild(div);
 }
 
-
-function agregarDestrabe() {
-  agregarDestrabeRapido('apoyo');
-}
+function agregarDestrabe() { agregarDestrabeRapido('apoyo'); }
 
 function setDestrabeTipo(btn, tipo, idx) {
   btn.closest('.destrabe-tipo-pills').querySelectorAll('.destrabe-tipo-pill').forEach(p => p.className = 'destrabe-tipo-pill');
@@ -609,9 +597,7 @@ function toggleDestrabeAcItem(cb, idx) {
   document.getElementById('destrabe-ac-row-' + idx).style.display = cb.checked ? 'block' : 'none';
 }
 
-function eliminarDestrabe(idx) {
-  document.getElementById('destrabe-item-' + idx)?.remove();
-}
+function eliminarDestrabe(idx) { document.getElementById('destrabe-item-' + idx)?.remove(); }
 
 function recolectarDestrabres() {
   const destrabres = [];
@@ -704,12 +690,7 @@ function recolectarAcNuevos() {
     if (!desc) return;
     const ownerBtn = item.querySelector('.owner-pill.lider, .owner-pill.colab');
     const esLider = ownerBtn?.classList.contains('lider');
-    acs.push({
-      descripcion: desc, fecha: fecha || '',
-      owner_rut: esLider ? liderData.rut : colabData.rut,
-      owner_nombre: esLider ? liderData.nombre : colabData.nombre,
-      owner_mail: ''
-    });
+    acs.push({ descripcion: desc, fecha: fecha || '', owner_rut: esLider ? liderData.rut : colabData.rut, owner_nombre: esLider ? liderData.nombre : colabData.nombre, owner_mail: '' });
   });
   return acs;
 }
@@ -719,17 +700,10 @@ async function enviarCheckin() {
   const btn = document.getElementById('btn-submit');
   btn.disabled = true;
   btn.textContent = 'Enviando...';
-
   const payload = {
     mes: document.getElementById('mes-select').value,
-    lider_rut: liderData.rut,
-    lider_nombre: liderData.nombre,
-    lider_mail: '',
-    nombre_display_lider: liderData.nombre,
-    colaborador_rut: colabData.rut,
-    colaborador_nombre: colabData.nombre,
-    colaborador_mail: '',
-    nombre_display_colaborador: colabData.nombre,
+    lider_rut: liderData.rut, lider_nombre: liderData.nombre, lider_mail: '', nombre_display_lider: liderData.nombre,
+    colaborador_rut: colabData.rut, colaborador_nombre: colabData.nombre, colaborador_mail: '', nombre_display_colaborador: colabData.nombre,
     n2_rut: '', n3_rut: '', n4_rut: '', n5_rut: '',
     accionables_anteriores: accionablesAnteriores,
     focos: recolectarFocos(),
@@ -737,13 +711,8 @@ async function enviarCheckin() {
     pilares: recolectarPilares(),
     accionables_nuevos: recolectarAcNuevos()
   };
-
   try {
-    await fetch(WEBHOOK_CHECKIN, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    await fetch(WEBHOOK_CHECKIN, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     document.getElementById('formulario').style.display = 'none';
     document.getElementById('selector-grid').style.display = 'none';
     document.getElementById('success-screen').style.display = 'block';
@@ -754,11 +723,7 @@ async function enviarCheckin() {
   }
 }
 
-function nuevoCheckin() {
-  location.reload();
-}
-
-cargarLideres();
+function nuevoCheckin() { location.reload(); }
 </script>
 </body>
 </html>
