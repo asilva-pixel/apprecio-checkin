@@ -118,6 +118,33 @@
   .success-screen p { font-size: 13px; color: var(--subtle); line-height: 1.6; }
   .btn-nuevo { margin-top: 24px; padding: 12px 24px; border-radius: 10px; border: 0.5px solid var(--border); background: white; font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); cursor: pointer; }
   .btn-dashboard { margin-top: 12px; padding: 12px 24px; border-radius: 10px; border: none; background: var(--red); font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600; color: white; cursor: pointer; text-decoration: none; display: inline-block; }
+  .parte-b { background: white; border-radius: 12px; border: 2px solid var(--purple); margin-top: 24px; overflow: hidden; }
+  .parte-b-header { background: var(--purple); padding: 14px 20px; display: flex; align-items: center; gap: 12px; }
+  .parte-b-header h3 { font-size: 13px; font-weight: 700; color: white; }
+  .parte-b-header p { font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 2px; }
+  .parte-b-badge { margin-left: auto; font-size: 9px; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: rgba(255,255,255,0.2); color: white; white-space: nowrap; }
+  .parte-b-body { padding: 20px; }
+  .eval-pilar { margin-bottom: 20px; }
+  .eval-pilar-name { font-size: 12px; font-weight: 700; color: var(--dark); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .escala-options { display: flex; gap: 8px; flex-wrap: wrap; }
+  .escala-opt { flex: 1; min-width: 48px; border: 0.5px solid var(--border); border-radius: 8px; padding: 8px 4px; text-align: center; cursor: pointer; background: var(--gray); font-family: 'Montserrat', sans-serif; }
+  .escala-opt:hover { border-color: var(--purple); }
+  .escala-opt.sel { border-color: var(--purple); background: var(--purple-light); }
+  .escala-num { font-size: 18px; font-weight: 700; color: var(--purple); display: block; }
+  .escala-label { font-size: 9px; font-weight: 600; color: var(--subtle); display: block; margin-top: 2px; line-height: 1.3; }
+  .escala-desc { background: var(--gray); border-radius: 8px; padding: 12px 14px; margin-top: 10px; font-size: 11px; color: var(--subtle); line-height: 1.7; display: none; }
+  .potencial-options { display: flex; gap: 10px; flex-wrap: wrap; }
+  .potencial-opt { flex: 1; min-width: 120px; border: 0.5px solid var(--border); border-radius: 10px; padding: 12px 14px; cursor: pointer; background: var(--gray); font-family: 'Montserrat', sans-serif; text-align: left; }
+  .potencial-opt.sel-1 { border-color: #4A90D9; background: #EBF4FF; }
+  .potencial-opt.sel-2 { border-color: var(--yellow); background: var(--yellow-light); }
+  .potencial-opt.sel-3 { border-color: var(--purple); background: var(--purple-light); }
+  .potencial-num { font-size: 18px; font-weight: 700; display: block; margin-bottom: 4px; }
+  .potencial-name { font-size: 11px; font-weight: 700; display: block; margin-bottom: 4px; }
+  .potencial-desc { font-size: 10px; color: var(--subtle); line-height: 1.5; }
+  .btn-guardar-eval { width: 100%; padding: 13px; border-radius: 10px; border: none; background: var(--purple); font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700; color: white; cursor: pointer; margin-top: 20px; }
+  .btn-guardar-eval:disabled { opacity: 0.5; cursor: not-allowed; }
+  .eval-saved { background: var(--green-light); border-radius: 10px; padding: 16px 20px; text-align: center; display: none; margin-top: 16px; }
+  .eval-saved p { font-size: 13px; color: var(--green); font-weight: 600; margin-bottom: 10px; }
   input[type="date"] { font-family: 'Montserrat', sans-serif; }
   @media (max-width: 600px) {
     .selector-grid { grid-template-columns: 1fr; }
@@ -313,10 +340,104 @@
       <div class="success-icon">✓</div>
       <h2>Check-in enviado correctamente</h2>
       <p>El resumen fue enviado por email al líder y al colaborador.<br>Los accionables aparecerán en el próximo check-in.</p>
+
+      <!-- PARTE B -->
+      <div class="parte-b" id="parte-b" style="text-align:left;margin-top:32px;">
+        <div class="parte-b-header">
+          <div>
+            <h3>🔒 Evaluación privada del líder</h3>
+            <p>Solo visible para ti — no se comparte con el colaborador</p>
+          </div>
+          <span class="parte-b-badge">Confidencial</span>
+        </div>
+        <div class="parte-b-body">
+
+          <div class="eval-pilar">
+            <div class="eval-pilar-name">🎯 Accountability — ¿Cómo evaluarías este pilar este mes?</div>
+            <div class="escala-options" id="esc-acc">
+              <button class="escala-opt" onclick="setEscala('acc',1,this)"><span class="escala-num">🔴</span><span class="escala-label">1 Bajo lo esperado</span></button>
+              <button class="escala-opt" onclick="setEscala('acc',2,this)"><span class="escala-num">🟡</span><span class="escala-label">2 En desarrollo</span></button>
+              <button class="escala-opt" onclick="setEscala('acc',3,this)"><span class="escala-num">🟢</span><span class="escala-label">3 Dentro de lo esperado</span></button>
+              <button class="escala-opt" onclick="setEscala('acc',4,this)"><span class="escala-num">🔵</span><span class="escala-label">4 Sobre lo esperado</span></button>
+              <button class="escala-opt" onclick="setEscala('acc',5,this)"><span class="escala-num">🟣</span><span class="escala-label">5 Excepcional</span></button>
+            </div>
+            <div class="escala-desc" id="desc-acc"></div>
+          </div>
+
+          <div class="eval-pilar">
+            <div class="eval-pilar-name">⚡ Productividad — ¿Cómo evaluarías este pilar este mes?</div>
+            <div class="escala-options" id="esc-prod">
+              <button class="escala-opt" onclick="setEscala('prod',1,this)"><span class="escala-num">🔴</span><span class="escala-label">1 Bajo lo esperado</span></button>
+              <button class="escala-opt" onclick="setEscala('prod',2,this)"><span class="escala-num">🟡</span><span class="escala-label">2 En desarrollo</span></button>
+              <button class="escala-opt" onclick="setEscala('prod',3,this)"><span class="escala-num">🟢</span><span class="escala-label">3 Dentro de lo esperado</span></button>
+              <button class="escala-opt" onclick="setEscala('prod',4,this)"><span class="escala-num">🔵</span><span class="escala-label">4 Sobre lo esperado</span></button>
+              <button class="escala-opt" onclick="setEscala('prod',5,this)"><span class="escala-num">🟣</span><span class="escala-label">5 Excepcional</span></button>
+            </div>
+            <div class="escala-desc" id="desc-prod"></div>
+          </div>
+
+          <div class="eval-pilar">
+            <div class="eval-pilar-name">🌟 Customer Centricity — ¿Cómo evaluarías este pilar este mes?</div>
+            <div class="escala-options" id="esc-cc">
+              <button class="escala-opt" onclick="setEscala('cc',1,this)"><span class="escala-num">🔴</span><span class="escala-label">1 Bajo lo esperado</span></button>
+              <button class="escala-opt" onclick="setEscala('cc',2,this)"><span class="escala-num">🟡</span><span class="escala-label">2 En desarrollo</span></button>
+              <button class="escala-opt" onclick="setEscala('cc',3,this)"><span class="escala-num">🟢</span><span class="escala-label">3 Dentro de lo esperado</span></button>
+              <button class="escala-opt" onclick="setEscala('cc',4,this)"><span class="escala-num">🔵</span><span class="escala-label">4 Sobre lo esperado</span></button>
+              <button class="escala-opt" onclick="setEscala('cc',5,this)"><span class="escala-num">🟣</span><span class="escala-label">5 Excepcional</span></button>
+            </div>
+            <div class="escala-desc" id="desc-cc"></div>
+          </div>
+
+          <div class="eval-pilar">
+            <div class="eval-pilar-name">⭐ Performance general del mes</div>
+            <div class="escala-options" id="esc-perf">
+              <button class="escala-opt" onclick="setEscala('perf',1,this)"><span class="escala-num">🔴</span><span class="escala-label">1 Bajo lo esperado</span></button>
+              <button class="escala-opt" onclick="setEscala('perf',2,this)"><span class="escala-num">🟡</span><span class="escala-label">2 En desarrollo</span></button>
+              <button class="escala-opt" onclick="setEscala('perf',3,this)"><span class="escala-num">🟢</span><span class="escala-label">3 Dentro de lo esperado</span></button>
+              <button class="escala-opt" onclick="setEscala('perf',4,this)"><span class="escala-num">🔵</span><span class="escala-label">4 Sobre lo esperado</span></button>
+              <button class="escala-opt" onclick="setEscala('perf',5,this)"><span class="escala-num">🟣</span><span class="escala-label">5 Excepcional</span></button>
+            </div>
+            <div class="escala-desc" id="desc-perf"></div>
+          </div>
+
+          <div class="eval-pilar">
+            <div class="eval-pilar-name">🚀 Percepción de potencial</div>
+            <div class="potencial-options">
+              <button class="potencial-opt" onclick="setPotencial(1,this)">
+                <span class="potencial-num" style="color:#4A90D9;">🔵 1</span>
+                <span class="potencial-name">Consolidando su rol</span>
+                <span class="potencial-desc">Enfocado en dominar su posición actual. No hay señales claras de asumir más responsabilidad en el corto plazo.</span>
+              </button>
+              <button class="potencial-opt" onclick="setPotencial(2,this)">
+                <span class="potencial-num" style="color:var(--yellow);">🟡 2</span>
+                <span class="potencial-name">Potencial en desarrollo</span>
+                <span class="potencial-desc">Muestra señales de crecimiento. Aprende rápido, toma iniciativa. Podría asumir más en 1-2 años con el desarrollo adecuado.</span>
+              </button>
+              <button class="potencial-opt" onclick="setPotencial(3,this)">
+                <span class="potencial-num" style="color:var(--purple);">🟣 3</span>
+                <span class="potencial-name">Listo para más</span>
+                <span class="potencial-desc">Opera consistentemente sobre lo esperado. Preparado para mayor responsabilidad hoy o en menos de 12 meses.</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="eval-pilar">
+            <div class="eval-pilar-name">📝 Notas privadas</div>
+            <textarea class="textarea" id="notas-privadas" rows="4" placeholder="Contexto adicional, situaciones a monitorear, señales de engagement, conversaciones pendientes... Solo visible para ti."></textarea>
+          </div>
+
+          <button class="btn-guardar-eval" id="btn-guardar-eval" onclick="guardarEvaluacion()">Guardar evaluación privada</button>
+
+          <div class="eval-saved" id="eval-saved">
+            <p>✓ Evaluación guardada correctamente</p>
+            <a class="btn-dashboard" href="dashboard.html">Ver dashboard de tu equipo →</a>
+          </div>
+
+        </div>
+      </div>
+
       <br>
-      <button class="btn-nuevo" onclick="nuevoCheckin()">Hacer otro check-in</button>
-      <br>
-      <a class="btn-dashboard" href="dashboard.html">Ver dashboard de tu equipo →</a>
+      <button class="btn-nuevo" onclick="nuevoCheckin()" style="margin-top:24px;">Hacer otro check-in</button>
     </div>
   </div>
 </div>
@@ -713,6 +834,7 @@ async function enviarCheckin() {
   };
   try {
     await fetch(WEBHOOK_CHECKIN, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    checkinIdActual = payload.id_checkin || '';
     document.getElementById('formulario').style.display = 'none';
     document.getElementById('selector-grid').style.display = 'none';
     document.getElementById('success-screen').style.display = 'block';
@@ -724,6 +846,79 @@ async function enviarCheckin() {
 }
 
 function nuevoCheckin() { location.reload(); }
+
+// PARTE B — EVALUACIÓN PRIVADA
+let evalData = { acc: null, prod: null, cc: null, perf: null, potencial: null };
+let checkinIdActual = null;
+
+const escalaDescripciones = {
+  1: '🔴 <strong>Bajo lo esperado:</strong> Los comportamientos no se observan. Actúa de forma contraria a lo esperado. Requiere supervisión constante. Genera impacto negativo en el equipo o proceso.',
+  2: '🟡 <strong>En desarrollo:</strong> Los comportamientos se observan de forma parcial o inconsistente. Aplica la competencia en algunos casos, pero no de forma sostenida. Requiere apoyo o guía frecuente.',
+  3: '🟢 <strong>Dentro de lo esperado:</strong> Los comportamientos se observan de forma consistente. Aplica la competencia de manera autónoma. Cumple el estándar definido para su rol.',
+  4: '🔵 <strong>Sobre lo esperado:</strong> Los comportamientos elevan al equipo. Aplica la competencia con alto estándar. Influye positivamente en otros. Mejora la forma de trabajar del equipo.',
+  5: '🟣 <strong>Excepcional:</strong> Los comportamientos elevan el estándar organizacional. Es referente para otros. Genera impacto más allá de su equipo. Instala o mejora prácticas que escalan.'
+};
+
+function setEscala(pilar, valor, btn) {
+  evalData[pilar] = valor;
+  const cont = btn.closest('.escala-options');
+  cont.querySelectorAll('.escala-opt').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  const desc = document.getElementById('desc-' + pilar);
+  desc.innerHTML = escalaDescripciones[valor];
+  desc.style.display = 'block';
+}
+
+function setPotencial(valor, btn) {
+  evalData.potencial = valor;
+  document.querySelectorAll('.potencial-opt').forEach(b => { b.className = 'potencial-opt'; });
+  btn.classList.add('sel-' + valor);
+}
+
+async function guardarEvaluacion() {
+  if (!evalData.acc || !evalData.prod || !evalData.cc || !evalData.perf || !evalData.potencial) {
+    alert('Por favor completa todas las notas y la percepción de potencial antes de guardar.');
+    return;
+  }
+  const btn = document.getElementById('btn-guardar-eval');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const fecha = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+  const idEval = `EV-${fecha.replace(/-/g,'')}-${Math.random().toString(36).substring(2,6).toUpperCase()}`;
+
+  const payload = {
+    id_evaluacion: idEval,
+    id_checkin: checkinIdActual || '',
+    rut_lider: liderData?.rut || '',
+    rut_colaborador: colabData?.rut || '',
+    nombre_colaborador: colabData?.nombre || '',
+    mes: document.getElementById('mes-select')?.value || '',
+    fecha_evaluacion: fecha,
+    nota_accountability: evalData.acc,
+    nota_productividad: evalData.prod,
+    nota_customer_centricity: evalData.cc,
+    nota_performance: evalData.perf,
+    potencial: evalData.potencial,
+    notas_privadas: document.getElementById('notas-privadas')?.value?.trim() || ''
+  };
+
+  try {
+    await fetch('https://n8n.openip.cl/webhook/guardar-evaluacion', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    btn.style.display = 'none';
+    document.getElementById('eval-saved').style.display = 'block';
+  } catch(e) {
+    alert('Error al guardar. Intenta de nuevo.');
+    btn.disabled = false;
+    btn.textContent = 'Guardar evaluación privada';
+  }
+}
 </script>
 </body>
 </html>
