@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Check-in Mensual de Desempeño · Apprecio</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #FA345E;
+    --purple: #8B85D4;
+    --purple-light: #f0eef8;
+    --green: #1a8a45;
+    --green-light: #e6f9ee;
+    --yellow: #b07a00;
+    --yellow-light: #fff8e6;
+    --dark: #1a1a1a;
+    --gray: #f7f6f8;
+    --border: #e2e0e8;
+    --text: #444;
+    --subtle: #999;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Montserrat', sans-serif; background: var(--gray); min-height: 100vh; color: var(--dark); }
+  .header { background: var(--red); padding: 24px 32px 20px; position: relative; overflow: hidden; }
+  .header h1 { font-size: 20px; font-weight: 700; color: white; position: relative; z-index: 1; }
+  .header p { font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 4px; font-weight: 500; position: relative; z-index: 1; text-transform: uppercase; letter-spacing: 0.8px; }
+  .header-meta { margin-top: 16px; position: relative; z-index: 1; display: flex; align-items: center; gap: 12px; }
+  .header-meta label { font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 500; }
+  .mes-select { font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700; color: var(--red); background: white; border: none; border-radius: 8px; padding: 7px 14px; cursor: pointer; }
+  .header-orn { position: absolute; right: 0; top: 0; pointer-events: none; }
+  .main { max-width: 740px; margin: 0 auto; padding: 24px 20px 80px; }
+  .selector-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .selector-card { background: white; border-radius: 12px; border: 0.5px solid var(--border); padding: 16px 18px; }
+  .selector-card label { font-size: 10px; font-weight: 700; color: var(--subtle); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 8px; }
+  .selector-card select { font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); background: var(--gray); border: 0.5px solid var(--border); border-radius: 8px; padding: 9px 12px; width: 100%; cursor: pointer; }
+  .selector-card select:disabled { opacity: 0.5; cursor: not-allowed; }
+  .persona-info { margin-top: 8px; font-size: 11px; color: var(--subtle); min-height: 16px; }
+  .bloque { background: white; border-radius: 12px; border: 0.5px solid var(--border); margin-bottom: 14px; overflow: hidden; opacity: 0; transform: translateY(12px); transition: opacity 0.3s ease, transform 0.3s ease; }
+  .bloque.visible { opacity: 1; transform: translateY(0); }
+  .bloque-header { padding: 14px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 0.5px solid #f0eef4; }
+  .bloque-num { width: 28px; height: 28px; border-radius: 6px; background: var(--red); color: white; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .bloque-titulo { font-size: 13px; font-weight: 700; color: var(--dark); }
+  .bloque-sub { font-size: 11px; color: var(--subtle); margin-top: 1px; }
+  .badge { margin-left: auto; font-size: 9px; font-weight: 700; padding: 3px 9px; border-radius: 20px; letter-spacing: 0.3px; white-space: nowrap; }
+  .badge-req { background: #fff0f3; color: var(--red); }
+  .badge-opt { background: var(--purple-light); color: var(--purple); }
+  .bloque-body { padding: 18px 20px; }
+  .ac-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .ac-table th { padding: 8px 10px; text-align: left; font-size: 9px; font-weight: 700; color: var(--subtle); text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 0.5px solid var(--border); background: var(--gray); }
+  .ac-table td { padding: 10px; border-bottom: 0.5px solid #f5f5f5; vertical-align: top; }
+  .ac-table tr:last-child td { border-bottom: none; }
+  .status-select { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 600; border: 0.5px solid var(--border); border-radius: 8px; padding: 5px 8px; cursor: pointer; background: var(--gray); }
+  .reprog-box { background: #fdf6f8; border-radius: 8px; padding: 10px 12px; margin-top: 8px; font-size: 11px; }
+  .reprog-box label { color: var(--subtle); font-weight: 500; display: block; margin-bottom: 6px; }
+  .reprog-btns { display: flex; gap: 8px; margin-bottom: 6px; }
+  .reprog-btn { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; border: 0.5px solid var(--border); background: white; cursor: pointer; color: var(--subtle); }
+  .reprog-btn.active-si { border-color: var(--red); background: #fff5f7; color: var(--red); }
+  .reprog-btn.active-no { border-color: var(--purple); background: #f5f4fc; color: var(--purple); }
+  .historial-note { background: var(--yellow-light); border-radius: 6px; padding: 6px 10px; font-size: 10px; color: var(--yellow); margin-top: 6px; line-height: 1.6; }
+  .empty-state { text-align: center; padding: 20px; font-size: 12px; color: var(--subtle); font-style: italic; }
+  .foco-item { background: var(--gray); border: 0.5px solid #e8e6f0; border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
+  .foco-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .foco-num { width: 22px; height: 22px; border-radius: 5px; background: var(--purple); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .foco-titulo-input { font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600; padding: 7px 12px; border: 0.5px solid var(--border); border-radius: 8px; color: var(--dark); background: white; flex: 1; }
+  .foco-bullets { margin-left: 32px; }
+  .foco-bullet-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .bullet-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--red); flex-shrink: 0; }
+  .bullet-input { font-family: 'Montserrat', sans-serif; font-size: 12px; padding: 6px 10px; border: none; border-bottom: 0.5px solid var(--border); color: var(--text); background: transparent; width: 100%; }
+  .bullet-input:focus { outline: none; border-bottom-color: var(--red); }
+  .tip-box { background: #fdf6f8; border-left: 3px solid var(--red); border-radius: 0 8px 8px 0; padding: 10px 14px; margin-top: 12px; font-size: 11px; color: var(--subtle); font-style: italic; line-height: 1.6; }
+  .add-btn { font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 600; color: var(--red); background: none; border: none; cursor: pointer; padding: 6px 0; display: flex; align-items: center; gap: 6px; margin-top: 10px; }
+  .add-btn.purple { color: var(--purple); }
+  .destrabe-item { background: var(--gray); border: 0.5px solid #e8e6f0; border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; position: relative; }
+  .destrabe-tipo-pills { display: flex; gap: 8px; margin-bottom: 10px; }
+  .destrabe-tipo-pill { padding: 6px 14px; border-radius: 20px; border: 0.5px solid var(--border); font-size: 11px; font-weight: 600; cursor: pointer; font-family: 'Montserrat', sans-serif; color: var(--subtle); background: white; }
+  .destrabe-tipo-pill.sel-red { border-color: var(--red); background: #fff5f7; color: var(--red); }
+  .destrabe-tipo-pill.sel-purple { border-color: var(--purple); background: #f5f4fc; color: var(--purple); }
+  .destrabe-none { border: 0.5px dashed var(--border); border-radius: 10px; padding: 10px 14px; text-align: center; font-size: 12px; color: var(--subtle); cursor: pointer; background: none; font-family: 'Montserrat', sans-serif; font-weight: 500; width: 100%; margin-bottom: 10px; }
+  .destrabe-none.sel { border-style: solid; border-color: var(--purple); color: var(--purple); }
+  .destrabe-remove { position: absolute; top: 10px; right: 12px; background: none; border: none; cursor: pointer; font-size: 16px; color: var(--subtle); font-family: 'Montserrat', sans-serif; }
+  .field-label { font-size: 10px; font-weight: 700; color: var(--subtle); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; display: block; }
+  .textarea { font-family: 'Montserrat', sans-serif; font-size: 13px; padding: 10px 12px; border: 0.5px solid var(--border); border-radius: 8px; color: var(--dark); background: white; width: 100%; resize: none; line-height: 1.6; }
+  .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--subtle); cursor: pointer; margin-top: 10px; }
+  .pilar-card { border: 0.5px solid #e8e6f0; border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+  .pilar-header { padding: 12px 16px; display: flex; align-items: center; gap: 10px; background: white; }
+  .pilar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .pi-acc { background: #fff0f3; } .pi-prod { background: var(--purple-light); } .pi-cc { background: #e8f7f2; }
+  .pilar-name { font-size: 13px; font-weight: 700; color: var(--dark); }
+  .pilar-desc { font-size: 10px; color: var(--subtle); margin-top: 1px; }
+  .pilar-body { padding: 12px 16px 16px; background: var(--gray); border-top: 0.5px solid #f0eef4; }
+  .conducta-bloque { background: white; border: 0.5px solid #e8e6f0; border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+  .tipo-pills { display: flex; gap: 8px; margin-bottom: 10px; }
+  .tipo-pill { padding: 5px 14px; border-radius: 20px; border: 0.5px solid var(--border); font-size: 11px; font-weight: 600; cursor: pointer; font-family: 'Montserrat', sans-serif; color: var(--subtle); background: white; }
+  .tipo-pill.fort { border-color: var(--green); background: var(--green-light); color: var(--green); }
+  .tipo-pill.opor { border-color: var(--yellow); background: var(--yellow-light); color: var(--yellow); }
+  .conducta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ctag { font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 20px; display: inline-block; margin-bottom: 4px; }
+  .ctag-c { background: var(--purple-light); color: var(--purple); }
+  .ctag-i { background: #fff0f3; color: var(--red); }
+  .add-conducta-btn { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 600; color: var(--purple); background: none; border: 0.5px dashed #c8c4e8; border-radius: 8px; cursor: pointer; padding: 8px 14px; width: 100%; text-align: center; margin-top: 4px; }
+  .ac-nuevo { background: var(--gray); border: 0.5px solid #e8e6f0; border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+  .ac-nuevo-grid { display: grid; grid-template-columns: 1fr 120px; gap: 8px; margin-bottom: 8px; }
+  .ac-input { font-family: 'Montserrat', sans-serif; font-size: 13px; padding: 9px 12px; border: 0.5px solid var(--border); border-radius: 8px; color: var(--dark); background: white; width: 100%; }
+  .owner-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .owner-pill { padding: 5px 12px; border-radius: 20px; border: 0.5px solid var(--border); font-size: 11px; font-weight: 600; cursor: pointer; background: white; font-family: 'Montserrat', sans-serif; color: var(--subtle); }
+  .owner-pill.lider { border-color: var(--red); background: #fff5f7; color: var(--red); }
+  .owner-pill.colab { border-color: var(--purple); background: #f5f4fc; color: var(--purple); }
+  .submit-area { margin-top: 24px; display: flex; justify-content: flex-end; }
+  .btn-primary { padding: 13px 28px; border-radius: 10px; border: none; background: var(--red); font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700; color: white; cursor: pointer; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .loading { text-align: center; padding: 20px; font-size: 12px; color: var(--subtle); }
+  .success-screen { display: none; text-align: center; padding: 60px 20px; }
+  .success-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--green-light); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+  .success-screen h2 { font-size: 20px; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
+  .success-screen p { font-size: 13px; color: var(--subtle); line-height: 1.6; }
+  .btn-nuevo { margin-top: 24px; padding: 12px 24px; border-radius: 10px; border: 0.5px solid var(--border); background: white; font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); cursor: pointer; }
+  input[type="date"] { font-family: 'Montserrat', sans-serif; }
+  @media (max-width: 600px) {
+    .selector-grid { grid-template-columns: 1fr; }
+    .conducta-grid { grid-template-columns: 1fr; }
+    .ac-nuevo-grid { grid-template-columns: 1fr; }
+    .destrabe-opts { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-orn">
+    <svg width="120" height="80" viewBox="0 0 120 80" fill="none">
+      <rect x="80" width="40" height="40" fill="rgba(255,255,255,0.10)"/>
+      <rect x="40" width="40" height="40" fill="rgba(255,255,255,0.06)"/>
+      <rect x="80" y="40" width="40" height="40" fill="rgba(255,255,255,0.14)"/>
+      <rect x="40" y="40" width="40" height="40" fill="rgba(255,255,255,0.08)"/>
+    </svg>
+  </div>
+  <p>Feedback Continuo Apprecio</p>
+  <h1>Check-in Mensual de Desempeño</h1>
+  <div class="header-meta">
+    <label>Mes correspondiente:</label>
+    <select class="mes-select" id="mes-select"></select>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="selector-grid" id="selector-grid">
+    <div class="selector-card">
+      <label>Líder</label>
+      <select id="lider-select" onchange="onLiderChange()">
+        <option value="">Cargando líderes...</option>
+      </select>
+      <div class="persona-info" id="lider-info"></div>
+    </div>
+    <div class="selector-card">
+      <label>Colaborador</label>
+      <select id="colab-select" onchange="onColabChange()" disabled>
+        <option value="">Selecciona un líder primero</option>
+      </select>
+      <div class="persona-info" id="colab-info"></div>
+    </div>
+  </div>
+
+  <div id="formulario" style="display:none;">
+
+    <!-- BLOQUE 0 -->
+    <div class="bloque" id="bloque-0">
+      <div class="bloque-header">
+        <div class="bloque-num">0</div>
+        <div>
+          <div class="bloque-titulo">Seguimiento de accionables anteriores</div>
+          <div class="bloque-sub">Accionables activos del check-in anterior</div>
+        </div>
+        <span class="badge badge-req">Obligatorio</span>
+      </div>
+      <div class="bloque-body">
+        <div id="ac-ant-container"><div class="loading">Cargando accionables...</div></div>
+      </div>
+    </div>
+
+    <!-- BLOQUE 1 -->
+    <div class="bloque" id="bloque-1">
+      <div class="bloque-header">
+        <div class="bloque-num">1</div>
+        <div>
+          <div class="bloque-titulo">Foco del mes</div>
+          <div class="bloque-sub">¿En qué está la persona? ¿Cuáles son sus prioridades?</div>
+        </div>
+        <span class="badge badge-req">Obligatorio</span>
+      </div>
+      <div class="bloque-body" id="focos-container">
+        <div class="foco-item">
+          <div class="foco-row">
+            <div class="foco-num">1</div>
+            <input class="foco-titulo-input" placeholder="Nombre del proyecto o área de foco..." />
+          </div>
+          <div class="foco-bullets">
+            <div class="foco-bullet-row"><div class="bullet-dot"></div><input class="bullet-input" placeholder="Prioridad, avance o contexto relevante..." /></div>
+            <div class="foco-bullet-row"><div class="bullet-dot"></div><input class="bullet-input" placeholder="Agrega otro punto..." /></div>
+            <button class="add-btn" style="font-size:11px;margin-left:13px;" onclick="agregarBullet(this)">+ Agregar punto</button>
+          </div>
+        </div>
+        <div class="tip-box">💡 <strong>Recomendación:</strong> idealmente no más de 4 focos por mes. El multifoco es un riesgo para la productividad y eventualmente una señal de que falta priorización.</div>
+        <button class="add-btn purple" style="margin-top:12px;" onclick="agregarFoco()">+ Agregar foco</button>
+      </div>
+    </div>
+
+    <!-- BLOQUE 2 -->
+    <div class="bloque" id="bloque-2">
+      <div class="bloque-header">
+        <div class="bloque-num">2</div>
+        <div>
+          <div class="bloque-titulo">Destrabe</div>
+          <div class="bloque-sub">¿Qué necesita del líder para avanzar?</div>
+        </div>
+        <span class="badge badge-opt">Opcional</span>
+      </div>
+      <div class="bloque-body">
+        <button class="destrabe-none" id="opt-ninguno" onclick="toggleNinguno()">Por ahora no necesito nada del líder</button>
+        <div id="destrabres-container" style="margin-top:10px;"></div>
+        <button class="add-btn purple" id="btn-add-destrabe" onclick="agregarDestrabe()" style="margin-top:6px;">+ Agregar destrabe</button>
+      </div>
+    </div>
+
+    <!-- BLOQUE 3 -->
+    <div class="bloque" id="bloque-3">
+      <div class="bloque-header">
+        <div class="bloque-num">3</div>
+        <div>
+          <div class="bloque-titulo">Feedback conductual apalancado en los pilares de Apprecio</div>
+          <div class="bloque-sub">Conducta observada e impacto concreto — clasifica cada observación</div>
+        </div>
+        <span class="badge badge-req">Obligatorio</span>
+      </div>
+      <div class="bloque-body">
+
+        <div class="pilar-card">
+          <div class="pilar-header">
+            <div class="pilar-icon pi-acc">🎯</div>
+            <div><div class="pilar-name">Accountability</div><div class="pilar-desc">Cumple compromisos · Comunica riesgos a tiempo · Cierra temas · Dice la verdad</div></div>
+          </div>
+          <div class="pilar-body" id="pilar-acc">
+            <div class="conducta-bloque">
+              <div class="tipo-pills">
+                <button class="tipo-pill" onclick="setTipo(this,'fort')">Fortaleza</button>
+                <button class="tipo-pill" onclick="setTipo(this,'opor')">Oportunidad de mejora</button>
+              </div>
+              <div class="conducta-grid">
+                <div><span class="ctag ctag-c">Conducta observada</span><textarea class="textarea" rows="3" placeholder="¿Qué hizo o no hizo concretamente?"></textarea></div>
+                <div><span class="ctag ctag-i">Impacto generado</span><textarea class="textarea" rows="3" placeholder="¿Qué efecto tuvo?"></textarea></div>
+              </div>
+            </div>
+            <button class="add-conducta-btn" onclick="agregarConducta('pilar-acc')">+ Agregar otra observación en Accountability</button>
+          </div>
+        </div>
+
+        <div class="pilar-card">
+          <div class="pilar-header">
+            <div class="pilar-icon pi-prod">⚡</div>
+            <div><div class="pilar-name">Productividad</div><div class="pilar-desc">Prioriza con foco · Cuida calidad y tiempo · Aporta valor · Mejora continua</div></div>
+          </div>
+          <div class="pilar-body" id="pilar-prod">
+            <div class="conducta-bloque">
+              <div class="tipo-pills">
+                <button class="tipo-pill" onclick="setTipo(this,'fort')">Fortaleza</button>
+                <button class="tipo-pill" onclick="setTipo(this,'opor')">Oportunidad de mejora</button>
+              </div>
+              <div class="conducta-grid">
+                <div><span class="ctag ctag-c">Conducta observada</span><textarea class="textarea" rows="3" placeholder="¿Qué hizo o no hizo concretamente?"></textarea></div>
+                <div><span class="ctag ctag-i">Impacto generado</span><textarea class="textarea" rows="3" placeholder="¿Qué efecto tuvo?"></textarea></div>
+              </div>
+            </div>
+            <button class="add-conducta-btn" onclick="agregarConducta('pilar-prod')">+ Agregar otra observación en Productividad</button>
+          </div>
+        </div>
+
+        <div class="pilar-card">
+          <div class="pilar-header">
+            <div class="pilar-icon pi-cc">🌟</div>
+            <div><div class="pilar-name">Customer Centricity</div><div class="pilar-desc">Conecta trabajo con el cliente · Actúa ante quiebres · Diseña experiencias simples</div></div>
+          </div>
+          <div class="pilar-body" id="pilar-cc">
+            <div class="conducta-bloque">
+              <div class="tipo-pills">
+                <button class="tipo-pill" onclick="setTipo(this,'fort')">Fortaleza</button>
+                <button class="tipo-pill" onclick="setTipo(this,'opor')">Oportunidad de mejora</button>
+              </div>
+              <div class="conducta-grid">
+                <div><span class="ctag ctag-c">Conducta observada</span><textarea class="textarea" rows="3" placeholder="¿Qué hizo o no hizo concretamente?"></textarea></div>
+                <div><span class="ctag ctag-i">Impacto generado</span><textarea class="textarea" rows="3" placeholder="¿Qué efecto tuvo?"></textarea></div>
+              </div>
+            </div>
+            <button class="add-conducta-btn" onclick="agregarConducta('pilar-cc')">+ Agregar otra observación en Customer Centricity</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- BLOQUE 4 -->
+    <div class="bloque" id="bloque-4">
+      <div class="bloque-header">
+        <div class="bloque-num">4</div>
+        <div>
+          <div class="bloque-titulo">Accionables post conversación</div>
+          <div class="bloque-sub">Con owner, fecha y seguimiento — aparecen en el próximo check-in</div>
+        </div>
+        <span class="badge badge-req">Obligatorio</span>
+      </div>
+      <div class="bloque-body" id="ac-nuevos-container">
+        <div class="ac-nuevo">
+          <div class="ac-nuevo-grid">
+            <div><span class="field-label">Accionable</span><input class="ac-input ac-desc" placeholder="¿Qué se va a hacer?" /></div>
+            <div><span class="field-label">Fecha</span><input class="ac-input ac-fecha" type="date" /></div>
+          </div>
+          <div><span class="field-label">Owner</span><div class="owner-pills" id="owners-0"></div></div>
+        </div>
+        <button class="add-btn purple" onclick="agregarAcNuevo()">+ Agregar accionable</button>
+      </div>
+    </div>
+
+    <div class="submit-area">
+      <button class="btn-primary" id="btn-submit" onclick="enviarCheckin()">Enviar check-in — notificar a ambos ✓</button>
+    </div>
+
+  </div>
+
+  <div class="success-screen" id="success-screen">
+    <div class="success-icon">✓</div>
+    <h2>Check-in enviado correctamente</h2>
+    <p>El resumen fue enviado por email al líder y al colaborador.<br>Los accionables aparecerán en el próximo check-in.</p>
+    <button class="btn-nuevo" onclick="nuevoCheckin()">Hacer otro check-in</button>
+  </div>
+
+</div>
+
+<script>
+const WEBHOOK_CHECKIN = 'https://n8n.openip.cl/webhook/checkin-feedback';
+const WEBHOOK_LIDERES = 'https://n8n.openip.cl/webhook/get-lideres';
+const WEBHOOK_EQUIPO  = 'https://n8n.openip.cl/webhook/get-equipo';
+const WEBHOOK_ACCION  = 'https://n8n.openip.cl/webhook/get-accionables';
+
+let liderData = null, colabData = null;
+let accionablesAnteriores = [];
+let focoCount = 1, acNuevoCount = 0;
+let destrabeTipo = null;
+
+// MES
+const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const anio = new Date().getFullYear();
+const mesActual = new Date().getMonth();
+const selMes = document.getElementById('mes-select');
+meses.forEach((m, i) => {
+  const opt = document.createElement('option');
+  opt.value = m + ' ' + anio;
+  opt.textContent = m + ' ' + anio;
+  if (i === mesActual) opt.selected = true;
+  selMes.appendChild(opt);
+});
+
+// CARGAR LÍDERES
+async function cargarLideres() {
+  try {
+    const res = await fetch(WEBHOOK_LIDERES);
+    const data = await res.json();
+    const sel = document.getElementById('lider-select');
+    sel.innerHTML = '<option value="">— Selecciona tu nombre —</option>';
+    (data.lideres || []).forEach(l => {
+      const opt = document.createElement('option');
+      opt.value = JSON.stringify(l);
+      opt.textContent = l.nombre;
+      sel.appendChild(opt);
+    });
+  } catch(e) {
+    document.getElementById('lider-select').innerHTML = '<option value="">Error al cargar</option>';
+  }
+}
+
+async function onLiderChange() {
+  const val = document.getElementById('lider-select').value;
+  if (!val) { liderData = null; resetColab(); return; }
+  liderData = JSON.parse(val);
+  document.getElementById('lider-info').textContent = liderData.cargo + ' · ' + liderData.area;
+  const colabSel = document.getElementById('colab-select');
+  colabSel.innerHTML = '<option value="">Cargando equipo...</option>';
+  colabSel.disabled = true;
+  try {
+    const res = await fetch(WEBHOOK_EQUIPO + '?rut=' + liderData.rut);
+    const data = await res.json();
+    colabSel.innerHTML = '<option value="">— Selecciona colaborador —</option>';
+    (data.colaboradores || []).forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = JSON.stringify(c);
+      opt.textContent = c.nombre;
+      colabSel.appendChild(opt);
+    });
+    colabSel.disabled = false;
+  } catch(e) {
+    colabSel.innerHTML = '<option value="">Error al cargar</option>';
+  }
+  document.getElementById('formulario').style.display = 'none';
+  colabData = null;
+}
+
+async function onColabChange() {
+  const val = document.getElementById('colab-select').value;
+  if (!val) { colabData = null; document.getElementById('formulario').style.display = 'none'; return; }
+  colabData = JSON.parse(val);
+  document.getElementById('colab-info').textContent = colabData.cargo + ' · ' + colabData.area;
+  actualizarOwnerPills();
+  await cargarAccionablesAnteriores();
+  document.getElementById('formulario').style.display = 'block';
+  setTimeout(() => {
+    document.querySelectorAll('.bloque').forEach((b, i) => {
+      setTimeout(() => b.classList.add('visible'), i * 80);
+    });
+  }, 50);
+}
+
+function resetColab() {
+  const s = document.getElementById('colab-select');
+  s.innerHTML = '<option value="">Selecciona un líder primero</option>';
+  s.disabled = true;
+  document.getElementById('colab-info').textContent = '';
+  document.getElementById('lider-info').textContent = '';
+  document.getElementById('formulario').style.display = 'none';
+}
+
+async function cargarAccionablesAnteriores() {
+  const cont = document.getElementById('ac-ant-container');
+  cont.innerHTML = '<div class="loading">Cargando accionables...</div>';
+  try {
+    const res = await fetch(WEBHOOK_ACCION + '?rut_colaborador=' + colabData.rut + '&rut_lider=' + liderData.rut);
+    const data = await res.json();
+    accionablesAnteriores = data.accionables || [];
+    if (accionablesAnteriores.length === 0) {
+      cont.innerHTML = '<div class="empty-state">No hay accionables activos del período anterior.</div>';
+      return;
+    }
+    let html = `<table class="ac-table"><thead><tr><th>Accionable</th><th>Owner</th><th>Fecha</th><th>Estatus</th></tr></thead><tbody>`;
+    accionablesAnteriores.forEach((ac, i) => {
+      const fechaFmt = ac.fecha ? ac.fecha.split('-').reverse().join('-') : '—';
+      html += `<tr><td>${ac.descripcion}</td><td>${ac.owner_nombre}</td><td>${fechaFmt}</td><td>
+        <select class="status-select" onchange="onEstatusChange(this,${i},'${ac.fecha}')">
+          <option value="">— Estatus —</option>
+          <option value="cumplido">✓ Cumplido</option>
+          <option value="En proceso" selected>⏳ En proceso</option>
+          <option value="no-cumplido">No cumplido</option>
+          <option value="postergado">Postergado</option>
+        </select>
+        <div id="reprog-${i}"></div>
+      </td></tr>`;
+    });
+    html += '</tbody></table><p style="font-size:11px;color:var(--subtle);font-style:italic;margin-top:8px;">Los accionables no cumplidos migrarán automáticamente al próximo check-in.</p>';
+    cont.innerHTML = html;
+  } catch(e) {
+    cont.innerHTML = '<div class="empty-state">No se pudieron cargar los accionables.</div>';
+  }
+}
+
+function onEstatusChange(sel, idx, fechaOrig) {
+  const div = document.getElementById('reprog-' + idx);
+  const val = sel.value;
+  accionablesAnteriores[idx] = { ...accionablesAnteriores[idx], estatus: val };
+  if (val === 'no-cumplido' || val === 'postergado') {
+    div.innerHTML = `<div class="reprog-box">
+      <label>¿Se reprograma con nueva fecha?</label>
+      <div class="reprog-btns">
+        <button class="reprog-btn" onclick="mostrarNuevaFecha(this,${idx},'${fechaOrig}')">Sí, nueva fecha</button>
+        <button class="reprog-btn" onclick="sinFecha(this,${idx},'${fechaOrig}')">No, queda pendiente</button>
+      </div>
+      <div id="nf-${idx}" style="display:none;"><input class="ac-input" type="date" style="width:180px;margin-top:6px;" onchange="registrarNuevaFecha(${idx},'${fechaOrig}',this.value)" /></div>
+      <div id="hist-${idx}"></div>
+    </div>`;
+  } else { div.innerHTML = ''; }
+}
+
+function mostrarNuevaFecha(btn, idx, fo) {
+  btn.className = 'reprog-btn active-si';
+  btn.parentElement.querySelectorAll('.reprog-btn').forEach(b => { if(b!==btn) b.className='reprog-btn'; });
+  document.getElementById('nf-' + idx).style.display = 'block';
+}
+
+function sinFecha(btn, idx, fo) {
+  btn.className = 'reprog-btn active-no';
+  btn.parentElement.querySelectorAll('.reprog-btn').forEach(b => { if(b!==btn) b.className='reprog-btn'; });
+  document.getElementById('nf-' + idx).style.display = 'none';
+  document.getElementById('hist-' + idx).innerHTML = `<div class="historial-note">📋 Fecha original: ${fo.split('-').reverse().join('-')} — Queda pendiente sin reprogramar</div>`;
+  accionablesAnteriores[idx] = { ...accionablesAnteriores[idx], nueva_fecha: '', historial: 'Postergado sin nueva fecha' };
+}
+
+function registrarNuevaFecha(idx, fo, nf) {
+  document.getElementById('hist-' + idx).innerHTML = `<div class="historial-note">📅 ${fo.split('-').reverse().join('-')} → <strong>${nf.split('-').reverse().join('-')}</strong></div>`;
+  accionablesAnteriores[idx] = { ...accionablesAnteriores[idx], nueva_fecha: nf, historial: `Reprogramado de ${fo} a ${nf}` };
+}
+
+function actualizarOwnerPills() {
+  document.querySelectorAll('.owner-pills').forEach(cont => {
+    cont.innerHTML = `
+      <button class="owner-pill" data-tipo="lider" onclick="setOwner(this,'lider')">${liderData.nombre}</button>
+      <button class="owner-pill" data-tipo="colab" onclick="setOwner(this,'colab')">${colabData.nombre}</button>`;
+  });
+}
+
+function setOwner(btn, tipo) {
+  btn.closest('.owner-pills').querySelectorAll('.owner-pill').forEach(p => p.className = 'owner-pill');
+  btn.classList.add(tipo === 'lider' ? 'lider' : 'colab');
+}
+
+function agregarFoco() {
+  if (focoCount >= 4) { alert('Máximo 4 focos por mes.\n\nEl multifoco es un riesgo para la productividad y eventualmente una señal de que falta priorización.'); return; }
+  focoCount++;
+  const cont = document.getElementById('focos-container');
+  const tip = cont.querySelector('.tip-box');
+  const item = document.createElement('div');
+  item.className = 'foco-item';
+  item.innerHTML = `<div class="foco-row"><div class="foco-num">${focoCount}</div><input class="foco-titulo-input" placeholder="Nombre del proyecto o área de foco..." /></div>
+    <div class="foco-bullets">
+      <div class="foco-bullet-row"><div class="bullet-dot"></div><input class="bullet-input" placeholder="Prioridad, avance o contexto relevante..." /></div>
+      <button class="add-btn" style="font-size:11px;margin-left:13px;" onclick="agregarBullet(this)">+ Agregar punto</button>
+    </div>`;
+  cont.insertBefore(item, tip);
+}
+
+function agregarBullet(btn) {
+  const bullets = btn.closest('.foco-bullets');
+  const row = document.createElement('div');
+  row.className = 'foco-bullet-row';
+  row.innerHTML = '<div class="bullet-dot"></div><input class="bullet-input" placeholder="Agrega otro punto..." />';
+  bullets.insertBefore(row, btn);
+}
+
+let ningunoActivo = false;
+let destrabeCount = 0;
+
+function toggleNinguno() {
+  ningunoActivo = !ningunoActivo;
+  const btn = document.getElementById('opt-ninguno');
+  const cont = document.getElementById('destrabres-container');
+  const addBtn = document.getElementById('btn-add-destrabe');
+  if (ningunoActivo) {
+    btn.classList.add('sel');
+    cont.innerHTML = '';
+    addBtn.style.display = 'none';
+    destrabeCount = 0;
+  } else {
+    btn.classList.remove('sel');
+    addBtn.style.display = 'flex';
+  }
+}
+
+function agregarDestrabe() {
+  ningunoActivo = false;
+  document.getElementById('opt-ninguno').classList.remove('sel');
+  destrabeCount++;
+  const idx = destrabeCount;
+  const cont = document.getElementById('destrabres-container');
+  const div = document.createElement('div');
+  div.className = 'destrabe-item';
+  div.id = 'destrabe-item-' + idx;
+  div.innerHTML = `
+    <button class="destrabe-remove" onclick="eliminarDestrabe(${idx})">✕</button>
+    <span class="field-label">Tipo</span>
+    <div class="destrabe-tipo-pills" id="dtipo-${idx}" style="margin-bottom:10px;">
+      <button class="destrabe-tipo-pill" onclick="setDestrabeTipo(this,'apoyo',${idx})">🔧 Apoyo concreto</button>
+      <button class="destrabe-tipo-pill" onclick="setDestrabeTipo(this,'coaching',${idx})">💬 Espacio de conversación</button>
+    </div>
+    <span class="field-label">¿Qué necesitas?</span>
+    <textarea class="textarea destrabe-desc-input" rows="3" placeholder="Describe con claridad qué necesitas del líder..." style="margin-bottom:10px;"></textarea>
+    <label class="checkbox-row">
+      <input type="checkbox" class="check-ac" onchange="toggleDestrabeAcItem(this,${idx})" />
+      <span>¿Esto se traduce en un accionable para el líder?</span>
+    </label>
+    <div id="destrabe-ac-row-${idx}" style="display:none;margin-top:10px;">
+      <div style="display:grid;grid-template-columns:1fr 130px;gap:8px;">
+        <input class="ac-input destrabe-ac-desc" placeholder="Describe el accionable del líder..." />
+        <input class="ac-input destrabe-ac-fecha" type="date" />
+      </div>
+    </div>`;
+  cont.appendChild(div);
+}
+
+function setDestrabeTipo(btn, tipo, idx) {
+  btn.closest('.destrabe-tipo-pills').querySelectorAll('.destrabe-tipo-pill').forEach(p => p.className = 'destrabe-tipo-pill');
+  btn.classList.add(tipo === 'apoyo' ? 'sel-red' : 'sel-purple');
+  document.getElementById('dtipo-' + idx).dataset.tipo = tipo;
+}
+
+function toggleDestrabeAcItem(cb, idx) {
+  document.getElementById('destrabe-ac-row-' + idx).style.display = cb.checked ? 'block' : 'none';
+}
+
+function eliminarDestrabe(idx) {
+  document.getElementById('destrabe-item-' + idx)?.remove();
+}
+
+function recolectarDestrabres() {
+  const destrabres = [];
+  if (ningunoActivo) return destrabres;
+  document.querySelectorAll('.destrabe-item').forEach(item => {
+    const tipoPills = item.querySelector('.destrabe-tipo-pills');
+    const tipo = tipoPills?.dataset.tipo || '';
+    const desc = item.querySelector('.destrabe-desc-input')?.value?.trim();
+    if (!desc) return;
+    const esAc = item.querySelector('.check-ac')?.checked || false;
+    const acDesc = item.querySelector('.destrabe-ac-desc')?.value?.trim() || '';
+    const acFecha = item.querySelector('.destrabe-ac-fecha')?.value || '';
+    destrabres.push({ tipo, descripcion: desc, es_accionable: esAc, accionable_descripcion: acDesc, accionable_fecha: acFecha });
+  });
+  return destrabres;
+}
+
+function setTipo(btn, tipo) {
+  btn.closest('.tipo-pills').querySelectorAll('.tipo-pill').forEach(p => { p.className = 'tipo-pill'; });
+  btn.classList.add(tipo);
+}
+
+function agregarConducta(pilarId) {
+  const pilar = document.getElementById(pilarId);
+  const addBtn = pilar.querySelector('.add-conducta-btn');
+  const bloque = document.createElement('div');
+  bloque.className = 'conducta-bloque';
+  bloque.innerHTML = `<div class="tipo-pills">
+    <button class="tipo-pill" onclick="setTipo(this,'fort')">Fortaleza</button>
+    <button class="tipo-pill" onclick="setTipo(this,'opor')">Oportunidad de mejora</button>
+  </div>
+  <div class="conducta-grid">
+    <div><span class="ctag ctag-c">Conducta observada</span><textarea class="textarea" rows="3" placeholder="¿Qué hizo o no hizo concretamente?"></textarea></div>
+    <div><span class="ctag ctag-i">Impacto generado</span><textarea class="textarea" rows="3" placeholder="¿Qué efecto tuvo?"></textarea></div>
+  </div>`;
+  pilar.insertBefore(bloque, addBtn);
+}
+
+function agregarAcNuevo() {
+  acNuevoCount++;
+  const cont = document.getElementById('ac-nuevos-container');
+  const addBtn = cont.querySelector('.add-btn');
+  const div = document.createElement('div');
+  div.className = 'ac-nuevo';
+  div.innerHTML = `<div class="ac-nuevo-grid">
+    <div><span class="field-label">Accionable</span><input class="ac-input ac-desc" placeholder="¿Qué se va a hacer?" /></div>
+    <div><span class="field-label">Fecha</span><input class="ac-input ac-fecha" type="date" /></div>
+  </div>
+  <div><span class="field-label">Owner</span>
+    <div class="owner-pills">
+      <button class="owner-pill" data-tipo="lider" onclick="setOwner(this,'lider')">${liderData?.nombre || 'Líder'}</button>
+      <button class="owner-pill" data-tipo="colab" onclick="setOwner(this,'colab')">${colabData?.nombre || 'Colaborador'}</button>
+    </div>
+  </div>`;
+  cont.insertBefore(div, addBtn);
+}
+
+function recolectarFocos() {
+  const focos = [];
+  document.querySelectorAll('.foco-item').forEach(item => {
+    const titulo = item.querySelector('.foco-titulo-input')?.value?.trim();
+    if (!titulo) return;
+    const puntos = [];
+    item.querySelectorAll('.bullet-input').forEach(b => { if(b.value.trim()) puntos.push(b.value.trim()); });
+    focos.push({ titulo, puntos });
+  });
+  return focos;
+}
+
+function recolectarPilares() {
+  const pilares = { accountability: [], productividad: [], customer_centricity: [] };
+  const map = { 'pilar-acc': 'accountability', 'pilar-prod': 'productividad', 'pilar-cc': 'customer_centricity' };
+  Object.entries(map).forEach(([pilarId, key]) => {
+    document.getElementById(pilarId).querySelectorAll('.conducta-bloque').forEach(bloque => {
+      const tipo = bloque.querySelector('.tipo-pill.fort') ? 'fortaleza' : bloque.querySelector('.tipo-pill.opor') ? 'oportunidad' : '';
+      const textareas = bloque.querySelectorAll('.textarea');
+      const conducta = textareas[0]?.value?.trim();
+      const impacto = textareas[1]?.value?.trim();
+      if (conducta) pilares[key].push({ tipo, conducta, impacto: impacto || '' });
+    });
+  });
+  return pilares;
+}
+
+function recolectarAcNuevos() {
+  const acs = [];
+  document.querySelectorAll('.ac-nuevo').forEach(item => {
+    const desc = item.querySelector('.ac-desc')?.value?.trim();
+    const fecha = item.querySelector('.ac-fecha')?.value;
+    if (!desc) return;
+    const ownerBtn = item.querySelector('.owner-pill.lider, .owner-pill.colab');
+    const esLider = ownerBtn?.classList.contains('lider');
+    acs.push({
+      descripcion: desc, fecha: fecha || '',
+      owner_rut: esLider ? liderData.rut : colabData.rut,
+      owner_nombre: esLider ? liderData.nombre : colabData.nombre,
+      owner_mail: ''
+    });
+  });
+  return acs;
+}
+
+async function enviarCheckin() {
+  if (!liderData || !colabData) { alert('Selecciona líder y colaborador antes de enviar.'); return; }
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+
+  const payload = {
+    mes: document.getElementById('mes-select').value,
+    lider_rut: liderData.rut,
+    lider_nombre: liderData.nombre,
+    lider_mail: '',
+    nombre_display_lider: liderData.nombre,
+    colaborador_rut: colabData.rut,
+    colaborador_nombre: colabData.nombre,
+    colaborador_mail: '',
+    nombre_display_colaborador: colabData.nombre,
+    n2_rut: '', n3_rut: '', n4_rut: '', n5_rut: '',
+    accionables_anteriores: accionablesAnteriores,
+    focos: recolectarFocos(),
+    destrabe: recolectarDestrabres(),
+    pilares: recolectarPilares(),
+    accionables_nuevos: recolectarAcNuevos()
+  };
+
+  try {
+    await fetch(WEBHOOK_CHECKIN, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    document.getElementById('formulario').style.display = 'none';
+    document.getElementById('selector-grid').style.display = 'none';
+    document.getElementById('success-screen').style.display = 'block';
+  } catch(e) {
+    alert('Error al enviar. Intenta de nuevo.');
+    btn.disabled = false;
+    btn.textContent = 'Enviar check-in — notificar a ambos ✓';
+  }
+}
+
+function nuevoCheckin() {
+  location.reload();
+}
+
+cargarLideres();
+</script>
+</body>
+</html>
