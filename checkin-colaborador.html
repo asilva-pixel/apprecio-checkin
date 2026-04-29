@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Check-in Mensual · Apprecio</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  :root {
+    --red: #FA345E; --purple: #8B85D4; --purple-light: #f0eef8;
+    --green: #1a8a45; --green-light: #e6f9ee; --yellow: #b07a00;
+    --yellow-light: #fff8e6; --dark: #1a1a1a; --gray: #f7f6f8;
+    --border: #e2e0e8; --text: #444; --subtle: #999;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Montserrat', sans-serif; background: var(--gray); min-height: 100vh; color: var(--dark); }
+
+  /* LOGIN */
+  .login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; flex-direction: column; padding: 20px; }
+  .login-card { background: white; border-radius: 16px; border: 0.5px solid var(--border); padding: 40px 36px; max-width: 400px; width: 100%; text-align: center; }
+  .login-logo { width: 48px; height: 48px; border-radius: 12px; background: var(--purple); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; }
+  .login-logo svg { width: 24px; height: 24px; fill: white; }
+  .login-title { font-size: 18px; font-weight: 700; color: var(--dark); margin-bottom: 6px; }
+  .login-sub { font-size: 12px; color: var(--subtle); margin-bottom: 28px; line-height: 1.6; }
+  .login-error { background: #fff0f3; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--red); margin-top: 16px; display: none; }
+
+  /* HEADER */
+  .header { background: var(--purple); padding: 20px 32px; position: relative; overflow: hidden; }
+  .header-orn { position: absolute; right: 0; top: 0; pointer-events: none; }
+  .header-label { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.7); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; position: relative; z-index: 1; }
+  .header-title { font-size: 18px; font-weight: 700; color: white; position: relative; z-index: 1; }
+  .header-user { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; position: relative; z-index: 1; }
+  .user-info { display: flex; flex-direction: column; }
+  .user-name { font-size: 14px; font-weight: 700; color: white; }
+  .user-lider { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .mes-select { font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 600; color: var(--purple); background: white; border: none; border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+  .logout-btn { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 600; color: var(--purple); background: white; border: none; border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+
+  /* LOADING */
+  .loading-screen { display: flex; align-items: center; justify-content: center; min-height: 60vh; flex-direction: column; gap: 16px; }
+  .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--purple); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-screen p { font-size: 13px; color: var(--subtle); }
+
+  /* MAIN */
+  .main { max-width: 680px; margin: 0 auto; padding: 24px 20px 80px; }
+
+  /* CONTEXT CARD */
+  .context-card { background: white; border-radius: 12px; border: 0.5px solid var(--border); padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 14px; }
+  .context-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--purple); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: white; flex-shrink: 0; }
+  .context-info { flex: 1; }
+  .context-name { font-size: 14px; font-weight: 700; color: var(--dark); }
+  .context-sub { font-size: 11px; color: var(--subtle); margin-top: 2px; }
+  .context-mes { font-size: 11px; font-weight: 600; color: var(--purple); background: var(--purple-light); padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+
+  /* BLOQUES */
+  .bloque { background: white; border-radius: 12px; border: 0.5px solid var(--border); margin-bottom: 14px; overflow: hidden; opacity: 0; transform: translateY(12px); transition: opacity 0.3s ease, transform 0.3s ease; }
+  .bloque.visible { opacity: 1; transform: translateY(0); }
+  .bloque-header { padding: 14px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 0.5px solid #f0eef4; }
+  .bloque-num { width: 28px; height: 28px; border-radius: 6px; background: var(--purple); color: white; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .bloque-titulo { font-size: 13px; font-weight: 700; color: var(--dark); }
+  .bloque-sub { font-size: 11px; color: var(--subtle); margin-top: 1px; }
+  .badge { margin-left: auto; font-size: 9px; font-weight: 700; padding: 3px 9px; border-radius: 20px; letter-spacing: 0.3px; white-space: nowrap; }
+  .badge-req { background: var(--purple-light); color: var(--purple); }
+  .badge-opt { background: var(--gray); color: var(--subtle); }
+  .bloque-body { padding: 18px 20px; }
+
+  /* FOCO */
+  .foco-item { background: var(--gray); border: 0.5px solid #e8e6f0; border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
+  .foco-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .foco-num { width: 22px; height: 22px; border-radius: 5px; background: var(--purple); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .foco-titulo-input { font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600; padding: 7px 12px; border: 0.5px solid var(--border); border-radius: 8px; color: var(--dark); background: white; flex: 1; }
+  .foco-bullets { margin-left: 32px; }
+  .foco-bullet-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .bullet-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--purple); flex-shrink: 0; }
+  .bullet-input { font-family: 'Montserrat', sans-serif; font-size: 12px; padding: 6px 10px; border: none; border-bottom: 0.5px solid var(--border); color: var(--text); background: transparent; width: 100%; }
+  .bullet-input:focus { outline: none; border-bottom-color: var(--purple); }
+  .add-btn { font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 600; color: var(--purple); background: none; border: none; cursor: pointer; padding: 6px 0; display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+  .tip-box { background: #f5f4fc; border-left: 3px solid var(--purple); border-radius: 0 8px 8px 0; padding: 10px 14px; margin-top: 12px; font-size: 11px; color: var(--subtle); font-style: italic; line-height: 1.6; }
+
+  /* DESTRABE */
+  .destrabe-item { background: var(--gray); border: 0.5px solid #e8e6f0; border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; position: relative; }
+  .destrabe-tipo-pills { display: flex; gap: 8px; margin-bottom: 10px; }
+  .destrabe-tipo-pill { padding: 6px 14px; border-radius: 20px; border: 0.5px solid var(--border); font-size: 11px; font-weight: 600; cursor: pointer; font-family: 'Montserrat', sans-serif; color: var(--subtle); background: white; }
+  .destrabe-tipo-pill.sel-red { border-color: var(--red); background: #fff5f7; color: var(--red); }
+  .destrabe-tipo-pill.sel-purple { border-color: var(--purple); background: #f5f4fc; color: var(--purple); }
+  .destrabe-none { border: 0.5px dashed var(--border); border-radius: 10px; padding: 10px 14px; text-align: center; font-size: 12px; color: var(--subtle); cursor: pointer; background: none; font-family: 'Montserrat', sans-serif; font-weight: 500; width: 100%; margin-bottom: 10px; }
+  .destrabe-none.sel { border-style: solid; border-color: var(--purple); color: var(--purple); }
+  .destrabe-remove { position: absolute; top: 10px; right: 12px; background: none; border: none; cursor: pointer; font-size: 16px; color: var(--subtle); }
+  .field-label { font-size: 10px; font-weight: 700; color: var(--subtle); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; display: block; }
+  .textarea { font-family: 'Montserrat', sans-serif; font-size: 13px; padding: 10px 12px; border: 0.5px solid var(--border); border-radius: 8px; color: var(--dark); background: white; width: 100%; resize: none; line-height: 1.6; }
+  .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--subtle); cursor: pointer; margin-top: 10px; }
+  .ac-input { font-family: 'Montserrat', sans-serif; font-size: 13px; padding: 9px 12px; border: 0.5px solid var(--border); border-radius: 8px; color: var(--dark); background: white; width: 100%; }
+
+  /* ACCIONABLES */
+  .ac-nuevo { background: var(--gray); border: 0.5px solid #e8e6f0; border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+  .ac-nuevo-grid { display: grid; grid-template-columns: 1fr 120px; gap: 8px; }
+
+  /* SUBMIT */
+  .submit-area { margin-top: 24px; }
+  .btn-primary { width: 100%; padding: 14px; border-radius: 10px; border: none; background: var(--purple); font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700; color: white; cursor: pointer; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-secondary { width: 100%; padding: 12px; border-radius: 10px; border: 0.5px solid var(--border); background: white; font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); cursor: pointer; margin-top: 10px; }
+
+  /* SUCCESS */
+  .success-screen { display: none; text-align: center; padding: 60px 20px; }
+  .success-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--purple-light); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+  .success-screen h2 { font-size: 20px; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
+  .success-screen p { font-size: 13px; color: var(--subtle); line-height: 1.6; }
+
+  input[type="date"] { font-family: 'Montserrat', sans-serif; }
+  @media (max-width: 600px) { .ac-nuevo-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen" class="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+    </div>
+    <div class="login-title">Mi Check-in Mensual</div>
+    <div class="login-sub">Completa tu parte antes de la reunión con tu líder. Inicia sesión con tu cuenta de Apprecio.</div>
+    <div id="g_id_signin"></div>
+    <div class="login-error" id="login-error">Solo cuentas de Apprecio o Dcanje pueden acceder.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none;">
+  <div class="header">
+    <div class="header-orn">
+      <svg width="120" height="80" viewBox="0 0 120 80" fill="none">
+        <rect x="80" width="40" height="40" fill="rgba(255,255,255,0.10)"/>
+        <rect x="40" width="40" height="40" fill="rgba(255,255,255,0.06)"/>
+        <rect x="80" y="40" width="40" height="40" fill="rgba(255,255,255,0.14)"/>
+        <rect x="40" y="40" width="40" height="40" fill="rgba(255,255,255,0.08)"/>
+      </svg>
+    </div>
+    <div class="header-label">Feedback Continuo Apprecio</div>
+    <div class="header-title">Mi Check-in Mensual</div>
+    <div class="header-user">
+      <div class="user-info">
+        <span class="user-name" id="user-name"></span>
+        <span class="user-lider" id="user-lider"></span>
+      </div>
+      <div class="header-right">
+        <select class="mes-select" id="mes-select"></select>
+        <button class="logout-btn" onclick="logout()">Salir</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="loading-screen" id="loading">
+      <div class="spinner"></div>
+      <p>Cargando tu información...</p>
+    </div>
+
+    <div id="formulario" style="display:none;">
+
+      <!-- BLOQUE 1 — FOCO -->
+      <div class="bloque" id="bloque-1">
+        <div class="bloque-header">
+          <div class="bloque-num">1</div>
+          <div>
+            <div class="bloque-titulo">Mi foco del mes</div>
+            <div class="bloque-sub">¿En qué estás trabajando? ¿Cuáles son tus prioridades?</div>
+          </div>
+          <span class="badge badge-req">Obligatorio</span>
+        </div>
+        <div class="bloque-body" id="focos-container">
+          <div class="foco-item">
+            <div class="foco-row">
+              <div class="foco-num">1</div>
+              <input class="foco-titulo-input" placeholder="Nombre del proyecto o área de foco..." />
+            </div>
+            <div class="foco-bullets">
+              <div class="foco-bullet-row"><div class="bullet-dot"></div><input class="bullet-input" placeholder="¿Qué avances tuviste? ¿Qué está en curso?" /></div>
+              <div class="foco-bullet-row"><div class="bullet-dot"></div><input class="bullet-input" placeholder="Agrega otro punto..." /></div>
+              <button class="add-btn" style="font-size:11px;margin-left:13px;" onclick="agregarBullet(this)">+ Agregar punto</button>
+            </div>
+          </div>
+          <div class="tip-box">💡 Enfócate en lo que realmente importa este mes — no en todo lo que hiciste, sino en lo que más impacto tuvo o tendrá.</div>
+          <button class="add-btn" style="margin-top:12px;" onclick="agregarFoco()">+ Agregar otro foco</button>
+        </div>
+      </div>
+
+      <!-- BLOQUE 2 — DESTRABE -->
+      <div class="bloque" id="bloque-2">
+        <div class="bloque-header">
+          <div class="bloque-num">2</div>
+          <div>
+            <div class="bloque-titulo">¿Qué necesitas de tu líder?</div>
+            <div class="bloque-sub">¿Hay algo que te está frenando o que necesitas para avanzar?</div>
+          </div>
+          <span class="badge badge-opt">Opcional</span>
+        </div>
+        <div class="bloque-body">
+          <div style="display:flex;gap:10px;margin-bottom:10px;">
+            <button class="destrabe-tipo-pill" onclick="agregarDestrabeRapido('apoyo')" style="flex:1;padding:12px 14px;text-align:left;border-radius:10px;">
+              <span style="display:block;font-size:18px;margin-bottom:4px;">🔧</span>
+              <strong style="font-size:12px;">Necesito apoyo concreto</strong><br>
+              <span style="font-weight:400;font-size:11px;">Mi líder tiene que hacer o resolver algo</span>
+            </button>
+            <button class="destrabe-tipo-pill" onclick="agregarDestrabeRapido('coaching')" style="flex:1;padding:12px 14px;text-align:left;border-radius:10px;">
+              <span style="display:block;font-size:18px;margin-bottom:4px;">💬</span>
+              <strong style="font-size:12px;">Quiero conversar</strong><br>
+              <span style="font-weight:400;font-size:11px;">Necesito que mi líder me acompañe a pensar</span>
+            </button>
+          </div>
+          <button class="destrabe-none" id="opt-ninguno" onclick="toggleNinguno()">Por ahora no necesito nada de mi líder</button>
+          <div id="destrabres-container" style="margin-top:10px;"></div>
+          <button class="add-btn" id="btn-add-destrabe" onclick="agregarDestrabe()" style="margin-top:6px;display:none;">+ Agregar otro</button>
+        </div>
+      </div>
+
+      <!-- BLOQUE 3 — ACCIONABLES PROPUESTOS -->
+      <div class="bloque" id="bloque-3">
+        <div class="bloque-header">
+          <div class="bloque-num">3</div>
+          <div>
+            <div class="bloque-titulo">Mis accionables propuestos</div>
+            <div class="bloque-sub">Compromisos que quieres proponer para el próximo mes</div>
+          </div>
+          <span class="badge badge-opt">Opcional</span>
+        </div>
+        <div class="bloque-body" id="ac-container">
+          <div class="ac-nuevo">
+            <div class="ac-nuevo-grid">
+              <div><span class="field-label">Accionable</span><input class="ac-input ac-desc" placeholder="¿Qué te comprometes a hacer?" /></div>
+              <div><span class="field-label">Fecha propuesta</span><input class="ac-input ac-fecha" type="date" /></div>
+            </div>
+          </div>
+          <button class="add-btn" onclick="agregarAcNuevo()">+ Agregar otro accionable</button>
+          <div class="tip-box" style="margin-top:12px;">💡 Estos accionables son una propuesta — en la reunión con tu líder los confirman y pueden agregar más.</div>
+        </div>
+      </div>
+
+      <div class="submit-area">
+        <button class="btn-primary" id="btn-submit" onclick="enviarFormulario()">Enviar mi check-in previo ✓</button>
+        <button class="btn-secondary" onclick="guardarBorrador()">Guardar borrador</button>
+      </div>
+
+    </div>
+
+    <div class="success-screen" id="success-screen">
+      <div class="success-icon">✓</div>
+      <h2>¡Listo! Tu check-in fue enviado</h2>
+      <p>Tu líder <strong id="lider-nombre-success"></strong> podrá ver tu perspectiva antes de la reunión.<br>Nos vemos en el 1:1 🙌</p>
+      <br>
+      <button class="btn-secondary" style="max-width:300px;margin:0 auto;" onclick="location.reload()">Volver al inicio</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CLIENT_ID = '589779415783-vomns28ralb0efttkj5no91ggo7rtoj3.apps.googleusercontent.com';
+const DOMINIOS_PERMITIDOS = ['apprecio.com', 'dcanje.com'];
+const WEBHOOK_COLABORADOR = 'https://n8n.openip.cl/webhook/get-colaborador';
+const WEBHOOK_CHECKIN_COLAB = 'https://n8n.openip.cl/webhook/checkin-colaborador';
+
+let usuarioActual = null;
+let colaboradorData = null;
+let focoCount = 1;
+let ningunoActivo = false;
+let destrabeCount = 0;
+
+window.onload = function() {
+  google.accounts.id.initialize({
+    client_id: CLIENT_ID,
+    callback: handleCredentialResponse,
+    auto_select: false
+  });
+  google.accounts.id.renderButton(
+    document.getElementById('g_id_signin'),
+    { theme: 'outline', size: 'large', text: 'signin_with', locale: 'es', width: 280 }
+  );
+};
+
+function handleCredentialResponse(response) {
+  const payload = JSON.parse(atob(response.credential.split('.')[1]));
+  const email = payload.email || '';
+  const dominio = email.split('@')[1] || '';
+  if (!DOMINIOS_PERMITIDOS.includes(dominio)) {
+    document.getElementById('login-error').style.display = 'block';
+    return;
+  }
+  usuarioActual = { email, nombre: payload.name, given_name: payload.given_name };
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  iniciarApp();
+}
+
+function logout() { google.accounts.id.disableAutoSelect(); location.reload(); }
+
+async function iniciarApp() {
+  // Mes selector
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const anio = new Date().getFullYear();
+  const mesActual = new Date().getMonth();
+  const selMes = document.getElementById('mes-select');
+  meses.forEach((m, i) => {
+    const opt = document.createElement('option');
+    opt.value = m + ' ' + anio;
+    opt.textContent = m + ' ' + anio;
+    if (i === mesActual) opt.selected = true;
+    selMes.appendChild(opt);
+  });
+
+  // Buscar datos del colaborador
+  try {
+    const res = await fetch(`${WEBHOOK_COLABORADOR}?email=${encodeURIComponent(usuarioActual.email)}`);
+    const data = await res.json();
+
+    if (!data.encontrado) {
+      document.getElementById('loading').innerHTML = '<p style="color:var(--red);font-size:13px;">No encontramos tu perfil en el sistema. Contacta a tu líder o a RRHH.</p>';
+      return;
+    }
+
+    colaboradorData = data;
+    document.getElementById('user-name').textContent = data.nombre;
+    document.getElementById('user-lider').textContent = 'Líder: ' + data.lider_nombre;
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('formulario').style.display = 'block';
+
+    setTimeout(() => {
+      document.querySelectorAll('.bloque').forEach((b, i) => {
+        setTimeout(() => b.classList.add('visible'), i * 80);
+      });
+    }, 50);
+
+    // Cargar borrador si existe
+    cargarBorrador();
+
+  } catch(e) {
+    document.getElementById('loading').innerHTML = '<p style="color:var(--red);font-size:13px;">Error al cargar tu perfil. Intenta recargar la página.</p>';
+  }
+}
+
+// FOCO
+function agregarFoco() {
+  if (focoCount >= 4) { alert('Máximo 4 focos por mes.'); return; }
+  focoCount++;
+  const cont = document.getElementById('focos-container');
+  const tip = cont.querySelector('.tip-box');
+  const item = document.createElement('div');
+  item.className = 'foco-item';
+  item.innerHTML = `<div class="foco-row"><div class="foco-num">${focoCount}</div><input class="foco-titulo-input" placeholder="Nombre del proyecto o área de foco..." /></div>
+    <div class="foco-bullets">
+      <div class="foco-bullet-row"><div class="bullet-dot"></div><input class="bullet-input" placeholder="¿Qué avances tuviste? ¿Qué está en curso?" /></div>
+      <button class="add-btn" style="font-size:11px;margin-left:13px;" onclick="agregarBullet(this)">+ Agregar punto</button>
+    </div>`;
+  cont.insertBefore(item, tip);
+}
+
+function agregarBullet(btn) {
+  const bullets = btn.closest('.foco-bullets');
+  const row = document.createElement('div');
+  row.className = 'foco-bullet-row';
+  row.innerHTML = '<div class="bullet-dot"></div><input class="bullet-input" placeholder="Agrega otro punto..." />';
+  bullets.insertBefore(row, btn);
+}
+
+// DESTRABE
+function toggleNinguno() {
+  ningunoActivo = !ningunoActivo;
+  const btn = document.getElementById('opt-ninguno');
+  const cont = document.getElementById('destrabres-container');
+  const addBtn = document.getElementById('btn-add-destrabe');
+  if (ningunoActivo) { btn.classList.add('sel'); cont.innerHTML = ''; addBtn.style.display = 'none'; destrabeCount = 0; }
+  else { btn.classList.remove('sel'); }
+}
+
+function agregarDestrabeRapido(tipo) {
+  ningunoActivo = false;
+  document.getElementById('opt-ninguno').classList.remove('sel');
+  document.getElementById('btn-add-destrabe').style.display = 'flex';
+  destrabeCount++;
+  const idx = destrabeCount;
+  const cont = document.getElementById('destrabres-container');
+  const div = document.createElement('div');
+  div.className = 'destrabe-item';
+  div.id = 'destrabe-item-' + idx;
+  div.innerHTML = `
+    <button class="destrabe-remove" onclick="eliminarDestrabe(${idx})">✕</button>
+    <span class="field-label">Tipo</span>
+    <div class="destrabe-tipo-pills" id="dtipo-${idx}" data-tipo="${tipo}" style="margin-bottom:10px;">
+      <button class="destrabe-tipo-pill ${tipo==='apoyo'?'sel-red':''}" onclick="setDestrabeTipo(this,'apoyo',${idx})">🔧 Apoyo concreto</button>
+      <button class="destrabe-tipo-pill ${tipo==='coaching'?'sel-purple':''}" onclick="setDestrabeTipo(this,'coaching',${idx})">💬 Quiero conversar</button>
+    </div>
+    <span class="field-label">¿Qué necesitas?</span>
+    <textarea class="textarea destrabe-desc-input" rows="3" placeholder="Describe con claridad qué necesitas de tu líder..." style="margin-bottom:10px;"></textarea>
+    <label class="checkbox-row">
+      <input type="checkbox" class="check-ac" onchange="toggleDestrabeAcItem(this,${idx})" />
+      <span>¿Necesitas que esto quede como accionable para tu líder?</span>
+    </label>
+    <div id="destrabe-ac-row-${idx}" style="display:none;margin-top:10px;">
+      <div style="display:grid;grid-template-columns:1fr 130px;gap:8px;">
+        <input class="ac-input destrabe-ac-desc" placeholder="Describe el accionable..." />
+        <input class="ac-input destrabe-ac-fecha" type="date" />
+      </div>
+    </div>`;
+  cont.appendChild(div);
+}
+
+function agregarDestrabe() { agregarDestrabeRapido('apoyo'); }
+
+function setDestrabeTipo(btn, tipo, idx) {
+  btn.closest('.destrabe-tipo-pills').querySelectorAll('.destrabe-tipo-pill').forEach(p => p.className = 'destrabe-tipo-pill');
+  btn.classList.add(tipo === 'apoyo' ? 'sel-red' : 'sel-purple');
+  document.getElementById('dtipo-' + idx).dataset.tipo = tipo;
+}
+
+function toggleDestrabeAcItem(cb, idx) {
+  document.getElementById('destrabe-ac-row-' + idx).style.display = cb.checked ? 'block' : 'none';
+}
+
+function eliminarDestrabe(idx) { document.getElementById('destrabe-item-' + idx)?.remove(); }
+
+// ACCIONABLES
+function agregarAcNuevo() {
+  const cont = document.getElementById('ac-container');
+  const addBtn = cont.querySelector('.add-btn');
+  const div = document.createElement('div');
+  div.className = 'ac-nuevo';
+  div.innerHTML = `<div class="ac-nuevo-grid">
+    <div><span class="field-label">Accionable</span><input class="ac-input ac-desc" placeholder="¿Qué te comprometes a hacer?" /></div>
+    <div><span class="field-label">Fecha propuesta</span><input class="ac-input ac-fecha" type="date" /></div>
+  </div>`;
+  cont.insertBefore(div, addBtn);
+}
+
+// RECOLECTAR DATOS
+function recolectarFocos() {
+  const focos = [];
+  document.querySelectorAll('.foco-item').forEach(item => {
+    const titulo = item.querySelector('.foco-titulo-input')?.value?.trim();
+    if (!titulo) return;
+    const puntos = [];
+    item.querySelectorAll('.bullet-input').forEach(b => { if(b.value.trim()) puntos.push(b.value.trim()); });
+    focos.push({ titulo, puntos });
+  });
+  return focos;
+}
+
+function recolectarDestrabres() {
+  const destrabres = [];
+  if (ningunoActivo) return destrabres;
+  document.querySelectorAll('.destrabe-item').forEach(item => {
+    const tipoPills = item.querySelector('.destrabe-tipo-pills');
+    const tipo = tipoPills?.dataset.tipo || '';
+    const desc = item.querySelector('.destrabe-desc-input')?.value?.trim();
+    if (!desc) return;
+    const esAc = item.querySelector('.check-ac')?.checked || false;
+    const acDesc = item.querySelector('.destrabe-ac-desc')?.value?.trim() || '';
+    const acFecha = item.querySelector('.destrabe-ac-fecha')?.value || '';
+    destrabres.push({ tipo, descripcion: desc, es_accionable: esAc, accionable_descripcion: acDesc, accionable_fecha: acFecha });
+  });
+  return destrabres;
+}
+
+function recolectarAcNuevos() {
+  const acs = [];
+  document.querySelectorAll('.ac-nuevo').forEach(item => {
+    const desc = item.querySelector('.ac-desc')?.value?.trim();
+    const fecha = item.querySelector('.ac-fecha')?.value;
+    if (!desc) return;
+    acs.push({
+      descripcion: desc, fecha: fecha || '',
+      owner_rut: colaboradorData.rut,
+      owner_nombre: colaboradorData.nombre,
+      owner_mail: usuarioActual.email
+    });
+  });
+  return acs;
+}
+
+function construirPayload() {
+  return {
+    mes: document.getElementById('mes-select').value,
+    colaborador_rut: colaboradorData.rut,
+    colaborador_nombre: colaboradorData.nombre,
+    colaborador_mail: usuarioActual.email,
+    lider_rut: colaboradorData.lider_rut,
+    lider_nombre: colaboradorData.lider_nombre,
+    lider_mail: colaboradorData.lider_mail,
+    focos: recolectarFocos(),
+    destrabe: recolectarDestrabres(),
+    accionables_propuestos: recolectarAcNuevos(),
+    estado: 'enviado'
+  };
+}
+
+// BORRADOR
+function guardarBorrador() {
+  const payload = construirPayload();
+  payload.estado = 'borrador';
+  localStorage.setItem('checkin_borrador_' + colaboradorData.rut, JSON.stringify(payload));
+  alert('Borrador guardado. Puedes volver a completarlo cuando quieras.');
+}
+
+function cargarBorrador() {
+  const borrador = localStorage.getItem('checkin_borrador_' + colaboradorData?.rut);
+  if (!borrador) return;
+  try {
+    const data = JSON.parse(borrador);
+    if (data.estado !== 'borrador') return;
+    // Cargar focos
+    if (data.focos?.length > 0) {
+      const primerFoco = document.querySelector('.foco-titulo-input');
+      if (primerFoco) primerFoco.value = data.focos[0].titulo || '';
+      const primerBullets = document.querySelectorAll('.bullet-input');
+      if (data.focos[0].puntos) {
+        data.focos[0].puntos.forEach((p, i) => { if(primerBullets[i]) primerBullets[i].value = p; });
+      }
+    }
+  } catch(e) {}
+}
+
+// ENVIAR
+async function enviarFormulario() {
+  const focos = recolectarFocos();
+  if (focos.length === 0) { alert('Por favor completa al menos un foco del mes.'); return; }
+
+  const btn = document.getElementById('btn-submit');
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+
+  const payload = construirPayload();
+
+  try {
+    await fetch(WEBHOOK_CHECKIN_COLAB, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    // Limpiar borrador
+    localStorage.removeItem('checkin_borrador_' + colaboradorData.rut);
+    document.getElementById('lider-nombre-success').textContent = colaboradorData.lider_nombre;
+    document.getElementById('formulario').style.display = 'none';
+    document.getElementById('success-screen').style.display = 'block';
+  } catch(e) {
+    alert('Error al enviar. Intenta de nuevo.');
+    btn.disabled = false;
+    btn.textContent = 'Enviar mi check-in previo ✓';
+  }
+}
+</script>
+</body>
+</html>
