@@ -496,19 +496,34 @@ function construirPayload() {
 }
 
 // BORRADOR
-function guardarBorrador() {
+let idPrecheckActual = null;
+
+async function guardarBorrador() {
   const payload = construirPayload();
   payload.estado = 'borrador';
-  localStorage.setItem('checkin_borrador_' + colaboradorData.rut, JSON.stringify(payload));
-  alert('Borrador guardado. Puedes volver a completarlo cuando quieras.');
+
+  try {
+    await fetch(WEBHOOK_CHECKIN_COLAB, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    alert('Borrador guardado. Puedes volver a completarlo cuando quieras.');
+  } catch(e) {
+    alert('Error al guardar el borrador. Intenta de nuevo.');
+  }
 }
 
-function cargarBorrador() {
-  const borrador = localStorage.getItem('checkin_borrador_' + colaboradorData?.rut);
-  if (!borrador) return;
+async function cargarBorrador() {
+  if (!colaboradorData) return;
+  const mes = document.getElementById('mes-select').value;
   try {
-    const data = JSON.parse(borrador);
-    if (data.estado !== 'borrador') return;
+    const res = await fetch(`https://n8n.openip.cl/webhook/get-borrador-colaborador?rut_colaborador=${colaboradorData.rut}&mes=${encodeURIComponent(mes)}`);
+    const data = await res.json();
+    if (!data.encontrado) return;
+
+    idPrecheckActual = data.id_precheck;
+
     // Cargar focos
     if (data.focos?.length > 0) {
       const primerFoco = document.querySelector('.foco-titulo-input');
@@ -518,10 +533,18 @@ function cargarBorrador() {
         data.focos[0].puntos.forEach((p, i) => { if(primerBullets[i]) primerBullets[i].value = p; });
       }
     }
-  } catch(e) {}
+
+    // Mostrar aviso de borrador
+    const aviso = document.createElement('div');
+    aviso.style.cssText = 'background:var(--purple-light);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--purple);margin-bottom:16px;font-weight:600;';
+    aviso.textContent = '📋 Cargamos tu borrador guardado anteriormente.';
+    document.getElementById('formulario').insertBefore(aviso, document.getElementById('bloque-1'));
+
+  } catch(e) {
+    // No hay borrador — continuar normal
+  }
 }
 
-// ENVIAR
 async function enviarFormulario() {
   const focos = recolectarFocos();
   if (focos.length === 0) { alert('Por favor completa al menos un foco del mes.'); return; }
@@ -538,8 +561,16 @@ async function enviarFormulario() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    // Limpiar borrador
-    localStorage.removeItem('checkin_borrador_' + colaboradorData.rut);
+
+    // Si había un borrador, actualizamos su estado
+    if (idPrecheckActual) {
+      await fetch('https://n8n.openip.cl/webhook/actualizar-precheck', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id_precheck: idPrecheckActual, estado: 'enviado' })
+      });
+    }
+
     document.getElementById('lider-nombre-success').textContent = colaboradorData.lider_nombre;
     document.getElementById('formulario').style.display = 'none';
     document.getElementById('success-screen').style.display = 'block';
