@@ -297,7 +297,7 @@
                 <div style="display:flex;gap:8px;margin-top:8px;">
                   <button class="tipo-pill" onclick="setTipo(this,'fort')">Fortaleza</button>
                   <button class="tipo-pill" onclick="setTipo(this,'opor')">Oportunidad de mejora</button>
-                  <button class="tipo-pill" onclick="setTipo(this,'mixto')">Ambas</button>
+                  
                 </div>
               </div>
               <button class="add-conducta-btn" onclick="agregarConducta('pilar-acc')">+ Agregar otra observación en Accountability</button>
@@ -326,7 +326,7 @@
                 <div style="display:flex;gap:8px;margin-top:8px;">
                   <button class="tipo-pill" onclick="setTipo(this,'fort')">Fortaleza</button>
                   <button class="tipo-pill" onclick="setTipo(this,'opor')">Oportunidad de mejora</button>
-                  <button class="tipo-pill" onclick="setTipo(this,'mixto')">Ambas</button>
+                  
                 </div>
               </div>
               <button class="add-conducta-btn" onclick="agregarConducta('pilar-prod')">+ Agregar otra observación en Productividad</button>
@@ -355,7 +355,7 @@
                 <div style="display:flex;gap:8px;margin-top:8px;">
                   <button class="tipo-pill" onclick="setTipo(this,'fort')">Fortaleza</button>
                   <button class="tipo-pill" onclick="setTipo(this,'opor')">Oportunidad de mejora</button>
-                  <button class="tipo-pill" onclick="setTipo(this,'mixto')">Ambas</button>
+                  
                 </div>
               </div>
               <button class="add-conducta-btn" onclick="agregarConducta('pilar-cc')">+ Agregar otra observación en Customer Centricity</button>
@@ -565,7 +565,7 @@ function handleCredentialResponse(response) {
   usuarioActual = { email, nombre: payload.name, foto: payload.picture };
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
-  document.getElementById('user-name').textContent = payload.given_name;
+  document.getElementById('user-name').textContent = decodeURIComponent(escape(payload.given_name));
   iniciarApp();
 }
 
@@ -869,7 +869,7 @@ function agregarConducta(pilarId) {
     <div style="display:flex;gap:8px;margin-top:8px;">
       <button class="tipo-pill" onclick="setTipo(this,'fort')">Fortaleza</button>
       <button class="tipo-pill" onclick="setTipo(this,'opor')">Oportunidad de mejora</button>
-      <button class="tipo-pill" onclick="setTipo(this,'mixto')">Ambas</button>
+      
     </div>`;
   pilar.insertBefore(bloque, addBtn);
 }
