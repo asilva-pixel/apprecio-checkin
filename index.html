@@ -968,14 +968,6 @@ function nuevoCheckin() { location.reload(); }
 let evalData = { acc: null, prod: null, cc: null, perf: null, potencial: null };
 let checkinIdActual = null;
 
-const escalaDescripciones = {
-  1: '🔴 <strong>Bajo lo esperado:</strong> Los comportamientos no se observan. Actúa de forma contraria a lo esperado. Requiere supervisión constante. Genera impacto negativo en el equipo o proceso.',
-  2: '🟡 <strong>En desarrollo:</strong> Los comportamientos se observan de forma parcial o inconsistente. Aplica la competencia en algunos casos, pero no de forma sostenida. Requiere apoyo o guía frecuente.',
-  3: '🟢 <strong>Dentro de lo esperado:</strong> Los comportamientos se observan de forma consistente. Aplica la competencia de manera autónoma. Cumple el estándar definido para su rol.',
-  4: '🔵 <strong>Sobre lo esperado:</strong> Los comportamientos elevan al equipo. Aplica la competencia con alto estándar. Influye positivamente en otros. Mejora la forma de trabajar del equipo.',
-  5: '🟣 <strong>Excepcional:</strong> Los comportamientos elevan el estándar organizacional. Es referente para otros. Genera impacto más allá de su equipo. Instala o mejora prácticas que escalan.'
-};
-
 function setEscala(pilar, valor, btn) {
   evalData[pilar] = valor;
   const cont = btn.closest('.escala-options');
