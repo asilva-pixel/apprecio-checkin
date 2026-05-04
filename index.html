@@ -108,7 +108,12 @@
   .escala-opt { flex: 1; border: 0.5px solid var(--border); border-radius: 8px; padding: 8px 4px; text-align: center; cursor: pointer; background: var(--gray); font-family: 'Montserrat', sans-serif; transition: all 0.15s; }
   .escala-opt:hover { border-color: var(--red); }
   .escala-opt.sel { border-color: var(--red); background: #fff0f3; }
-  .escala-num { font-size: 16px; font-weight: 700; display: block; }
+  .escala-num { font-size: 20px; font-weight: 800; display: block; }
+  .escala-opt:nth-child(1) .escala-num { color: #e53e3e; }
+  .escala-opt:nth-child(2) .escala-num { color: #d69e2e; }
+  .escala-opt:nth-child(3) .escala-num { color: var(--green); }
+  .escala-opt:nth-child(4) .escala-num { color: #3182ce; }
+  .escala-opt:nth-child(5) .escala-num { color: var(--purple); }
   .escala-label { font-size: 9px; font-weight: 600; color: var(--subtle); display: block; margin-top: 3px; line-height: 1.3; }
   .escala-desc-inline { background: var(--gray); border-radius: 8px; padding: 10px 12px; margin-top: 10px; font-size: 11px; color: var(--subtle); line-height: 1.7; display: none; }
   .ac-nuevo { background: var(--gray); border: 0.5px solid #e8e6f0; border-radius: 10px; padding: 14px; margin-bottom: 10px; }
@@ -297,14 +302,14 @@
               </div>
               <button class="add-conducta-btn" onclick="agregarConducta('pilar-acc')">+ Agregar otra observación en Accountability</button>
               <div class="nota-acordada-box">
-                <div class="nota-acordada-label">Nota acordada con el colaborador</div>
-                <div class="nota-acordada-sub">Basada en la escala del Culture Book — acuerdo de las partes</div>
+                <div class="nota-acordada-label">Performance conductual durante el mes</div>
+                <div class="nota-acordada-sub">Basada en la escala de performance</div>
                 <div class="escala-options" id="esc-pilar-acc">
-                  <button class="escala-opt" onclick="setNotaPilar('acc',1,this)"><span class="escala-num">🔴</span><span class="escala-label">1<br>Bajo lo esperado</span></button>
-                  <button class="escala-opt" onclick="setNotaPilar('acc',2,this)"><span class="escala-num">🟡</span><span class="escala-label">2<br>En desarrollo</span></button>
-                  <button class="escala-opt" onclick="setNotaPilar('acc',3,this)"><span class="escala-num">🟢</span><span class="escala-label">3<br>Dentro de lo esperado</span></button>
-                  <button class="escala-opt" onclick="setNotaPilar('acc',4,this)"><span class="escala-num">🔵</span><span class="escala-label">4<br>Sobre lo esperado</span></button>
-                  <button class="escala-opt" onclick="setNotaPilar('acc',5,this)"><span class="escala-num">🟣</span><span class="escala-label">5<br>Excepcional</span></button>
+                  <button class="escala-opt" onclick="setNotaPilar('acc',1,this)"><span class="escala-num">1</span><span class="escala-label">Bajo lo esperado</span></button>
+                  <button class="escala-opt" onclick="setNotaPilar('acc',2,this)"><span class="escala-num">2</span><span class="escala-label">En desarrollo</span></button>
+                  <button class="escala-opt" onclick="setNotaPilar('acc',3,this)"><span class="escala-num">3</span><span class="escala-label">Dentro de lo esperado</span></button>
+                  <button class="escala-opt" onclick="setNotaPilar('acc',4,this)"><span class="escala-num">4</span><span class="escala-label">Sobre lo esperado</span></button>
+                  <button class="escala-opt" onclick="setNotaPilar('acc',5,this)"><span class="escala-num">5</span><span class="escala-label">Excepcional</span></button>
                 </div>
                 <div class="escala-desc-inline" id="desc-pilar-acc"></div>
               </div>
@@ -326,14 +331,14 @@
               </div>
               <button class="add-conducta-btn" onclick="agregarConducta('pilar-prod')">+ Agregar otra observación en Productividad</button>
               <div class="nota-acordada-box">
-                <div class="nota-acordada-label">Nota acordada con el colaborador</div>
-                <div class="nota-acordada-sub">Basada en la escala del Culture Book — acuerdo de las partes</div>
+                <div class="nota-acordada-label">Performance conductual durante el mes</div>
+                <div class="nota-acordada-sub">Basada en la escala de performance</div>
                 <div class="escala-options" id="esc-pilar-prod">
-                  <button class="escala-opt" onclick="setNotaPilar('prod',1,this)"><span class="escala-num">🔴</span><span class="escala-label">1<br>Bajo lo esperado</span></button>
-                  <button class="escala-opt" onclick="setNotaPilar('prod',2,this)"><span class="escala-num">🟡</span><span class="escala-label">2<br>En desarrollo</span></button>
-                  <button class="escala-opt" onclick="setNotaPilar('prod',3,this)"><span class="escala-num">🟢</span><span class="escala-label">3<br>Dentro de lo esperado</span></button>
-                  <button class="escala-opt" onclick="setNotaPilar('prod',4,this)"><span class="escala-num">🔵</span><span class="escala-label">4<br>Sobre lo esperado</span></button>
-                  <button class="escala-opt" onclick="setNotaPilar('prod',5,this)"><span class="escala-num">🟣</span><span class="escala-label">5<br>Excepcional</span></button>
+                  <button class="escala-opt" onclick="setNotaPilar('prod',1,this)"><span class="escala-num">1</span><span class="escala-label">Bajo lo esperado</span></button>
+                  <button class="escala-opt" onclick="setNotaPilar('prod',2,this)"><span class="escala-num">2</span><span class="escala-label">En desarrollo</span></button>
+                  <button class="escala-opt" onclick="setNotaPilar('prod',3,this)"><span class="escala-num">3</span><span class="escala-label">Dentro de lo esperado</span></button>
+                  <button class="escala-opt" onclick="setNotaPilar('prod',4,this)"><span class="escala-num">4</span><span class="escala-label">Sobre lo esperado</span></button>
+                  <button class="escala-opt" onclick="setNotaPilar('prod',5,this)"><span class="escala-num">5</span><span class="escala-label">Excepcional</span></button>
                 </div>
                 <div class="escala-desc-inline" id="desc-pilar-prod"></div>
               </div>
@@ -355,14 +360,14 @@
               </div>
               <button class="add-conducta-btn" onclick="agregarConducta('pilar-cc')">+ Agregar otra observación en Customer Centricity</button>
               <div class="nota-acordada-box">
-                <div class="nota-acordada-label">Nota acordada con el colaborador</div>
-                <div class="nota-acordada-sub">Basada en la escala del Culture Book — acuerdo de las partes</div>
+                <div class="nota-acordada-label">Performance conductual durante el mes</div>
+                <div class="nota-acordada-sub">Basada en la escala de performance</div>
                 <div class="escala-options" id="esc-pilar-cc">
-                  <button class="escala-opt" onclick="setNotaPilar('cc',1,this)"><span class="escala-num">🔴</span><span class="escala-label">1<br>Bajo lo esperado</span></button>
-                  <button class="escala-opt" onclick="setNotaPilar('cc',2,this)"><span class="escala-num">🟡</span><span class="escala-label">2<br>En desarrollo</span></button>
-                  <button class="escala-opt" onclick="setNotaPilar('cc',3,this)"><span class="escala-num">🟢</span><span class="escala-label">3<br>Dentro de lo esperado</span></button>
-                  <button class="escala-opt" onclick="setNotaPilar('cc',4,this)"><span class="escala-num">🔵</span><span class="escala-label">4<br>Sobre lo esperado</span></button>
-                  <button class="escala-opt" onclick="setNotaPilar('cc',5,this)"><span class="escala-num">🟣</span><span class="escala-label">5<br>Excepcional</span></button>
+                  <button class="escala-opt" onclick="setNotaPilar('cc',1,this)"><span class="escala-num">1</span><span class="escala-label">Bajo lo esperado</span></button>
+                  <button class="escala-opt" onclick="setNotaPilar('cc',2,this)"><span class="escala-num">2</span><span class="escala-label">En desarrollo</span></button>
+                  <button class="escala-opt" onclick="setNotaPilar('cc',3,this)"><span class="escala-num">3</span><span class="escala-label">Dentro de lo esperado</span></button>
+                  <button class="escala-opt" onclick="setNotaPilar('cc',4,this)"><span class="escala-num">4</span><span class="escala-label">Sobre lo esperado</span></button>
+                  <button class="escala-opt" onclick="setNotaPilar('cc',5,this)"><span class="escala-num">5</span><span class="escala-label">Excepcional</span></button>
                 </div>
                 <div class="escala-desc-inline" id="desc-pilar-cc"></div>
               </div>
@@ -394,22 +399,19 @@
       <div class="bloque" id="bloque-5">
         <div class="bloque-header">
           <div class="bloque-num">5</div>
-          <div><div class="bloque-titulo">Performance del mes</div><div class="bloque-sub">Nota general acordada con el colaborador — resumen del mes completo</div></div>
+          <div><div class="bloque-titulo">Performance del mes</div><div class="bloque-sub">Nota general acordada entre el líder y el colaborador</div></div>
           <span class="badge badge-req">Obligatorio</span>
         </div>
         <div class="bloque-body">
           <div style="background:var(--gray);border-radius:10px;padding:16px;">
             <div class="escala-options" id="esc-performance">
-              <button class="escala-opt" onclick="setNotaPerformance(1,this)"><span class="escala-num">🔴</span><span class="escala-label">1<br>Bajo lo esperado</span></button>
-              <button class="escala-opt" onclick="setNotaPerformance(2,this)"><span class="escala-num">🟡</span><span class="escala-label">2<br>En desarrollo</span></button>
-              <button class="escala-opt" onclick="setNotaPerformance(3,this)"><span class="escala-num">🟢</span><span class="escala-label">3<br>Dentro de lo esperado</span></button>
-              <button class="escala-opt" onclick="setNotaPerformance(4,this)"><span class="escala-num">🔵</span><span class="escala-label">4<br>Sobre lo esperado</span></button>
-              <button class="escala-opt" onclick="setNotaPerformance(5,this)"><span class="escala-num">🟣</span><span class="escala-label">5<br>Excepcional</span></button>
+              <button class="escala-opt" onclick="setNotaPerformance(1,this)"><span class="escala-num">1</span><span class="escala-label">Bajo lo esperado</span></button>
+              <button class="escala-opt" onclick="setNotaPerformance(2,this)"><span class="escala-num">2</span><span class="escala-label">En desarrollo</span></button>
+              <button class="escala-opt" onclick="setNotaPerformance(3,this)"><span class="escala-num">3</span><span class="escala-label">Dentro de lo esperado</span></button>
+              <button class="escala-opt" onclick="setNotaPerformance(4,this)"><span class="escala-num">4</span><span class="escala-label">Sobre lo esperado</span></button>
+              <button class="escala-opt" onclick="setNotaPerformance(5,this)"><span class="escala-num">5</span><span class="escala-label">Excepcional</span></button>
             </div>
             <div class="escala-desc-inline" id="desc-performance"></div>
-          </div>
-          <div style="margin-top:14px;background:#fdf6f8;border-left:3px solid var(--red);border-radius:0 8px 8px 0;padding:10px 14px;font-size:11px;color:var(--subtle);font-style:italic;line-height:1.6;">
-            💡 Esta nota es un acuerdo de las partes. Se acumula mes a mes y alimenta la evaluación de desempeño anual — combatiendo el sesgo de recencia.
           </div>
         </div>
       </div>
