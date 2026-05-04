@@ -10,167 +10,164 @@
   :root { --red:#FA345E;--purple:#8B85D4;--purple-light:#f0eef8;--green:#1a8a45;--green-light:#e6f9ee;--yellow:#b07a00;--yellow-light:#fff8e6;--dark:#1a1a1a;--gray:#f7f6f8;--border:#e2e0e8;--subtle:#999; }
   * { box-sizing:border-box;margin:0;padding:0; }
   body { font-family:'Montserrat',sans-serif;background:var(--gray);min-height:100vh;color:var(--dark); }
-  .login-screen { display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:24px;padding:20px; }
+  .login-screen { display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;padding:20px; }
   .login-card { background:white;border-radius:16px;border:0.5px solid var(--border);padding:40px 36px;max-width:400px;width:100%;text-align:center; }
   .login-logo { width:48px;height:48px;border-radius:12px;background:var(--red);margin:0 auto 20px;display:flex;align-items:center;justify-content:center; }
   .login-logo svg { width:24px;height:24px;fill:white; }
   .login-title { font-size:18px;font-weight:700;color:var(--dark);margin-bottom:6px; }
   .login-sub { font-size:12px;color:var(--subtle);margin-bottom:28px;line-height:1.6; }
   .login-error { background:#fff0f3;border-radius:8px;padding:10px 14px;font-size:12px;color:var(--red);margin-top:16px;display:none; }
-  .header { background:var(--red);padding:20px 32px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden; }
+  .header { background:var(--red);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden; }
   .header-orn { position:absolute;right:0;top:0;pointer-events:none; }
   .header-left { position:relative;z-index:1; }
-  .header-label { font-size:10px;font-weight:600;color:rgba(255,255,255,0.7);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px; }
-  .header-title { font-size:18px;font-weight:700;color:white; }
-  .header-right { position:relative;z-index:1;display:flex;align-items:center;gap:12px; }
-  .lider-select { font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;color:var(--red);background:white;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;min-width:200px; }
+  .header-label { font-size:10px;font-weight:600;color:rgba(255,255,255,0.7);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px; }
+  .header-title { font-size:16px;font-weight:700;color:white; }
+  .header-right { position:relative;z-index:1;display:flex;align-items:center;gap:10px;flex-wrap:wrap; }
+  .header-select { font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:var(--red);background:white;border:none;border-radius:8px;padding:7px 12px;cursor:pointer; }
   .user-name { font-size:12px;font-weight:600;color:rgba(255,255,255,0.9); }
   .logout-btn { font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;color:var(--red);background:white;border:none;border-radius:6px;padding:5px 10px;cursor:pointer; }
   .spinner { width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin 0.8s linear infinite; }
-  @keyframes spin { to { transform:rotate(360deg); } }
+  @keyframes spin { to{transform:rotate(360deg);} }
   .loading-screen { display:flex;align-items:center;justify-content:center;min-height:60vh;flex-direction:column;gap:16px; }
   .loading-screen p { font-size:13px;color:var(--subtle); }
-  .main { max-width:1100px;margin:0 auto;padding:24px 20px 60px; }
-  .metrics-row { display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px; }
-  .metric-card { background:white;border-radius:12px;border:0.5px solid var(--border);padding:16px 18px; }
-  .metric-label { font-size:10px;font-weight:600;color:var(--subtle);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px; }
-  .metric-val { font-size:32px;font-weight:700;line-height:1; }
-  .metric-sub { font-size:11px;color:var(--subtle);margin-top:6px; }
-  .mv-red { color:var(--red); } .mv-purple { color:var(--purple); } .mv-green { color:var(--green); } .mv-yellow { color:var(--yellow); }
-  .two-col { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px; }
-  .full-col { margin-bottom:16px; }
-  .card { background:white;border-radius:12px;border:0.5px solid var(--border);padding:18px 20px; }
-  .card-title { font-size:13px;font-weight:700;color:var(--dark);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between; }
-  .card-tag { font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--purple-light);color:var(--purple); }
-  .pilar-row { margin-bottom:14px; }
-  .pilar-label { display:flex;align-items:center;justify-content:space-between;margin-bottom:6px; }
-  .pilar-name { font-size:12px;font-weight:600;color:var(--dark); }
-  .pilar-counts { font-size:11px;color:var(--subtle); }
-  .pilar-bar { height:10px;border-radius:5px;background:var(--gray);overflow:hidden;display:flex; }
-  .bar-f { background:var(--green);border-radius:5px 0 0 5px; }
-  .bar-o { background:var(--red);border-radius:0 5px 5px 0; }
-  .bar-legend { display:flex;gap:14px;margin-top:10px; }
-  .bar-legend-item { display:flex;align-items:center;gap:5px;font-size:10px;color:var(--subtle); }
-  .bar-legend-dot { width:8px;height:8px;border-radius:2px; }
+  .main { max-width:1100px;margin:0 auto;padding:20px 16px 60px; }
+  .metrics-row { display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px; }
+  .metric-card { background:white;border-radius:12px;border:0.5px solid var(--border);padding:14px 16px; }
+  .metric-label { font-size:9px;font-weight:600;color:var(--subtle);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px; }
+  .metric-val { font-size:28px;font-weight:700;line-height:1; }
+  .metric-sub { font-size:10px;color:var(--subtle);margin-top:4px; }
+  .mv-red{color:var(--red);} .mv-purple{color:var(--purple);} .mv-green{color:var(--green);} .mv-yellow{color:var(--yellow);}
+  .two-col { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px; }
+  .full-col { margin-bottom:14px; }
+  .card { background:white;border-radius:12px;border:0.5px solid var(--border);padding:16px 18px; }
+  .card-title { font-size:12px;font-weight:700;color:var(--dark);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between; }
+  .card-tag { font-size:9px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--purple-light);color:var(--purple); }
+  .pilar-row { margin-bottom:12px; }
+  .pilar-label { display:flex;align-items:center;justify-content:space-between;margin-bottom:5px; }
+  .pilar-name { font-size:11px;font-weight:600;color:var(--dark); }
+  .pilar-counts { font-size:10px;color:var(--subtle); }
+  .pilar-bar { height:8px;border-radius:4px;background:var(--gray);overflow:hidden;display:flex; }
+  .bar-f{background:var(--green);} .bar-o{background:var(--red);}
+  .bar-legend { display:flex;gap:12px;margin-top:8px; }
+  .bar-legend-item { display:flex;align-items:center;gap:4px;font-size:9px;color:var(--subtle); }
+  .bar-legend-dot { width:7px;height:7px;border-radius:2px; }
   .colab-table { width:100%;border-collapse:collapse; }
-  .colab-table th { padding:8px 10px;text-align:left;font-size:9px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:0.4px;border-bottom:0.5px solid var(--border);background:var(--gray); }
-  .colab-table td { padding:10px;border-bottom:0.5px solid #f5f5f5;font-size:12px;color:var(--dark); }
+  .colab-table th { padding:7px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:0.4px;border-bottom:0.5px solid var(--border);background:var(--gray); }
+  .colab-table td { padding:9px 8px;border-bottom:0.5px solid #f5f5f5;font-size:11px;color:var(--dark); }
   .colab-table tr:last-child td { border-bottom:none; }
   .colab-table tr { cursor:pointer; }
   .colab-table tr:hover td { background:#fdf6f8; }
-  .checkin-dots { display:flex;gap:4px; }
+  .checkin-dots { display:flex;gap:3px; }
   .dot { width:8px;height:8px;border-radius:50%; }
-  .dot-ok { background:var(--green); } .dot-empty { background:var(--border); }
-  .badge-sm { display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600; }
-  .b-green { background:var(--green-light);color:var(--green); }
-  .b-red { background:#fff0f3;color:var(--red); }
-  .b-yellow { background:var(--yellow-light);color:var(--yellow); }
-  .b-purple { background:var(--purple-light);color:var(--purple); }
+  .dot-ok{background:var(--green);} .dot-empty{background:var(--border);}
+  .badge-sm { display:inline-block;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:600; }
+  .b-green{background:var(--green-light);color:var(--green);}
+  .b-red{background:#fff0f3;color:var(--red);}
+  .b-yellow{background:var(--yellow-light);color:var(--yellow);}
+  .b-purple{background:var(--purple-light);color:var(--purple);}
   .ac-table { width:100%;border-collapse:collapse; }
-  .ac-table th { padding:8px 10px;text-align:left;font-size:9px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:0.4px;border-bottom:0.5px solid var(--border);background:var(--gray); }
-  .ac-table td { padding:10px;border-bottom:0.5px solid #f5f5f5;font-size:12px; }
+  .ac-table th { padding:7px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:0.4px;border-bottom:0.5px solid var(--border);background:var(--gray); }
+  .ac-table td { padding:9px 8px;border-bottom:0.5px solid #f5f5f5;font-size:11px; }
   .ac-table tr:last-child td { border-bottom:none; }
-  .empty { text-align:center;padding:24px;font-size:12px;color:var(--subtle);font-style:italic; }
-  .detail-back { display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--red);background:none;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;margin-bottom:16px;padding:0; }
-  .btn-bitacora { font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--purple);background:var(--purple-light);border:0.5px solid var(--purple);border-radius:8px;padding:8px 16px;cursor:pointer; }
-  .modal-overlay { position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px; }
-  .modal { background:white;border-radius:16px;max-width:580px;width:100%;max-height:90vh;overflow-y:auto;padding:28px; }
-  .modal-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:20px; }
-  .modal-title { font-size:15px;font-weight:700;color:var(--dark); }
-  .modal-close { background:none;border:none;font-size:20px;cursor:pointer;color:var(--subtle); }
-  .modal-section { margin-bottom:20px; }
-  .modal-label { font-size:11px;font-weight:700;color:var(--dark);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;display:block; }
-  .modal-sub { font-size:11px;color:var(--subtle);margin-bottom:10px;line-height:1.6;font-style:italic; }
-  .likert-scale { display:flex;gap:4px;align-items:center;margin-bottom:10px; }
-  .likert-btn { width:36px;height:36px;border-radius:8px;border:0.5px solid var(--border);background:var(--gray);font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--subtle); }
-  .likert-btn.sel { border-color:var(--purple);background:var(--purple-light);color:var(--purple); }
-  .likert-labels { display:flex;justify-content:space-between;font-size:9px;color:var(--subtle);margin-bottom:12px; }
-  .riesgo-opts { display:flex;gap:8px; }
-  .riesgo-opt { flex:1;border:0.5px solid var(--border);border-radius:8px;padding:10px;text-align:center;cursor:pointer;background:var(--gray);font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:var(--subtle); }
-  .riesgo-opt.sel-bajo { border-color:var(--green);background:var(--green-light);color:var(--green); }
-  .riesgo-opt.sel-medio { border-color:var(--yellow);background:var(--yellow-light);color:var(--yellow); }
-  .riesgo-opt.sel-alto { border-color:var(--red);background:#fff0f3;color:var(--red); }
-  .potencial-opts { display:flex;gap:8px; }
-  .pot-opt { flex:1;border:0.5px solid var(--border);border-radius:8px;padding:10px;text-align:center;cursor:pointer;background:var(--gray);font-family:'Montserrat',sans-serif; }
-  .pot-opt.sel-1 { border-color:#4A90D9;background:#EBF4FF; }
-  .pot-opt.sel-2 { border-color:var(--yellow);background:var(--yellow-light); }
-  .pot-opt.sel-3 { border-color:var(--purple);background:var(--purple-light); }
-  .pot-num { font-size:16px;font-weight:800;display:block;margin-bottom:3px; }
-  .pot-name { font-size:10px;font-weight:700;display:block;margin-bottom:3px; }
-  .pot-desc { font-size:9px;color:var(--subtle);line-height:1.4; }
-  .modal-textarea { font-family:'Montserrat',sans-serif;font-size:12px;padding:10px 12px;border:0.5px solid var(--border);border-radius:8px;color:var(--dark);background:white;width:100%;resize:none;line-height:1.6; }
-  .btn-guardar-modal { width:100%;padding:13px;border-radius:10px;border:none;background:var(--purple);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:white;cursor:pointer;margin-top:8px; }
-  .btn-guardar-modal:disabled { opacity:0.5;cursor:not-allowed; }
-  .detail-header { display:flex;align-items:center;gap:14px;margin-bottom:20px; }
-  .detail-avatar { width:48px;height:48px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:white;flex-shrink:0; }
-  .detail-name { font-size:16px;font-weight:700;color:var(--dark); }
-  .detail-sub { font-size:12px;color:var(--subtle);margin-top:2px; }
-  .timeline-item { display:flex;gap:14px;margin-bottom:16px; }
+  .empty { text-align:center;padding:20px;font-size:11px;color:var(--subtle);font-style:italic; }
+  .detail-back { display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--red);background:none;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;margin-bottom:14px;padding:0; }
+  .detail-header { display:flex;align-items:center;gap:12px;margin-bottom:16px; }
+  .detail-avatar { width:44px;height:44px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:white;flex-shrink:0; }
+  .detail-name { font-size:15px;font-weight:700;color:var(--dark); }
+  .detail-sub { font-size:11px;color:var(--subtle);margin-top:2px; }
+  .btn-bitacora { font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--purple);background:var(--purple-light);border:0.5px solid var(--purple);border-radius:8px;padding:7px 14px;cursor:pointer; }
+  .timeline-item { display:flex;gap:12px;margin-bottom:14px; }
   .tl-left { display:flex;flex-direction:column;align-items:center; }
-  .tl-dot { width:10px;height:10px;border-radius:50%;background:var(--red);flex-shrink:0;margin-top:3px; }
-  .tl-line { width:1px;background:var(--border);flex:1;margin-top:4px; }
-  .tl-content { flex:1;padding-bottom:4px; }
-  .tl-mes { font-size:11px;font-weight:700;color:var(--red);margin-bottom:4px; }
-  .tl-tags { display:flex;gap:6px;flex-wrap:wrap;margin-top:4px; }
-  .tl-tag { font-size:9px;font-weight:600;padding:2px 8px;border-radius:20px; }
-  .tt-f { background:var(--green-light);color:var(--green); }
-  .tt-o { background:#fff0f3;color:var(--red); }
-  .tt-a { background:var(--purple-light);color:var(--purple); }
-
-  /* NINE BOX */
-  .ninebox-grid { display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:4px;aspect-ratio:1;max-width:320px;margin:0 auto; }
-  .nb-cell { border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px;position:relative;min-height:80px; }
-  .nb-label { font-size:9px;font-weight:700;text-align:center;line-height:1.3;margin-bottom:4px; }
+  .tl-dot { width:9px;height:9px;border-radius:50%;background:var(--red);flex-shrink:0;margin-top:3px; }
+  .tl-line { width:1px;background:var(--border);flex:1;margin-top:3px; }
+  .tl-content { flex:1; }
+  .tl-mes { font-size:11px;font-weight:700;color:var(--red);margin-bottom:3px; }
+  .tl-tags { display:flex;gap:5px;flex-wrap:wrap;margin-top:3px; }
+  .tl-tag { font-size:9px;font-weight:600;padding:2px 7px;border-radius:20px; }
+  .tt-f{background:var(--green-light);color:var(--green);}
+  .tt-o{background:#fff0f3;color:var(--red);}
+  .tt-a{background:var(--purple-light);color:var(--purple);}
+  .curva-wrap { position:relative;height:90px; }
+  .curva-svg { width:100%;height:100%; }
+  .score-pill { display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700; }
+  .nb-container { display:flex;gap:8px;align-items:flex-start; }
+  .nb-y-label { writing-mode:vertical-rl;transform:rotate(180deg);font-size:9px;color:var(--subtle);font-weight:600;text-align:center; }
+  .nb-main { flex:1; }
+  .nb-grid { display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:3px;max-width:320px;margin:0 auto; }
+  .nb-cell { border-radius:6px;padding:8px;display:flex;flex-direction:column;align-items:center;min-height:80px; }
+  .nb-cell-label { font-size:8px;font-weight:700;text-align:center;line-height:1.3;margin-bottom:6px; }
   .nb-personas { display:flex;flex-wrap:wrap;gap:3px;justify-content:center; }
-  .nb-persona { width:28px;height:28px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;cursor:pointer;border:1.5px solid rgba(0,0,0,0.15); }
-  .nb-axis-x { display:flex;justify-content:space-around;margin-top:8px;font-size:9px;color:var(--subtle);font-weight:600;max-width:320px;margin-left:auto;margin-right:auto; }
-  .nb-axis-y { display:flex;flex-direction:column;justify-content:space-around;font-size:9px;color:var(--subtle);font-weight:600;margin-right:8px;text-align:right; }
-  .nb-wrapper { display:flex;align-items:stretch; }
-  .nb-title-x { text-align:center;font-size:10px;color:var(--subtle);margin-top:4px; }
-  .nb-title-y { writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;color:var(--subtle);margin-right:4px;text-align:center; }
-  @media (max-width:768px) { .metrics-row{grid-template-columns:1fr 1fr;} .two-col{grid-template-columns:1fr;} }
+  .nb-persona { width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;cursor:pointer;border:1.5px solid rgba(0,0,0,0.1); }
+  .nb-x-labels { display:flex;justify-content:space-around;margin-top:4px;font-size:9px;color:var(--subtle);font-weight:600;max-width:320px;margin-left:auto;margin-right:auto; }
+  .nb-axis-title { text-align:center;font-size:9px;color:var(--subtle);margin-top:2px; }
+  .riesgo-row { display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid #f5f5f5;cursor:pointer; }
+  .riesgo-row:last-child { border-bottom:none; }
+  .riesgo-nombre { font-size:11px;font-weight:600;flex:1; }
+  .riesgo-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
+  .riesgo-label { font-size:10px;font-weight:600; }
+  .modal-overlay { position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px; }
+  .modal { background:white;border-radius:16px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;padding:24px; }
+  .modal-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:18px; }
+  .modal-title { font-size:14px;font-weight:700;color:var(--dark); }
+  .modal-close { background:none;border:none;font-size:20px;cursor:pointer;color:var(--subtle); }
+  .modal-section { margin-bottom:18px; }
+  .modal-label { font-size:10px;font-weight:700;color:var(--dark);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;display:block; }
+  .modal-sub { font-size:11px;color:var(--subtle);margin-bottom:8px;line-height:1.6;font-style:italic; }
+  .likert-scale { display:flex;gap:3px;margin-bottom:6px; }
+  .likert-btn { width:30px;height:30px;border-radius:6px;border:0.5px solid var(--border);background:var(--gray);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--subtle); }
+  .likert-btn.sel { border-color:var(--purple);background:var(--purple-light);color:var(--purple); }
+  .likert-labels { display:flex;justify-content:space-between;font-size:9px;color:var(--subtle);margin-bottom:10px; }
+  .riesgo-opts { display:flex;gap:8px; }
+  .riesgo-opt { flex:1;border:0.5px solid var(--border);border-radius:8px;padding:9px;text-align:center;cursor:pointer;background:var(--gray);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;color:var(--subtle); }
+  .riesgo-opt.sel-bajo{border-color:var(--green);background:var(--green-light);color:var(--green);}
+  .riesgo-opt.sel-medio{border-color:var(--yellow);background:var(--yellow-light);color:var(--yellow);}
+  .riesgo-opt.sel-alto{border-color:var(--red);background:#fff0f3;color:var(--red);}
+  .potencial-opts { display:flex;gap:8px; }
+  .pot-opt { flex:1;border:0.5px solid var(--border);border-radius:8px;padding:9px;text-align:center;cursor:pointer;background:var(--gray);font-family:'Montserrat',sans-serif; }
+  .pot-opt.sel-1{border-color:#4A90D9;background:#EBF4FF;}
+  .pot-opt.sel-2{border-color:var(--yellow);background:var(--yellow-light);}
+  .pot-opt.sel-3{border-color:var(--purple);background:var(--purple-light);}
+  .pot-num { font-size:15px;font-weight:800;display:block;margin-bottom:2px; }
+  .pot-name { font-size:9px;font-weight:700;display:block;margin-bottom:2px; }
+  .pot-desc { font-size:8px;color:var(--subtle);line-height:1.4; }
+  .modal-textarea { font-family:'Montserrat',sans-serif;font-size:12px;padding:9px 11px;border:0.5px solid var(--border);border-radius:8px;color:var(--dark);background:white;width:100%;resize:none;line-height:1.6; }
+  .btn-guardar-modal { width:100%;padding:12px;border-radius:10px;border:none;background:var(--purple);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:white;cursor:pointer;margin-top:6px; }
+  .btn-guardar-modal:disabled{opacity:0.5;cursor:not-allowed;}
+  @media(max-width:768px){.metrics-row{grid-template-columns:1fr 1fr;}.two-col{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="login-screen" class="login-screen">
   <div class="login-card">
-    <div class="login-logo">
-      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-    </div>
+    <div class="login-logo"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg></div>
     <div class="login-title">Dashboard de Desempeño</div>
-    <div class="login-sub">Inicia sesión con tu cuenta de Apprecio para acceder al dashboard de tu equipo.</div>
+    <div class="login-sub">Inicia sesión con tu cuenta de Apprecio.</div>
     <div id="g_id_signin"></div>
-    <div class="login-error" id="login-error">Solo cuentas de Apprecio o Dcanje pueden acceder a este sistema.</div>
+    <div class="login-error" id="login-error">Solo cuentas de Apprecio o Dcanje pueden acceder.</div>
   </div>
 </div>
 
-<!-- APP -->
 <div id="app" style="display:none;">
   <div class="header">
-    <div class="header-orn">
-      <svg width="120" height="80" viewBox="0 0 120 80" fill="none">
-        <rect x="80" width="40" height="40" fill="rgba(255,255,255,0.10)"/>
-        <rect x="40" width="40" height="40" fill="rgba(255,255,255,0.06)"/>
-        <rect x="80" y="40" width="40" height="40" fill="rgba(255,255,255,0.14)"/>
-        <rect x="40" y="40" width="40" height="40" fill="rgba(255,255,255,0.08)"/>
-      </svg>
-    </div>
+    <div class="header-orn"><svg width="100" height="70" viewBox="0 0 100 70" fill="none"><rect x="70" width="30" height="35" fill="rgba(255,255,255,0.10)"/><rect x="70" y="35" width="30" height="35" fill="rgba(255,255,255,0.14)"/></svg></div>
     <div class="header-left">
       <div class="header-label">Feedback Continuo Apprecio</div>
       <div class="header-title">Dashboard de Desempeño</div>
     </div>
     <div class="header-right">
-      <select class="lider-select" id="lider-select" onchange="cargarDashboard()">
+      <select class="header-select" id="lider-select" onchange="cargarDashboard()">
         <option value="">— Selecciona tu nombre —</option>
+      </select>
+      <select class="header-select" id="mes-select" onchange="cargarDashboard()" style="display:none;">
+        <option value="">Acumulado</option>
       </select>
       <span class="user-name" id="user-name"></span>
       <button class="logout-btn" onclick="logout()">Salir</button>
     </div>
   </div>
 
-  <div class="main" id="main">
+  <div class="main">
     <div class="loading-screen" id="loading"><div class="spinner"></div><p>Cargando dashboard...</p></div>
     <div id="dashboard-content" style="display:none;"></div>
     <div id="detail-content" style="display:none;"></div>
@@ -179,168 +176,254 @@
 
 <script>
 const CLIENT_ID = '589779415783-vomns28ralb0efttkj5no91ggo7rtoj3.apps.googleusercontent.com';
-const DOMINIOS_PERMITIDOS = ['apprecio.com', 'dcanje.com'];
-const ACCESO_COMPLETO = ['12605423-8', '15563184-8', '13724324-5', '16939271-4']; // Jaime, Seba, JI Ceballos, Ana María
+const DOMINIOS = ['apprecio.com','dcanje.com'];
 const WEBHOOK_LIDERES = 'https://n8n.openip.cl/webhook/get-lideres';
 const WEBHOOK_DASHBOARD = 'https://n8n.openip.cl/webhook/get-dashboard';
 
 let usuarioActual = null;
 let dashboardData = null;
-let rutUsuario = null;
 
 window.onload = function() {
-  google.accounts.id.initialize({
-    client_id: CLIENT_ID,
-    callback: handleCredentialResponse,
-    auto_select: false
-  });
-  google.accounts.id.renderButton(
-    document.getElementById('g_id_signin'),
-    { theme:'outline', size:'large', text:'signin_with', locale:'es', width:280 }
-  );
+  google.accounts.id.initialize({ client_id: CLIENT_ID, callback: handleCredentialResponse, auto_select: false });
+  google.accounts.id.renderButton(document.getElementById('g_id_signin'), { theme:'outline', size:'large', text:'signin_with', locale:'es', width:280 });
 };
 
 function handleCredentialResponse(response) {
   const payload = JSON.parse(atob(response.credential.split('.')[1]));
   const email = payload.email || '';
   const dominio = email.split('@')[1] || '';
-  if (!DOMINIOS_PERMITIDOS.includes(dominio)) {
-    document.getElementById('login-error').style.display = 'block';
-    return;
-  }
-  usuarioActual = { email, nombre: payload.name, given_name: payload.given_name };
+  if (!DOMINIOS.includes(dominio)) { document.getElementById('login-error').style.display = 'block'; return; }
+  usuarioActual = { email, nombre: payload.name };
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
-  document.getElementById('user-name').textContent = payload.given_name;
+  document.getElementById('user-name').textContent = decodeURIComponent(escape(payload.given_name));
   iniciarApp();
 }
 
 function logout() { google.accounts.id.disableAutoSelect(); location.reload(); }
 
 async function iniciarApp() {
-  document.getElementById('loading').style.display = 'flex';
   try {
     const res = await fetch(WEBHOOK_LIDERES);
     const data = await res.json();
     const sel = document.getElementById('lider-select');
     sel.innerHTML = '<option value="">— Selecciona tu nombre —</option>';
-    
-    // Buscar el RUT del usuario logueado por email
-    const lideres = data.lideres || [];
-    let rutEncontrado = null;
-    
-    lideres.forEach(l => {
+    (data.lideres||[]).forEach(l => {
       const opt = document.createElement('option');
       opt.value = l.rut;
       opt.textContent = l.nombre;
       sel.appendChild(opt);
-      // Intentar matchear por nombre con el email
-      if (usuarioActual.email && l.nombre) {
-        const nombreLower = l.nombre.toLowerCase();
-        const emailUser = usuarioActual.email.split('@')[0].toLowerCase();
-        if (nombreLower.includes(emailUser.split('.')[0]) || nombreLower.includes(emailUser.split('.')[1] || '')) {
-          rutEncontrado = l.rut;
-          opt.selected = true;
-        }
-      }
     });
-
     document.getElementById('loading').style.display = 'none';
-    
-    if (rutEncontrado) {
-      rutUsuario = rutEncontrado;
-      cargarDashboard();
-    }
   } catch(e) {
-    document.getElementById('loading').innerHTML = '<p>Error al cargar. Intenta recargar.</p>';
+    document.getElementById('loading').innerHTML = '<p>Error al cargar. Recarga la página.</p>';
   }
 }
 
 async function cargarDashboard() {
   const rut = document.getElementById('lider-select').value;
-  if (!rut) { document.getElementById('dashboard-content').style.display = 'none'; return; }
+  if (!rut) { document.getElementById('dashboard-content').style.display='none'; return; }
+  const mes = document.getElementById('mes-select').value;
 
   document.getElementById('loading').style.display = 'flex';
   document.getElementById('dashboard-content').style.display = 'none';
   document.getElementById('detail-content').style.display = 'none';
 
   try {
-    // Si tiene acceso completo o es el mismo usuario, cargar sin filtro de jerarquía
-    const tieneAccesoCompleto = ACCESO_COMPLETO.includes(rut);
-    const url = tieneAccesoCompleto ? WEBHOOK_DASHBOARD : `${WEBHOOK_DASHBOARD}?rut_lider=${rut}`;
+    let url = WEBHOOK_DASHBOARD + '?rut_lider=' + rut;
+    if (mes) url += '&mes=' + encodeURIComponent(mes);
     const res = await fetch(url);
     dashboardData = await res.json();
+
+    const selMes = document.getElementById('mes-select');
+    const mesActual = selMes.value;
+    selMes.innerHTML = '<option value="">Acumulado</option>';
+    (dashboardData.meses_disponibles||[]).forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = m.charAt(0).toUpperCase() + m.slice(1);
+      if (m === mesActual) opt.selected = true;
+      selMes.appendChild(opt);
+    });
+    selMes.style.display = 'block';
     renderDashboard(dashboardData);
   } catch(e) {
     document.getElementById('loading').innerHTML = '<p>Error al cargar los datos.</p>';
   }
 }
 
+function scoreColor(s) {
+  if (!s) return 'var(--subtle)';
+  if (s >= 4) return 'var(--green)';
+  if (s >= 3) return '#3182ce';
+  if (s >= 2) return 'var(--yellow)';
+  return 'var(--red)';
+}
+function scoreBg(s) {
+  if (!s) return 'var(--gray)';
+  if (s >= 4) return 'var(--green-light)';
+  if (s >= 3) return '#EBF4FF';
+  if (s >= 2) return 'var(--yellow-light)';
+  return '#fff0f3';
+}
+function avg(arr) { return arr?.length>0 ? Math.round((arr.reduce((a,b)=>a+b,0)/arr.length)*10)/10 : null; }
+
 function renderDashboard(data) {
-  const m = data.metricas || {};
-  const colabs = data.colaboradores || [];
-  const pilares = data.pilares || {};
-  const acActivos = data.accionables_activos_lista || [];
+  const m = data.metricas||{};
+  const colabs = data.colaboradores||[];
+  const pilares = data.pilares||{};
+  const scores = data.scores||{};
+  const acActivos = data.accionables_activos_lista||[];
+  const curva = data.curva_performance||[];
+  const scoresPorColab = data.scores_por_colab||{};
+  const bitacoraPorColab = data.bitacora_por_colab||{};
 
   function pilarBar(pilar, nombre, icono) {
-    const p = pilares[pilar] || { fortalezas:0, oportunidades:0 };
-    const total = p.fortalezas + p.oportunidades;
-    const wF = total > 0 ? Math.round((p.fortalezas/total)*100) : 0;
-    const wO = total > 0 ? Math.round((p.oportunidades/total)*100) : 0;
+    const p = pilares[pilar]||{fortalezas:0,oportunidades:0};
+    const total = p.fortalezas+p.oportunidades;
+    const wF = total>0?Math.round((p.fortalezas/total)*100):0;
+    const wO = total>0?Math.round((p.oportunidades/total)*100):0;
+    const s = scores[pilar];
     return `<div class="pilar-row">
-      <div class="pilar-label"><span class="pilar-name">${icono} ${nombre}</span><span class="pilar-counts">${p.fortalezas}F · ${p.oportunidades}O</span></div>
+      <div class="pilar-label">
+        <span class="pilar-name">${icono} ${nombre}</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          ${s?`<span class="score-pill" style="background:${scoreBg(s)};color:${scoreColor(s)};">⭐ ${s}</span>`:''}
+          <span class="pilar-counts">${p.fortalezas}F · ${p.oportunidades}O</span>
+        </div>
+      </div>
       <div class="pilar-bar"><div class="bar-f" style="width:${wF}%"></div><div class="bar-o" style="width:${wO}%"></div></div>
     </div>`;
   }
 
   function colabRow(c) {
-    const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-    const dots = meses.map(m => {
-      const tiene = (c.meses||[]).some(mes => mes.toLowerCase().includes(m.toLowerCase().substring(0,3)));
-      return `<div class="dot ${tiene?'dot-ok':'dot-empty'}" title="${m}"></div>`;
+    const mesesNombres = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const mesesCortos = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const dots = mesesCortos.map((mc,i) => {
+      const tiene = (c.meses||[]).some(mes=>mes.toLowerCase().includes(mesesNombres[i]));
+      return `<div class="dot ${tiene?'dot-ok':'dot-empty'}" title="${mc}"></div>`;
     }).join('');
     const initials = c.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
+    const sc = scoresPorColab[c.rut];
+    const perf = sc ? avg(sc.notas_perf) : null;
     return `<tr onclick="verDetalle('${c.rut}')">
-      <td><div style="display:flex;align-items:center;gap:10px;">
-        <div style="width:30px;height:30px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;flex-shrink:0;">${initials}</div>
-        <div><div style="font-weight:600;">${c.nombre}</div><div style="font-size:10px;color:var(--subtle);">${c.lider}</div></div>
+      <td><div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0;">${initials}</div>
+        <div><div style="font-weight:600;font-size:11px;">${c.nombre}</div><div style="font-size:9px;color:var(--subtle);">${c.lider}</div></div>
       </div></td>
       <td><div class="checkin-dots">${dots}</div></td>
-      <td>${c.checkins||0}</td>
-      <td>${c.accionables_activos||0}</td>
-      <td>${c.accionables_cumplidos||0}</td>
+      <td style="text-align:center;">${new Set(c.meses||[]).size}</td>
+      <td style="text-align:center;">${perf?`<span class="score-pill" style="background:${scoreBg(perf)};color:${scoreColor(perf)};">${perf}</span>`:'—'}</td>
+      <td style="text-align:center;">${c.accionables_activos||0}</td>
     </tr>`;
   }
 
-  function acRow(ac) {
-    const fecha = ac.Fecha_comprometida ? ac.Fecha_comprometida.split('-').reverse().join('-') : '—';
-    const hoy = new Date();
-    const vence = new Date(ac.Fecha_comprometida);
-    const diff = Math.ceil((vence-hoy)/(1000*60*60*24));
-    let badge = '<span class="badge-sm b-yellow">En proceso</span>';
-    if (diff <= 3 && diff >= 0) badge = `<span class="badge-sm b-red">Vence en ${diff}d</span>`;
-    else if (diff < 0) badge = '<span class="badge-sm b-red">Vencido</span>';
-    return `<tr><td>${ac.Descripcion}</td><td>${ac.Owner_nombre_display||ac.Owner_nombre||'—'}</td><td>${ac.Nombre_display_colaborador||ac.Nombre_colaborador||'—'}</td><td>${fecha}</td><td>${badge}</td></tr>`;
+  function renderCurva() {
+    if (!curva.length) return '<div class="empty">Sin datos de performance aún.</div>';
+    const W=400,H=90,pad=24;
+    const vals = curva.map(c=>c.promedio);
+    const minV = Math.max(0,Math.min(...vals)-0.5);
+    const maxV = Math.min(5,Math.max(...vals)+0.5);
+    const xStep = curva.length>1?(W-pad*2)/(curva.length-1):0;
+    const yPos = v => H-pad-((v-minV)/(maxV-minV))*(H-pad*2);
+    const points = curva.map((c,i)=>`${pad+i*xStep},${yPos(c.promedio)}`).join(' ');
+    const area = `${pad},${H-pad} ${points} ${pad+(curva.length-1)*xStep},${H-pad}`;
+    const dots = curva.map((c,i)=>`
+      <circle cx="${pad+i*xStep}" cy="${yPos(c.promedio)}" r="4" fill="var(--red)"/>
+      <text x="${pad+i*xStep}" y="${yPos(c.promedio)-8}" text-anchor="middle" font-size="9" font-weight="700" fill="var(--dark)">${c.promedio}</text>
+      <text x="${pad+i*xStep}" y="${H-4}" text-anchor="middle" font-size="8" fill="#999">${c.mes.substring(0,3)}</text>`).join('');
+    return `<div class="curva-wrap"><svg viewBox="0 0 ${W} ${H}" class="curva-svg" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="${area}" fill="rgba(250,52,94,0.08)"/>
+      <polyline points="${points}" fill="none" stroke="var(--red)" stroke-width="2" stroke-linejoin="round"/>
+      ${dots}</svg></div>`;
   }
+
+  function renderNineBox() {
+    const cells = [
+      {label:'Alto pot.\nBajo des.',bg:'#fff8e6',color:'#b07a00'},
+      {label:'Estrella\nen dev.',bg:'#e8f7f2',color:'#1a6a45'},
+      {label:'Top\nTalent',bg:'#e6f0ff',color:'#1a5276'},
+      {label:'Bajo\nimpacto',bg:'#fff0f3',color:'#c0392b'},
+      {label:'Núcleo\nestable',bg:'#f5f4fc',color:'#5b4ecb'},
+      {label:'Alto\ndesempeño',bg:'#e8f7f2',color:'#1a6a45'},
+      {label:'En\nriesgo',bg:'#fff0f3',color:'#c0392b'},
+      {label:'Pilar\nsólido',bg:'#fff8e6',color:'#b07a00'},
+      {label:'Sobre lo\nesperado',bg:'#e8f7f2',color:'#1a6a45'},
+    ];
+    const personas = {};
+    colabs.forEach(c => {
+      const sc = scoresPorColab[c.rut];
+      const bt = bitacoraPorColab[c.rut];
+      if (!sc?.notas_perf?.length||!bt?.potencial?.length) return;
+      const perf = avg(sc.notas_perf);
+      const pot = avg(bt.potencial);
+      const col = perf<2.5?0:perf<3.5?1:2;
+      const row = pot>=2.5?0:pot>=1.5?1:2;
+      const idx = row*3+col;
+      if (!personas[idx]) personas[idx]=[];
+      personas[idx].push({nombre:c.nombre,rut:c.rut});
+    });
+    const cellsHTML = cells.map((cell,i)=>{
+      const ps = personas[i]||[];
+      const psHTML = ps.map(p=>{
+        const ini=p.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
+        return `<div class="nb-persona" style="background:${cell.bg};color:${cell.color};border-color:${cell.color};" title="${p.nombre}" onclick="verDetalle('${p.rut}')">${ini}</div>`;
+      }).join('');
+      return `<div class="nb-cell" style="background:${cell.bg};">
+        <div class="nb-cell-label" style="color:${cell.color};">${cell.label.replace('\n','<br>')}</div>
+        <div class="nb-personas">${psHTML}</div>
+      </div>`;
+    }).join('');
+    return `<div class="nb-container">
+      <div class="nb-y-label">Potencial ↑</div>
+      <div style="flex:1;">
+        <div style="font-size:9px;color:var(--subtle);text-align:center;margin-bottom:4px;">Alto · Medio · Bajo</div>
+        <div class="nb-grid">${cellsHTML}</div>
+        <div class="nb-x-labels"><span>Bajo</span><span>Medio</span><span>Alto</span></div>
+        <div class="nb-axis-title">Performance →</div>
+      </div>
+    </div>`;
+  }
+
+  function renderRiesgo() {
+    const conDatos = colabs.filter(c=>bitacoraPorColab[c.rut]?.riesgo?.length>0);
+    if (!conDatos.length) return '<div class="empty">Sin datos de riesgo aún.</div>';
+    return conDatos.map(c=>{
+      const r = bitacoraPorColab[c.rut].riesgo;
+      const ultimo = r[r.length-1];
+      const color = ultimo==='bajo'?'var(--green)':ultimo==='medio'?'#d69e2e':'var(--red)';
+      const label = ultimo==='bajo'?'Bajo':ultimo==='medio'?'Medio':'Alto';
+      const ini = c.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
+      return `<div class="riesgo-row" onclick="verDetalle('${c.rut}')">
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:white;flex-shrink:0;">${ini}</div>
+        <span class="riesgo-nombre">${c.nombre}</span>
+        <div class="riesgo-dot" style="background:${color};"></div>
+        <span class="riesgo-label" style="color:${color};">${label}</span>
+      </div>`;
+    }).join('');
+  }
+
+  const perfScore = scores.performance;
 
   const html = `
     <div class="metrics-row">
-      <div class="metric-card"><div class="metric-label">Check-ins completados</div><div class="metric-val mv-red">${m.total_checkins||0}</div><div class="metric-sub">${colabs.length} colaborador${colabs.length!==1?'es':''}</div></div>
+      <div class="metric-card"><div class="metric-label">Check-ins completados</div><div class="metric-val mv-red">${m.porcentaje_checkins||0}<span style="font-size:16px;">%</span></div><div class="metric-sub">${colabs.filter(c=>new Set(c.meses||[]).size>0).length} de ${m.total_colaboradores||0} colaboradores</div></div>
       <div class="metric-card"><div class="metric-label">Accionables activos</div><div class="metric-val mv-purple">${m.accionables_activos||0}</div><div class="metric-sub">${m.accionables_cumplidos||0} cumplidos</div></div>
-      <div class="metric-card"><div class="metric-label">Fortalezas registradas</div><div class="metric-val mv-green">${m.fortalezas||0}</div><div class="metric-sub">en 3 pilares</div></div>
-      <div class="metric-card"><div class="metric-label">Oportunidades de mejora</div><div class="metric-val mv-yellow">${m.oportunidades||0}</div><div class="metric-sub">en 3 pilares</div></div>
+      <div class="metric-card"><div class="metric-label">Performance promedio</div><div class="metric-val" style="color:${scoreColor(perfScore)}">${perfScore||'—'}</div><div class="metric-sub">escala 1 a 5</div></div>
+      <div class="metric-card"><div class="metric-label">Fortalezas / Oportunidades</div><div class="metric-val mv-green">${m.fortalezas||0}<span style="font-size:16px;color:var(--subtle);font-weight:400;"> / </span><span style="font-size:24px;color:var(--yellow);">${m.oportunidades||0}</span></div><div class="metric-sub">en 3 pilares</div></div>
     </div>
+
     <div class="two-col">
       <div class="card">
         <div class="card-title">Equipo <span class="card-tag">clic para ver detalle</span></div>
-        ${colabs.length===0?'<div class="empty">No hay check-ins registrados aún.</div>':`
+        ${colabs.length===0?'<div class="empty">No hay check-ins registrados.</div>':`
         <table class="colab-table">
-          <thead><tr><th>Colaborador</th><th>Check-ins 2026</th><th>Total</th><th>Activos</th><th>Cumplidos</th></tr></thead>
+          <thead><tr><th>Colaborador</th><th>Check-ins 2026</th><th style="text-align:center;">Meses</th><th style="text-align:center;">Performance</th><th style="text-align:center;">Accionables</th></tr></thead>
           <tbody>${colabs.map(colabRow).join('')}</tbody>
         </table>`}
       </div>
       <div class="card">
-        <div class="card-title">Pilares — distribución acumulada</div>
+        <div class="card-title">Pilares — distribución y score promedio</div>
         ${pilarBar('accountability','Accountability','🎯')}
         ${pilarBar('productividad','Productividad','⚡')}
         ${pilarBar('customer_centricity','Customer Centricity','🌟')}
@@ -350,14 +433,30 @@ function renderDashboard(data) {
         </div>
       </div>
     </div>
+
+    <div class="two-col">
+      <div class="card"><div class="card-title">Curva de performance del equipo</div>${renderCurva()}</div>
+      <div class="card"><div class="card-title">Riesgo de fuga del equipo</div>${renderRiesgo()}</div>
+    </div>
+
     <div class="full-col card">
+      <div class="card-title">Nine Box — Desempeño vs Potencial <span class="card-tag">clic en persona para ver detalle</span></div>
+      ${renderNineBox()}
+    </div>
+
+    ${acActivos.length>0?`<div class="full-col card">
       <div class="card-title">Accionables activos del equipo</div>
-      ${acActivos.length===0?'<div class="empty">No hay accionables activos.</div>':`
       <table class="ac-table">
         <thead><tr><th>Accionable</th><th>Owner</th><th>Colaborador</th><th>Fecha</th><th>Estado</th></tr></thead>
-        <tbody>${acActivos.map(acRow).join('')}</tbody>
-      </table>`}
-    </div>`;
+        <tbody>${acActivos.map(ac=>{
+          const fecha=ac.Fecha_comprometida?ac.Fecha_comprometida.split('-').reverse().join('-'):'—';
+          const hoy=new Date(),vence=new Date(ac.Fecha_comprometida);
+          const diff=Math.ceil((vence-hoy)/(1000*60*60*24));
+          const badge=diff<=3&&diff>=0?`<span class="badge-sm b-red">Vence en ${diff}d</span>`:diff<0?'<span class="badge-sm b-red">Vencido</span>':'<span class="badge-sm b-yellow">En proceso</span>';
+          return `<tr><td>${ac.Descripcion}</td><td>${ac.Owner_nombre_display||ac.Owner_nombre||'—'}</td><td>${ac.Nombre_display_colaborador||ac.Nombre_colaborador||'—'}</td><td>${fecha}</td><td>${badge}</td></tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`:''}`;
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('dashboard-content').innerHTML = html;
@@ -366,31 +465,50 @@ function renderDashboard(data) {
 
 function verDetalle(rut) {
   if (!dashboardData) return;
-  const colab = dashboardData.colaboradores.find(c => c.rut === rut);
+  const colab = dashboardData.colaboradores.find(c=>c.rut===rut);
   if (!colab) return;
-  const p = (dashboardData.pilares_por_colab||{})[rut] || { accountability:{f:0,o:0}, productividad:{f:0,o:0}, customer_centricity:{f:0,o:0} };
-  const acColab = (dashboardData.accionables_activos_lista||[]).filter(a => a.RUT_colaborador === rut);
+  const p = (dashboardData.pilares_por_colab||{})[rut]||{accountability:{f:0,o:0},productividad:{f:0,o:0},customer_centricity:{f:0,o:0}};
+  const sc = (dashboardData.scores_por_colab||{})[rut]||{};
+  const bt = (dashboardData.bitacora_por_colab||{})[rut]||{};
+  const acColab = (dashboardData.accionables_activos_lista||[]).filter(a=>a.RUT_colaborador===rut);
   const initials = colab.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
+  const perfProm = avg(sc.notas_perf);
+  const potProm = avg(bt.potencial);
+  const engProm = avg(bt.engagement);
+  const ultimoRiesgo = bt.riesgo?.length>0?bt.riesgo[bt.riesgo.length-1]:null;
+  const riesgoColor = ultimoRiesgo==='bajo'?'var(--green)':ultimoRiesgo==='medio'?'#d69e2e':'var(--red)';
+  const riesgoLabel = ultimoRiesgo==='bajo'?'Bajo':ultimoRiesgo==='medio'?'Medio':ultimoRiesgo==='alto'?'Alto':'—';
+  const potLabel = potProm>=2.5?'Listo para más':potProm>=1.5?'Potencial en desarrollo':potProm?'Consolidando su rol':'—';
+  const potColor = potProm>=2.5?'var(--purple)':potProm>=1.5?'var(--yellow)':'#4A90D9';
 
   function pilarDetalle(pilar, nombre, icono) {
     const datos = p[pilar]||{f:0,o:0};
     const total = datos.f+datos.o;
     const wF = total>0?Math.round((datos.f/total)*100):0;
     const wO = total>0?Math.round((datos.o/total)*100):0;
+    const arr = pilar==='accountability'?sc.nota_acc:pilar==='productividad'?sc.nota_prod:sc.nota_cc;
+    const s = avg(arr);
     return `<div class="pilar-row">
-      <div class="pilar-label"><span class="pilar-name">${icono} ${nombre}</span><span class="pilar-counts">${datos.f}F · ${datos.o}O</span></div>
+      <div class="pilar-label">
+        <span class="pilar-name">${icono} ${nombre}</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          ${s?`<span class="score-pill" style="background:${scoreBg(s)};color:${scoreColor(s)};">⭐ ${s}</span>`:''}
+          <span class="pilar-counts">${datos.f}F · ${datos.o}O</span>
+        </div>
+      </div>
       <div class="pilar-bar"><div class="bar-f" style="width:${wF}%"></div><div class="bar-o" style="width:${wO}%"></div></div>
     </div>`;
   }
 
-  const timelineHTML = (colab.meses||[]).map(mes => `
+  const mesesUnicos = [...new Set(colab.meses||[])];
+  const timelineHTML = mesesUnicos.map(mes=>`
     <div class="timeline-item">
       <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
       <div class="tl-content">
         <div class="tl-mes">${mes}</div>
         <div class="tl-tags">
-          ${p.accountability.f>0?'<span class="tl-tag tt-f">Accountability: fortaleza</span>':''}
-          ${p.productividad.o>0?'<span class="tl-tag tt-o">Productividad: oportunidad</span>':''}
+          ${p.accountability.f>0?'<span class="tl-tag tt-f">Accountability F</span>':''}
+          ${p.productividad.o>0?'<span class="tl-tag tt-o">Productividad O</span>':''}
           ${acColab.length>0?`<span class="tl-tag tt-a">${acColab.length} accionable${acColab.length>1?'s':''}</span>`:''}
         </div>
       </div>
@@ -400,45 +518,28 @@ function verDetalle(rut) {
     <button class="detail-back" onclick="volverDashboard()">← Volver al equipo</button>
     <div class="detail-header">
       <div class="detail-avatar">${initials}</div>
-      <div style="flex:1;">
-        <div class="detail-name">${colab.nombre}</div>
-        <div class="detail-sub">Líder: ${colab.lider} · ${colab.checkins} check-in${colab.checkins!==1?'s':''} registrado${colab.checkins!==1?'s':''}</div>
-      </div>
+      <div style="flex:1;"><div class="detail-name">${colab.nombre}</div><div class="detail-sub">Líder: ${colab.lider} · ${mesesUnicos.length} check-in${mesesUnicos.length!==1?'s':''} registrado${mesesUnicos.length!==1?'s':''}</div></div>
       <button class="btn-bitacora" onclick="abrirBitacora('${rut}','${colab.nombre.replace(/'/g,"\\'")}','${colab.lider}')">📓 Bitácora privada</button>
     </div>
     <div class="metrics-row">
-      <div class="metric-card"><div class="metric-label">Check-ins</div><div class="metric-val mv-red">${colab.checkins||0}</div></div>
-      <div class="metric-card"><div class="metric-label">Accionables activos</div><div class="metric-val mv-purple">${colab.accionables_activos||0}</div></div>
-      <div class="metric-card"><div class="metric-label">Fortalezas</div><div class="metric-val mv-green">${p.accountability.f+p.productividad.f+p.customer_centricity.f}</div></div>
-      <div class="metric-card"><div class="metric-label">Oportunidades</div><div class="metric-val mv-yellow">${p.accountability.o+p.productividad.o+p.customer_centricity.o}</div></div>
+      <div class="metric-card"><div class="metric-label">Performance promedio</div><div class="metric-val" style="color:${scoreColor(perfProm)}">${perfProm||'—'}</div><div class="metric-sub">escala 1 a 5</div></div>
+      <div class="metric-card"><div class="metric-label">Potencial</div><div style="font-size:13px;font-weight:700;margin-top:6px;color:${potColor};">${potLabel}</div></div>
+      <div class="metric-card"><div class="metric-label">Engagement promedio</div><div class="metric-val mv-purple">${engProm||'—'}<span style="font-size:13px;">/10</span></div></div>
+      <div class="metric-card"><div class="metric-label">Riesgo de fuga</div><div class="metric-val" style="color:${riesgoColor};font-size:20px;">${riesgoLabel}</div></div>
     </div>
     <div class="two-col">
-      <div class="card">
-        <div class="card-title">Historial de check-ins</div>
-        ${colab.meses?.length>0?`<div class="timeline">${timelineHTML}</div>`:'<div class="empty">Sin check-ins registrados.</div>'}
-      </div>
+      <div class="card"><div class="card-title">Historial de check-ins</div>${mesesUnicos.length>0?`<div>${timelineHTML}</div>`:'<div class="empty">Sin check-ins registrados.</div>'}</div>
       <div class="card">
         <div class="card-title">Mapa conductual acumulado</div>
         ${pilarDetalle('accountability','Accountability','🎯')}
         ${pilarDetalle('productividad','Productividad','⚡')}
         ${pilarDetalle('customer_centricity','Customer Centricity','🌟')}
-        <div class="bar-legend">
-          <div class="bar-legend-item"><div class="bar-legend-dot" style="background:var(--green);"></div>Fortaleza</div>
-          <div class="bar-legend-item"><div class="bar-legend-dot" style="background:var(--red);"></div>Oportunidad</div>
-        </div>
+        <div class="bar-legend"><div class="bar-legend-item"><div class="bar-legend-dot" style="background:var(--green);"></div>Fortaleza</div><div class="bar-legend-item"><div class="bar-legend-dot" style="background:var(--red);"></div>Oportunidad</div></div>
       </div>
     </div>
-    ${acColab.length>0?`
-    <div class="full-col card">
-      <div class="card-title">Accionables activos</div>
-      <table class="ac-table">
-        <thead><tr><th>Accionable</th><th>Owner</th><th>Fecha</th><th>Estado</th></tr></thead>
-        <tbody>${acColab.map(ac => {
-          const fecha = ac.Fecha_comprometida?ac.Fecha_comprometida.split('-').reverse().join('-'):'—';
-          return `<tr><td>${ac.Descripcion}</td><td>${ac.Owner_nombre_display||ac.Owner_nombre}</td><td>${fecha}</td><td><span class="badge-sm b-yellow">En proceso</span></td></tr>`;
-        }).join('')}</tbody>
-      </table>
-    </div>`:''}`;
+    ${acColab.length>0?`<div class="full-col card"><div class="card-title">Accionables activos</div>
+    <table class="ac-table"><thead><tr><th>Accionable</th><th>Owner</th><th>Fecha</th><th>Estado</th></tr></thead>
+    <tbody>${acColab.map(ac=>{const fecha=ac.Fecha_comprometida?ac.Fecha_comprometida.split('-').reverse().join('-'):'—';return `<tr><td>${ac.Descripcion}</td><td>${ac.Owner_nombre_display||ac.Owner_nombre}</td><td>${fecha}</td><td><span class="badge-sm b-yellow">En proceso</span></td></tr>`;}).join('')}</tbody></table></div>`:''}`;
 
   document.getElementById('dashboard-content').style.display = 'none';
   document.getElementById('detail-content').innerHTML = html;
@@ -450,127 +551,94 @@ function volverDashboard() {
   document.getElementById('dashboard-content').style.display = 'block';
 }
 
-// BITÁCORA
-let bitacoraData = { rut: null, nombre: null, engagement: null, riesgo: null, potencial: null };
+let bitacoraData = {rut:null,nombre:null,engagement:null,riesgo:null,potencial:null};
 
 function abrirBitacora(rut, nombre, lider) {
-  bitacoraData = { rut, nombre, engagement: null, riesgo: null, potencial: null };
-
-  const likertBtns = Array.from({length:11}, (_,i) => 
-    `<button class="likert-btn" onclick="setEngagement(${i},this)">${i}</button>`
-  ).join('');
-
+  bitacoraData = {rut, nombre, engagement:null, riesgo:null, potencial:null};
+  const likertBtns = Array.from({length:11},(_,i)=>`<button class="likert-btn" onclick="setEngagement(${i},this)">${i}</button>`).join('');
   const modal = document.createElement('div');
   modal.className = 'modal-overlay';
   modal.id = 'modal-bitacora';
-  modal.innerHTML = `
-    <div class="modal">
-      <div class="modal-header">
-        <div class="modal-title">📓 Bitácora privada — ${nombre}</div>
-        <button class="modal-close" onclick="cerrarBitacora()">✕</button>
+  modal.innerHTML = `<div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📓 Bitácora privada — ${decodeURIComponent(escape(nombre))}</div>
+      <button class="modal-close" onclick="cerrarBitacora()">✕</button>
+    </div>
+    <div class="modal-section">
+      <span class="modal-label">Engagement</span>
+      <div class="modal-sub">"En una escala del 0 al 10 donde 0 es muy mal y 10 es increíble, ¿cómo te sientes en Apprecio?"</div>
+      <div class="likert-scale">${likertBtns}</div>
+      <div class="likert-labels"><span>0 Muy mal</span><span>10 Increíble</span></div>
+      <textarea class="modal-textarea" id="bt-engagement-comentario" rows="2" placeholder="¿Qué podemos hacer distinto para mejorar?"></textarea>
+    </div>
+    <div class="modal-section">
+      <span class="modal-label">Riesgo de fuga</span>
+      <div class="riesgo-opts" style="margin-bottom:8px;">
+        <button class="riesgo-opt" onclick="setRiesgo('bajo',this)">🟢 Bajo</button>
+        <button class="riesgo-opt" onclick="setRiesgo('medio',this)">🟡 Medio</button>
+        <button class="riesgo-opt" onclick="setRiesgo('alto',this)">🔴 Alto</button>
       </div>
-
-      <div class="modal-section">
-        <span class="modal-label">Engagement</span>
-        <div class="modal-sub">"En una escala del 0 al 10 donde 0 es muy mal y 10 es increíble, ¿cómo te sientes en Apprecio?"</div>
-        <div class="likert-scale">${likertBtns}</div>
-        <div class="likert-labels"><span>0 Muy mal</span><span>10 Increíble</span></div>
-        <textarea class="modal-textarea" id="bt-engagement-comentario" rows="3" placeholder="¿Qué podemos hacer distinto para mejorar?"></textarea>
+      <textarea class="modal-textarea" id="bt-riesgo-comentario" rows="2" placeholder="¿Qué señales observas?"></textarea>
+    </div>
+    <div class="modal-section">
+      <span class="modal-label">Percepción de potencial</span>
+      <div class="potencial-opts" style="margin-bottom:8px;">
+        <button class="pot-opt" onclick="setPotencialBt(1,this)"><span class="pot-num" style="color:#4A90D9;">1</span><span class="pot-name">Consolidando</span><span class="pot-desc">Enfocado en dominar su rol actual</span></button>
+        <button class="pot-opt" onclick="setPotencialBt(2,this)"><span class="pot-num" style="color:var(--yellow);">2</span><span class="pot-name">En desarrollo</span><span class="pot-desc">Señales de crecimiento en 1-2 años</span></button>
+        <button class="pot-opt" onclick="setPotencialBt(3,this)"><span class="pot-num" style="color:var(--purple);">3</span><span class="pot-name">Listo para más</span><span class="pot-desc">Preparado hoy o en menos de 12 meses</span></button>
       </div>
-
-      <div class="modal-section">
-        <span class="modal-label">Riesgo de fuga</span>
-        <div class="riesgo-opts" style="margin-bottom:10px;">
-          <button class="riesgo-opt" onclick="setRiesgo('bajo',this)">🟢 Bajo</button>
-          <button class="riesgo-opt" onclick="setRiesgo('medio',this)">🟡 Medio</button>
-          <button class="riesgo-opt" onclick="setRiesgo('alto',this)">🔴 Alto</button>
-        </div>
-        <textarea class="modal-textarea" id="bt-riesgo-comentario" rows="2" placeholder="¿Qué señales observas?"></textarea>
-      </div>
-
-      <div class="modal-section">
-        <span class="modal-label">Percepción de potencial</span>
-        <div class="potencial-opts" style="margin-bottom:10px;">
-          <button class="pot-opt" onclick="setPotencialBt(1,this)">
-            <span class="pot-num" style="color:#4A90D9;">1</span>
-            <span class="pot-name">Consolidando su rol</span>
-            <span class="pot-desc">Enfocado en dominar su posición actual</span>
-          </button>
-          <button class="pot-opt" onclick="setPotencialBt(2,this)">
-            <span class="pot-num" style="color:var(--yellow);">2</span>
-            <span class="pot-name">Potencial en desarrollo</span>
-            <span class="pot-desc">Señales de crecimiento en 1-2 años</span>
-          </button>
-          <button class="pot-opt" onclick="setPotencialBt(3,this)">
-            <span class="pot-num" style="color:var(--purple);">3</span>
-            <span class="pot-name">Listo para más</span>
-            <span class="pot-desc">Preparado para asumir más hoy o en menos de 12 meses</span>
-          </button>
-        </div>
-        <textarea class="modal-textarea" id="bt-potencial-comentario" rows="2" placeholder="Comentarios adicionales sobre el potencial..."></textarea>
-      </div>
-
-      <div class="modal-section">
-        <span class="modal-label">Notas adicionales</span>
-        <textarea class="modal-textarea" id="bt-notas" rows="3" placeholder="Cualquier contexto adicional relevante para esta persona..."></textarea>
-      </div>
-
-      <button class="btn-guardar-modal" id="btn-guardar-bitacora" onclick="guardarBitacora()">Guardar bitácora privada</button>
-    </div>`;
-
+      <textarea class="modal-textarea" id="bt-potencial-comentario" rows="2" placeholder="Comentarios adicionales..."></textarea>
+    </div>
+    <div class="modal-section">
+      <span class="modal-label">Notas adicionales</span>
+      <textarea class="modal-textarea" id="bt-notas" rows="3" placeholder="Contexto adicional relevante..."></textarea>
+    </div>
+    <button class="btn-guardar-modal" id="btn-guardar-bitacora" onclick="guardarBitacora()">Guardar bitácora privada</button>
+  </div>`;
   document.body.appendChild(modal);
 }
 
-function cerrarBitacora() {
-  document.getElementById('modal-bitacora')?.remove();
-}
+function cerrarBitacora() { document.getElementById('modal-bitacora')?.remove(); }
 
 function setEngagement(valor, btn) {
   bitacoraData.engagement = valor;
-  document.querySelectorAll('.likert-btn').forEach(b => b.classList.remove('sel'));
+  document.querySelectorAll('.likert-btn').forEach(b=>b.classList.remove('sel'));
   btn.classList.add('sel');
 }
 
 function setRiesgo(valor, btn) {
   bitacoraData.riesgo = valor;
-  document.querySelectorAll('.riesgo-opt').forEach(b => { b.className = 'riesgo-opt'; });
-  btn.classList.add('sel-' + valor);
+  document.querySelectorAll('.riesgo-opt').forEach(b=>{b.className='riesgo-opt';});
+  btn.classList.add('sel-'+valor);
 }
 
 function setPotencialBt(valor, btn) {
   bitacoraData.potencial = valor;
-  document.querySelectorAll('.pot-opt').forEach(b => { b.className = 'pot-opt'; });
-  btn.classList.add('sel-' + valor);
+  document.querySelectorAll('.pot-opt').forEach(b=>{b.className='pot-opt';});
+  btn.classList.add('sel-'+valor);
 }
 
 async function guardarBitacora() {
   const btn = document.getElementById('btn-guardar-bitacora');
   btn.disabled = true;
   btn.textContent = 'Guardando...';
-
   const liderRut = document.getElementById('lider-select').value;
-  const mes = new Date().toLocaleString('es-CL', { month: 'long', year: 'numeric' });
-
+  const mes = document.getElementById('mes-select').value || new Date().toLocaleString('es-CL',{month:'long',year:'numeric'});
   const payload = {
     rut_lider: liderRut,
     rut_colaborador: bitacoraData.rut,
     nombre_colaborador: bitacoraData.nombre,
-    mes: mes,
+    mes,
     engagement_nota: bitacoraData.engagement,
-    engagement_comentario: document.getElementById('bt-engagement-comentario')?.value?.trim() || '',
+    engagement_comentario: document.getElementById('bt-engagement-comentario')?.value?.trim()||'',
     riesgo_fuga: bitacoraData.riesgo,
-    riesgo_comentario: document.getElementById('bt-riesgo-comentario')?.value?.trim() || '',
+    riesgo_comentario: document.getElementById('bt-riesgo-comentario')?.value?.trim()||'',
     potencial: bitacoraData.potencial,
-    potencial_comentario: document.getElementById('bt-potencial-comentario')?.value?.trim() || '',
-    notas_adicionales: document.getElementById('bt-notas')?.value?.trim() || ''
+    potencial_comentario: document.getElementById('bt-potencial-comentario')?.value?.trim()||'',
+    notas_adicionales: document.getElementById('bt-notas')?.value?.trim()||''
   };
-
   try {
-    await fetch('https://n8n.openip.cl/webhook/guardar-bitacora', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    await fetch('https://n8n.openip.cl/webhook/guardar-bitacora',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     cerrarBitacora();
     alert('✓ Bitácora guardada correctamente.');
   } catch(e) {
