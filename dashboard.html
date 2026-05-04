@@ -72,6 +72,35 @@
   .ac-table tr:last-child td { border-bottom:none; }
   .empty { text-align:center;padding:24px;font-size:12px;color:var(--subtle);font-style:italic; }
   .detail-back { display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--red);background:none;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;margin-bottom:16px;padding:0; }
+  .btn-bitacora { font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--purple);background:var(--purple-light);border:0.5px solid var(--purple);border-radius:8px;padding:8px 16px;cursor:pointer; }
+  .modal-overlay { position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px; }
+  .modal { background:white;border-radius:16px;max-width:580px;width:100%;max-height:90vh;overflow-y:auto;padding:28px; }
+  .modal-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:20px; }
+  .modal-title { font-size:15px;font-weight:700;color:var(--dark); }
+  .modal-close { background:none;border:none;font-size:20px;cursor:pointer;color:var(--subtle); }
+  .modal-section { margin-bottom:20px; }
+  .modal-label { font-size:11px;font-weight:700;color:var(--dark);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;display:block; }
+  .modal-sub { font-size:11px;color:var(--subtle);margin-bottom:10px;line-height:1.6;font-style:italic; }
+  .likert-scale { display:flex;gap:4px;align-items:center;margin-bottom:10px; }
+  .likert-btn { width:36px;height:36px;border-radius:8px;border:0.5px solid var(--border);background:var(--gray);font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--subtle); }
+  .likert-btn.sel { border-color:var(--purple);background:var(--purple-light);color:var(--purple); }
+  .likert-labels { display:flex;justify-content:space-between;font-size:9px;color:var(--subtle);margin-bottom:12px; }
+  .riesgo-opts { display:flex;gap:8px; }
+  .riesgo-opt { flex:1;border:0.5px solid var(--border);border-radius:8px;padding:10px;text-align:center;cursor:pointer;background:var(--gray);font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:var(--subtle); }
+  .riesgo-opt.sel-bajo { border-color:var(--green);background:var(--green-light);color:var(--green); }
+  .riesgo-opt.sel-medio { border-color:var(--yellow);background:var(--yellow-light);color:var(--yellow); }
+  .riesgo-opt.sel-alto { border-color:var(--red);background:#fff0f3;color:var(--red); }
+  .potencial-opts { display:flex;gap:8px; }
+  .pot-opt { flex:1;border:0.5px solid var(--border);border-radius:8px;padding:10px;text-align:center;cursor:pointer;background:var(--gray);font-family:'Montserrat',sans-serif; }
+  .pot-opt.sel-1 { border-color:#4A90D9;background:#EBF4FF; }
+  .pot-opt.sel-2 { border-color:var(--yellow);background:var(--yellow-light); }
+  .pot-opt.sel-3 { border-color:var(--purple);background:var(--purple-light); }
+  .pot-num { font-size:16px;font-weight:800;display:block;margin-bottom:3px; }
+  .pot-name { font-size:10px;font-weight:700;display:block;margin-bottom:3px; }
+  .pot-desc { font-size:9px;color:var(--subtle);line-height:1.4; }
+  .modal-textarea { font-family:'Montserrat',sans-serif;font-size:12px;padding:10px 12px;border:0.5px solid var(--border);border-radius:8px;color:var(--dark);background:white;width:100%;resize:none;line-height:1.6; }
+  .btn-guardar-modal { width:100%;padding:13px;border-radius:10px;border:none;background:var(--purple);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:white;cursor:pointer;margin-top:8px; }
+  .btn-guardar-modal:disabled { opacity:0.5;cursor:not-allowed; }
   .detail-header { display:flex;align-items:center;gap:14px;margin-bottom:20px; }
   .detail-avatar { width:48px;height:48px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:white;flex-shrink:0; }
   .detail-name { font-size:16px;font-weight:700;color:var(--dark); }
@@ -182,7 +211,7 @@ function handleCredentialResponse(response) {
   usuarioActual = { email, nombre: payload.name, given_name: payload.given_name };
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
-  document.getElementById('user-name').textContent = decodeURIComponent(escape(payload.given_name));
+  document.getElementById('user-name').textContent = payload.given_name;
   iniciarApp();
 }
 
@@ -371,7 +400,11 @@ function verDetalle(rut) {
     <button class="detail-back" onclick="volverDashboard()">← Volver al equipo</button>
     <div class="detail-header">
       <div class="detail-avatar">${initials}</div>
-      <div><div class="detail-name">${colab.nombre}</div><div class="detail-sub">Líder: ${colab.lider} · ${colab.checkins} check-in${colab.checkins!==1?'s':''} registrado${colab.checkins!==1?'s':''}</div></div>
+      <div style="flex:1;">
+        <div class="detail-name">${colab.nombre}</div>
+        <div class="detail-sub">Líder: ${colab.lider} · ${colab.checkins} check-in${colab.checkins!==1?'s':''} registrado${colab.checkins!==1?'s':''}</div>
+      </div>
+      <button class="btn-bitacora" onclick="abrirBitacora('${rut}','${colab.nombre.replace(/'/g,"\\'")}','${colab.lider}')">📓 Bitácora privada</button>
     </div>
     <div class="metrics-row">
       <div class="metric-card"><div class="metric-label">Check-ins</div><div class="metric-val mv-red">${colab.checkins||0}</div></div>
@@ -415,6 +448,136 @@ function verDetalle(rut) {
 function volverDashboard() {
   document.getElementById('detail-content').style.display = 'none';
   document.getElementById('dashboard-content').style.display = 'block';
+}
+
+// BITÁCORA
+let bitacoraData = { rut: null, nombre: null, engagement: null, riesgo: null, potencial: null };
+
+function abrirBitacora(rut, nombre, lider) {
+  bitacoraData = { rut, nombre, engagement: null, riesgo: null, potencial: null };
+
+  const likertBtns = Array.from({length:11}, (_,i) => 
+    `<button class="likert-btn" onclick="setEngagement(${i},this)">${i}</button>`
+  ).join('');
+
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.id = 'modal-bitacora';
+  modal.innerHTML = `
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">📓 Bitácora privada — ${nombre}</div>
+        <button class="modal-close" onclick="cerrarBitacora()">✕</button>
+      </div>
+
+      <div class="modal-section">
+        <span class="modal-label">Engagement</span>
+        <div class="modal-sub">"En una escala del 0 al 10 donde 0 es muy mal y 10 es increíble, ¿cómo te sientes en Apprecio?"</div>
+        <div class="likert-scale">${likertBtns}</div>
+        <div class="likert-labels"><span>0 Muy mal</span><span>10 Increíble</span></div>
+        <textarea class="modal-textarea" id="bt-engagement-comentario" rows="3" placeholder="¿Qué podemos hacer distinto para mejorar?"></textarea>
+      </div>
+
+      <div class="modal-section">
+        <span class="modal-label">Riesgo de fuga</span>
+        <div class="riesgo-opts" style="margin-bottom:10px;">
+          <button class="riesgo-opt" onclick="setRiesgo('bajo',this)">🟢 Bajo</button>
+          <button class="riesgo-opt" onclick="setRiesgo('medio',this)">🟡 Medio</button>
+          <button class="riesgo-opt" onclick="setRiesgo('alto',this)">🔴 Alto</button>
+        </div>
+        <textarea class="modal-textarea" id="bt-riesgo-comentario" rows="2" placeholder="¿Qué señales observas?"></textarea>
+      </div>
+
+      <div class="modal-section">
+        <span class="modal-label">Percepción de potencial</span>
+        <div class="potencial-opts" style="margin-bottom:10px;">
+          <button class="pot-opt" onclick="setPotencialBt(1,this)">
+            <span class="pot-num" style="color:#4A90D9;">1</span>
+            <span class="pot-name">Consolidando su rol</span>
+            <span class="pot-desc">Enfocado en dominar su posición actual</span>
+          </button>
+          <button class="pot-opt" onclick="setPotencialBt(2,this)">
+            <span class="pot-num" style="color:var(--yellow);">2</span>
+            <span class="pot-name">Potencial en desarrollo</span>
+            <span class="pot-desc">Señales de crecimiento en 1-2 años</span>
+          </button>
+          <button class="pot-opt" onclick="setPotencialBt(3,this)">
+            <span class="pot-num" style="color:var(--purple);">3</span>
+            <span class="pot-name">Listo para más</span>
+            <span class="pot-desc">Preparado para asumir más hoy o en menos de 12 meses</span>
+          </button>
+        </div>
+        <textarea class="modal-textarea" id="bt-potencial-comentario" rows="2" placeholder="Comentarios adicionales sobre el potencial..."></textarea>
+      </div>
+
+      <div class="modal-section">
+        <span class="modal-label">Notas adicionales</span>
+        <textarea class="modal-textarea" id="bt-notas" rows="3" placeholder="Cualquier contexto adicional relevante para esta persona..."></textarea>
+      </div>
+
+      <button class="btn-guardar-modal" id="btn-guardar-bitacora" onclick="guardarBitacora()">Guardar bitácora privada</button>
+    </div>`;
+
+  document.body.appendChild(modal);
+}
+
+function cerrarBitacora() {
+  document.getElementById('modal-bitacora')?.remove();
+}
+
+function setEngagement(valor, btn) {
+  bitacoraData.engagement = valor;
+  document.querySelectorAll('.likert-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+
+function setRiesgo(valor, btn) {
+  bitacoraData.riesgo = valor;
+  document.querySelectorAll('.riesgo-opt').forEach(b => { b.className = 'riesgo-opt'; });
+  btn.classList.add('sel-' + valor);
+}
+
+function setPotencialBt(valor, btn) {
+  bitacoraData.potencial = valor;
+  document.querySelectorAll('.pot-opt').forEach(b => { b.className = 'pot-opt'; });
+  btn.classList.add('sel-' + valor);
+}
+
+async function guardarBitacora() {
+  const btn = document.getElementById('btn-guardar-bitacora');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  const liderRut = document.getElementById('lider-select').value;
+  const mes = new Date().toLocaleString('es-CL', { month: 'long', year: 'numeric' });
+
+  const payload = {
+    rut_lider: liderRut,
+    rut_colaborador: bitacoraData.rut,
+    nombre_colaborador: bitacoraData.nombre,
+    mes: mes,
+    engagement_nota: bitacoraData.engagement,
+    engagement_comentario: document.getElementById('bt-engagement-comentario')?.value?.trim() || '',
+    riesgo_fuga: bitacoraData.riesgo,
+    riesgo_comentario: document.getElementById('bt-riesgo-comentario')?.value?.trim() || '',
+    potencial: bitacoraData.potencial,
+    potencial_comentario: document.getElementById('bt-potencial-comentario')?.value?.trim() || '',
+    notas_adicionales: document.getElementById('bt-notas')?.value?.trim() || ''
+  };
+
+  try {
+    await fetch('https://n8n.openip.cl/webhook/guardar-bitacora', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    cerrarBitacora();
+    alert('✓ Bitácora guardada correctamente.');
+  } catch(e) {
+    alert('Error al guardar. Intenta de nuevo.');
+    btn.disabled = false;
+    btn.textContent = 'Guardar bitácora privada';
+  }
 }
 </script>
 </body>
