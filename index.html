@@ -638,6 +638,27 @@ async function onColabChange() {
   if (!val) { colabData = null; document.getElementById('formulario').style.display = 'none'; return; }
   colabData = JSON.parse(val);
   document.getElementById('colab-info').textContent = colabData.cargo + ' · ' + colabData.area;
+
+  // Verificar si ya existe check-in de este mes para este colaborador
+  const mesActual = document.getElementById('mes-select').value;
+  try {
+    const res = await fetch(`https://n8n.openip.cl/webhook/get-accionables?rut_colaborador=${colabData.rut}&rut_lider=${liderData.rut}`);
+    const data = await res.json();
+    // Buscar en el Sheet si ya hay check-in de este mes
+    const resCheckin = await fetch(`https://n8n.openip.cl/webhook/get-dashboard?rut_lider=${liderData.rut}`);
+    const dashData = await resCheckin.json();
+    const checkins = dashData.colaboradores || [];
+    const colabData2 = checkins.find(c => c.rut === colabData.rut);
+    if (colabData2 && colabData2.meses && colabData2.meses.some(m => m.toLowerCase() === mesActual.toLowerCase())) {
+      alert(`⚠️ Ya existe un check-in de ${mesActual} para ${colabData.nombre}.\n\nSi necesitas hacer correcciones, contacta a RRHH.`);
+      document.getElementById('colab-select').value = '';
+      colabData = null;
+      document.getElementById('colab-info').textContent = '';
+      document.getElementById('formulario').style.display = 'none';
+      return;
+    }
+  } catch(e) {}
+
   actualizarOwnerPills();
   await cargarAccionablesAnteriores();
   document.getElementById('formulario').style.display = 'block';
