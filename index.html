@@ -587,7 +587,80 @@ async function iniciarApp() {
     if (i === mesActual) opt.selected = true;
     selMes.appendChild(opt);
   });
-  await cargarLideres();
+
+  try {
+    // Obtener rol del usuario logueado
+    const resColab = await fetch(`https://n8n.openip.cl/webhook/get-colaborador?email=${encodeURIComponent(usuarioActual.email)}`);
+    const datosUsuario = await resColab.json();
+
+    if (!datosUsuario.encontrado) {
+      document.getElementById('app').innerHTML = '<div style="text-align:center;padding:60px 20px;font-family:Montserrat,sans-serif;"><p style="color:#FA345E;font-size:13px;">Tu usuario no está registrado en el sistema. Contacta a RRHH.</p></div>';
+      return;
+    }
+
+    const rol = datosUsuario.rol;
+
+    // Colaborador → redirigir al formulario del colaborador
+    if (rol === 'colaborador') {
+      window.location.href = 'checkin-colaborador.html';
+      return;
+    }
+
+    // Admin → carga todos los líderes con selector
+    if (rol === 'admin') {
+      await cargarLideres();
+      return;
+    }
+
+    // Líder → precarga su nombre y oculta el selector
+    if (rol === 'lider') {
+      // Ocultar selector de líder y precargarlo con el RUT del usuario
+      const selLider = document.getElementById('lider-select');
+      selLider.style.display = 'none';
+      document.getElementById('lider-info').textContent = '';
+
+      // Mostrar nombre del líder en lugar del selector
+      const labelLider = document.createElement('span');
+      labelLider.style.cssText = 'font-size:13px;font-weight:700;color:var(--dark);';
+      labelLider.textContent = datosUsuario.nombre;
+      selLider.parentNode.insertBefore(labelLider, selLider);
+
+      // Precargar liderData con los datos del usuario
+      liderData = {
+        rut: datosUsuario.rut,
+        nombre: datosUsuario.nombre,
+        cargo: datosUsuario.cargo,
+        area: datosUsuario.area
+      };
+
+      // Cargar equipo directo del líder
+      await cargarEquipoLider(datosUsuario.rut);
+      return;
+    }
+
+  } catch(e) {
+    await cargarLideres(); // fallback
+  }
+}
+
+async function cargarEquipoLider(rut) {
+  const colabSel = document.getElementById('colab-select');
+  colabSel.innerHTML = '<option value="">Cargando equipo...</option>';
+  colabSel.disabled = true;
+  try {
+    const res = await fetch(WEBHOOK_EQUIPO + '?rut=' + rut);
+    const data = await res.json();
+    colabSel.innerHTML = '<option value="">— Selecciona colaborador —</option>';
+    (data.colaboradores || []).forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = JSON.stringify({ rut: c.rut, nombre: c.nombre, cargo: c.cargo, area: c.area });
+      opt.textContent = c.nombre;
+      colabSel.appendChild(opt);
+    });
+    colabSel.disabled = false;
+  } catch(e) {
+    colabSel.innerHTML = '<option value="">Error al cargar</option>';
+  }
 }
 
 async function cargarLideres() {
