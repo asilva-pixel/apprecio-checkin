@@ -367,13 +367,14 @@ async function cargarDashboard() {
       selMes.appendChild(opt);
     });
     selMes.style.display = 'block';
-    renderDashboard(dashboardData);
+    renderDashboard(dashboardData, rut);
   } catch(e) {
     document.getElementById('loading').innerHTML = '<p>Error al cargar los datos.</p>';
   }
 }
 
-function renderDashboard(data) {
+function renderDashboard(data, rutActual) {
+  rutActual = rutActual || document.getElementById('lider-select').value;
   const m = data.metricas||{};
   const colabs = data.colaboradores||[];
   const pilares = data.pilares||{};
@@ -458,7 +459,7 @@ function renderDashboard(data) {
       if (mes) url += '&mes=' + encodeURIComponent(mes);
       const res = await fetch(url);
       dashboardData = await res.json();
-      renderDashboard(dashboardData);
+      renderDashboard(dashboardData, rut);
     } catch(e) {
       document.getElementById('loading').innerHTML = '<p>Error al cargar el equipo.</p>';
     }
@@ -466,11 +467,20 @@ function renderDashboard(data) {
 
   window.volverInicio = function() {
     navStack = [];
-    cargarDashboard();
+    const rutInicial = document.getElementById('lider-select').value;
+    document.getElementById('loading').style.display = 'flex';
+    document.getElementById('dashboard-content').style.display = 'none';
+    document.getElementById('detail-content').style.display = 'none';
+    const mes = document.getElementById('mes-select').value;
+    let url = `${WEBHOOK_DASHBOARD}?rut_lider=${rutInicial}`;
+    if (mes) url += '&mes=' + encodeURIComponent(mes);
+    fetch(url).then(r=>r.json()).then(data => {
+      dashboardData = data;
+      renderDashboard(data, rutInicial);
+    });
   };
 
   window.navBack = async function(idx) {
-    navStack = navStack.slice(0, idx+1);
     const nodo = navStack[idx];
     navStack = navStack.slice(0, idx);
     await window.abrirEquipo(nodo.rut, nodo.nombre);
@@ -658,7 +668,7 @@ function renderDashboard(data) {
   }
 
   const perfScore = scores.performance;
-  const liderRutActual = document.getElementById('lider-select').value;
+  const liderRutActual = rutActual;
   const esAccesoCompleto = ACCESO_COMPLETO.includes(liderRutActual);
 
   // Breadcrumb
@@ -756,7 +766,7 @@ function renderDashboard(data) {
   document.getElementById('loading').style.display = 'none';
   document.getElementById('dashboard-content').innerHTML = html;
   document.getElementById('dashboard-content').style.display = 'block';
-  renderEquipoTree(liderRutActual);
+  renderEquipoTree(rutActual);
 }
 
 function verDetalle(rut) {
