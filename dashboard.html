@@ -297,6 +297,7 @@ function logout() { google.accounts.id.disableAutoSelect(); location.reload(); }
 let tabActual = 'mi-equipo';
 let globalData = null;
 let areaActiva = 'global';
+let mesGlobalActivo = 'acumulado';
 
 function switchTab(tab) {
   tabActual = tab;
@@ -313,21 +314,29 @@ function switchTab(tab) {
     document.getElementById('detail-content').style.display = 'none';
     document.getElementById('mes-select').style.display = 'none';
     document.getElementById('lider-select').style.display = 'none';
-    cargarGlobal();
+    // Si ya tenemos datos globales, solo re-renderizar sin recargar
+    if (globalData) {
+      renderGlobal(globalData, areaActiva);
+    } else {
+      cargarGlobal(mesGlobalActivo);
+    }
   }
 }
 
 async function cargarGlobal(mes) {
+  mesGlobalActivo = mes || 'acumulado';
   document.getElementById('loading').style.display = 'flex';
   document.getElementById('global-content').style.display = 'none';
   try {
     let url = WEBHOOK_GLOBAL;
-    if (mes && mes !== 'acumulado') url += '?mes=' + encodeURIComponent(mes);
+    if (mesGlobalActivo && mesGlobalActivo !== 'acumulado') url += '?mes=' + encodeURIComponent(mesGlobalActivo);
     const res = await fetch(url);
     globalData = await res.json();
     renderGlobal(globalData, areaActiva);
   } catch(e) {
-    document.getElementById('loading').innerHTML = '<p>Error al cargar datos globales.</p>';
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('global-content').innerHTML = '<div style="text-align:center;padding:40px;font-size:13px;color:var(--subtle);">Error al cargar datos globales. Intenta de nuevo.</div>';
+    document.getElementById('global-content').style.display = 'block';
   }
 }
 
