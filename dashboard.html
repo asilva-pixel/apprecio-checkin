@@ -317,11 +317,13 @@ function switchTab(tab) {
   }
 }
 
-async function cargarGlobal() {
+async function cargarGlobal(mes) {
   document.getElementById('loading').style.display = 'flex';
   document.getElementById('global-content').style.display = 'none';
   try {
-    const res = await fetch(WEBHOOK_GLOBAL);
+    let url = WEBHOOK_GLOBAL;
+    if (mes && mes !== 'acumulado') url += '?mes=' + encodeURIComponent(mes);
+    const res = await fetch(url);
     globalData = await res.json();
     renderGlobal(globalData, areaActiva);
   } catch(e) {
@@ -342,6 +344,14 @@ function renderGlobal(data, areaId) {
     <span style="font-size:10px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:0.4px;margin-right:6px;">Vista:</span>
     <button class="area-tab ${esGlobal?'active':''}" onclick="renderGlobal(globalData,'global')">🌐 Apprecio</button>
     ${areas.map(a=>`<button class="area-tab ${areaId===a?'active':''}" onclick="renderGlobal(globalData,'${a}')">${a}</button>`).join('')}
+  </div>
+  <div style="margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+    <span style="font-size:10px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:0.4px;">Período:</span>
+    <select onchange="cargarGlobal(this.value)" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:var(--dark);background:white;border:0.5px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;">
+      <option value="acumulado" ${!data.mes_filtro||data.mes_filtro==='acumulado'?'selected':''}>Acumulado</option>
+      ${(data.meses_disponibles||[]).map(m=>`<option value="${m}" ${data.mes_filtro===m?'selected':''}>${m.charAt(0).toUpperCase()+m.slice(1)}</option>`).join('')}
+    </select>
+    ${data.mes_filtro&&data.mes_filtro!=='acumulado'?`<span class="badge-sm b-purple">Mostrando: ${data.mes_filtro}</span>`:''}
   </div>`;
 
   const metricsHTML = `<div class="metrics-row">
@@ -1280,13 +1290,15 @@ function verDetalle(rut) {
       ${curvaLinea}`;
   }
 
+  // Guardar meses sin bitácora en variable global para el modal
+  window._mesesSinBitacoraActual = mesesSinBitacora;
+
   const html = `
-    <button class="detail-back" onclick="volverDashboard()">← Volver al equipo</button>
     <div class="detail-header">
       <div class="detail-avatar">${initials}</div>
       <div style="flex:1;"><div class="detail-name">${colab.nombre}</div><div class="detail-sub">Líder: ${colab.lider} · ${mesesUnicos.length} check-in${mesesUnicos.length!==1?'s':''} registrado${mesesUnicos.length!==1?'s':''}</div></div>
       <button class="btn-ausencia" onclick="abrirAusencia('${rut}','${colab.nombre.replace(/'/g,"\\'")}')">📅 Registrar ausencia</button>
-      <button class="btn-bitacora" onclick="abrirBitacora('${rut}','${colab.nombre.replace(/'/g,"\\'")}', ${JSON.stringify(mesesSinBitacora)})">📓 Bitácora privada</button>
+      <button class="btn-bitacora" onclick="abrirBitacora('${rut}','${colab.nombre.replace(/'/g,"\\'")}')">📓 Bitácora privada</button>
     </div>
 
     <div class="metrics-row">
@@ -1441,6 +1453,8 @@ async function guardarAusencia() {
 let bitacoraData = {rut:null,nombre:null,engagement:null,riesgo:null,potencial:null};
 
 function abrirBitacora(rut, nombre, mesesSinBitacora) {
+  // Usar variable global si no se pasa como parámetro
+  if (!mesesSinBitacora) mesesSinBitacora = window._mesesSinBitacoraActual || [];
   bitacoraData = {rut, nombre, engagement:null, riesgo:null, potencial:null};
 
   // Si no hay meses sin bitácora, avisar
