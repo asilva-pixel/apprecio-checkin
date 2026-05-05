@@ -157,6 +157,11 @@
   .tree-expand.open { transform:rotate(90deg); }
   .tree-children { padding:6px 0 6px 24px;background:#fafafa;border-top:0.5px solid var(--border); }
   .tree-loading { padding:10px 14px;font-size:11px;color:var(--subtle);font-style:italic; }
+  .breadcrumb { display:flex;align-items:center;gap:6px;margin-bottom:16px;flex-wrap:wrap; }
+  .breadcrumb-item { font-size:11px;font-weight:600;color:var(--red);cursor:pointer;background:none;border:none;font-family:'Montserrat',sans-serif;padding:0; }
+  .breadcrumb-item:hover { text-decoration:underline; }
+  .breadcrumb-sep { font-size:11px;color:var(--subtle); }
+  .breadcrumb-current { font-size:11px;font-weight:700;color:var(--dark); }
   @media(max-width:768px){.metrics-row{grid-template-columns:1fr 1fr;}.two-col{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -202,8 +207,13 @@ const WEBHOOK_JUSTIFICACION = 'https://n8n.openip.cl/webhook/guardar-justificaci
 
 const MESES_ORDEN = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
+const ACCESO_COMPLETO = ['12605423-8','15563184-8','16939271-4']; // Jaime, Seba Rojas, Ana María
+
 let usuarioActual = null;
 let dashboardData = null;
+
+// Estado de navegación
+let navStack = []; // [{rut, nombre, tipo: 'org'|'equipo'|'detalle'}]
 
 // Escala de colores 1-5: rojo, amarillo, verde, azul, púrpura
 function scoreColor(s) {
@@ -292,6 +302,7 @@ async function iniciarApp() {
 async function cargarDashboard() {
   const rut = document.getElementById('lider-select').value;
   if (!rut) { document.getElementById('dashboard-content').style.display='none'; return; }
+  navStack = []; // reset navegación
   const mes = document.getElementById('mes-select').value;
   document.getElementById('loading').style.display = 'flex';
   document.getElementById('dashboard-content').style.display = 'none';
@@ -353,70 +364,73 @@ function renderDashboard(data) {
     </div>`;
   }
 
-  function renderEquipo() {
-    const liderRut = document.getElementById('lider-select').value;
+  function renderEquipo() {}  // deprecated
+
+  async function renderEquipoTree(rutLider) {
     const cont = document.getElementById('equipo-tree');
     if (!cont) return;
-    cont.innerHTML = '<div class="tree-loading">Cargando equipo...</div>';
-    cargarNivel(liderRut, cont, 0);
-  }
-
-  async function cargarNivel(rutLider, container, nivel) {
     try {
       const res = await fetch(`https://n8n.openip.cl/webhook/get-equipo?rut=${rutLider}`);
       const data = await res.json();
       const personas = data.colaboradores || [];
-      if (!personas.length) {
-        container.innerHTML = '<div class="tree-loading">Sin reportes directos.</div>';
+      const lideres = personas.filter(p=>p.es_lider);
+      if (!lideres.length) {
+        cont.innerHTML = '<div class="tree-loading">Este líder no tiene sub-equipos.</div>';
         return;
       }
-      container.innerHTML = personas.map(p => buildTreeNode(p, nivel)).join('');
+      cont.innerHTML = lideres.map(p => {
+        const initials = p.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
+        const areaLabel = [p.area, p.subarea1].filter(Boolean).join(' · ');
+        const sc = dashboardData?.scores_por_colab?.[p.rut];
+        const perf = sc ? avg(sc.notas_perf) : null;
+        const perfBadge = perf!==null ? `<span class="score-pill" style="background:${scoreBg(perf)};color:${scoreColor(perf)};">⭐ ${perf}</span>` : '';
+        return `<div class="tree-node">
+          <div class="tree-node-header" onclick="abrirEquipo('${p.rut}','${p.nombre.replace(/'/g,"\\'")}')">
+            <div class="tree-avatar" style="background:var(--purple);">${initials}</div>
+            <div class="tree-info">
+              <div class="tree-nombre">${p.nombre} <span style="font-size:9px;color:var(--purple);font-weight:600;background:var(--purple-light);padding:1px 6px;border-radius:10px;margin-left:4px;">Líder</span></div>
+              <div class="tree-sub">${p.cargo} · ${areaLabel}</div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+              ${perfBadge}
+              <span style="font-size:10px;color:var(--red);font-weight:600;">Ver equipo →</span>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
     } catch(e) {
-      container.innerHTML = '<div class="tree-loading">Error al cargar.</div>';
+      cont.innerHTML = '<div class="tree-loading">Error al cargar equipos.</div>';
     }
   }
 
-  function buildTreeNode(p, nivel) {
-    const initials = p.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
-    const sc = scoresPorColab[p.rut];
-    const perf = sc ? avg(sc.notas_perf) : null;
-    const perfBadge = perf!==null ? `<span class="score-pill" style="background:${scoreBg(perf)};color:${scoreColor(perf)};">⭐ ${perf}</span>` : '';
-    const areaLabel = [p.area, p.subarea1].filter(Boolean).join(' · ');
-    const bgColor = nivel===0?'var(--red)':nivel===1?'var(--purple)':'#3182ce';
-
-    if (p.es_lider) {
-      return `<div class="tree-node" id="node-${p.rut}">
-        <div class="tree-node-header" onclick="toggleNodo('${p.rut}', this)">
-          <div class="tree-avatar" style="background:${bgColor};">${initials}</div>
-          <div class="tree-info">
-            <div class="tree-nombre">${p.nombre} <span style="font-size:9px;color:var(--purple);font-weight:600;background:var(--purple-light);padding:1px 6px;border-radius:10px;margin-left:4px;">Líder</span></div>
-            <div class="tree-sub">${p.cargo} · ${areaLabel}</div>
-          </div>
-          <div style="display:flex;gap:6px;align-items:center;">
-            ${perfBadge}
-            <div class="tree-expand" id="expand-${p.rut}">▶</div>
-          </div>
-        </div>
-        <div class="tree-children" id="children-${p.rut}" style="display:none;">
-          <div class="tree-loading">Cargando equipo de ${p.nombre}...</div>
-        </div>
-      </div>`;
-    } else {
-      return `<div class="tree-node">
-        <div class="tree-node-header" onclick="verDetalle('${p.rut}')">
-          <div class="tree-avatar" style="background:${bgColor};">${initials}</div>
-          <div class="tree-info">
-            <div class="tree-nombre">${p.nombre}</div>
-            <div class="tree-sub">${p.cargo} · ${areaLabel}</div>
-          </div>
-          <div style="display:flex;gap:6px;align-items:center;">
-            ${perfBadge}
-            <span style="font-size:10px;color:var(--subtle);">Ver detalle →</span>
-          </div>
-        </div>
-      </div>`;
+  window.abrirEquipo = async function(rut, nombre) {
+    navStack.push({ rut, nombre });
+    document.getElementById('loading').style.display = 'flex';
+    document.getElementById('dashboard-content').style.display = 'none';
+    document.getElementById('detail-content').style.display = 'none';
+    try {
+      const mes = document.getElementById('mes-select').value;
+      let url = `${WEBHOOK_DASHBOARD}?rut_lider=${rut}`;
+      if (mes) url += '&mes=' + encodeURIComponent(mes);
+      const res = await fetch(url);
+      dashboardData = await res.json();
+      renderDashboard(dashboardData);
+    } catch(e) {
+      document.getElementById('loading').innerHTML = '<p>Error al cargar el equipo.</p>';
     }
-  }
+  };
+
+  window.volverInicio = function() {
+    navStack = [];
+    cargarDashboard();
+  };
+
+  window.navBack = async function(idx) {
+    navStack = navStack.slice(0, idx+1);
+    const nodo = navStack[idx];
+    navStack = navStack.slice(0, idx);
+    await window.abrirEquipo(nodo.rut, nodo.nombre);
+  };
 
   window.toggleNodo = async function(rut, headerEl) {
     const childrenDiv = document.getElementById('children-' + rut);
@@ -425,24 +439,10 @@ function renderDashboard(data) {
     const isOpen = childrenDiv.style.display !== 'none';
     if (isOpen) {
       childrenDiv.style.display = 'none';
-      expandBtn.classList.remove('open');
+      if (expandBtn) expandBtn.classList.remove('open');
     } else {
       childrenDiv.style.display = 'block';
-      expandBtn.classList.add('open');
-      if (childrenDiv.innerHTML.includes('Cargando')) {
-        try {
-          const res = await fetch(`https://n8n.openip.cl/webhook/get-equipo?rut=${rut}`);
-          const data = await res.json();
-          const personas = data.colaboradores || [];
-          if (!personas.length) {
-            childrenDiv.innerHTML = '<div class="tree-loading">Sin reportes directos.</div>';
-          } else {
-            childrenDiv.innerHTML = '<div style="padding-top:6px;">' + personas.map(p => buildTreeNode(p, 1)).join('') + '</div>';
-          }
-        } catch(e) {
-          childrenDiv.innerHTML = '<div class="tree-loading">Error al cargar.</div>';
-        }
-      }
+      if (expandBtn) expandBtn.classList.add('open');
     }
   };
 
@@ -614,8 +614,44 @@ function renderDashboard(data) {
   }
 
   const perfScore = scores.performance;
+  const liderRutActual = document.getElementById('lider-select').value;
+  const esAccesoCompleto = ACCESO_COMPLETO.includes(liderRutActual);
+
+  // Breadcrumb
+  const breadcrumbHTML = navStack.length > 0 ? `
+    <div class="breadcrumb">
+      <button class="breadcrumb-item" onclick="volverInicio()">Apprecio</button>
+      ${navStack.map((n,i) => i < navStack.length-1 ?
+        `<span class="breadcrumb-sep">›</span><button class="breadcrumb-item" onclick="navBack(${i})">${n.nombre}</button>` :
+        `<span class="breadcrumb-sep">›</span><span class="breadcrumb-current">${n.nombre}</span>`
+      ).join('')}
+    </div>` : '';
+
+  // Reportes directos — tabla con puntitos
+  function colabRow(c) {
+    const mesesNombres = MESES_ORDEN;
+    const mesesCortos = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const dots = mesesCortos.map((mc,i) => {
+      const tiene = (c.meses||[]).some(mes=>mes.toLowerCase().includes(mesesNombres[i]));
+      return `<div class="dot ${tiene?'dot-ok':'dot-empty'}" title="${mc}"></div>`;
+    }).join('');
+    const initials = c.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
+    const sc = scoresPorColab[c.rut];
+    const perf = sc ? avg(sc.notas_perf) : null;
+    return `<tr onclick="verDetalle('${c.rut}')">
+      <td><div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0;">${initials}</div>
+        <div><div style="font-weight:600;font-size:11px;">${c.nombre}</div><div style="font-size:9px;color:var(--subtle);">${c.lider}</div></div>
+      </div></td>
+      <td><div class="checkin-dots">${dots}</div></td>
+      <td style="text-align:center;">${new Set(c.meses||[]).size}</td>
+      <td style="text-align:center;">${perf!==null?`<span class="score-pill" style="background:${scoreBg(perf)};color:${scoreColor(perf)};">${perf}</span>`:'—'}</td>
+      <td style="text-align:center;">${c.accionables_activos||0}</td>
+    </tr>`;
+  }
 
   const html = `
+    ${breadcrumbHTML}
     <div class="metrics-row">
       <div class="metric-card"><div class="metric-label">Check-ins completados</div><div class="metric-val mv-red">${m.porcentaje_checkins||0}<span style="font-size:16px;">%</span></div><div class="metric-sub">${colabs.filter(c=>new Set(c.meses||[]).size>0).length} de ${m.total_colaboradores||0} colaboradores</div></div>
       <div class="metric-card"><div class="metric-label">Accionables activos</div><div class="metric-val mv-purple">${m.accionables_activos||0}</div><div class="metric-sub">${m.accionables_cumplidos||0} cumplidos</div></div>
@@ -625,8 +661,12 @@ function renderDashboard(data) {
 
     <div class="two-col">
       <div class="card">
-        <div class="card-title">Equipo <span class="card-tag">expandir líderes · clic colaborador para detalle</span></div>
-        <div id="equipo-tree"><div class="tree-loading">Selecciona un líder para ver el equipo.</div></div>
+        <div class="card-title">Reportes directos <span class="card-tag">clic para ver detalle individual</span></div>
+        ${colabs.length===0?'<div class="empty">No hay check-ins registrados.</div>':`
+        <table class="colab-table">
+          <thead><tr><th>Colaborador</th><th>Check-ins 2026</th><th style="text-align:center;">Meses</th><th style="text-align:center;">Performance</th><th style="text-align:center;">Accionables</th></tr></thead>
+          <tbody>${colabs.map(colabRow).join('')}</tbody>
+        </table>`}
       </div>
       <div class="card">
         <div class="card-title">Pilares — distribución y score promedio</div>
@@ -638,6 +678,11 @@ function renderDashboard(data) {
           <div class="bar-legend-item"><div class="bar-legend-dot" style="background:var(--red);"></div>Oportunidad</div>
         </div>
       </div>
+    </div>
+
+    <div class="full-col card">
+      <div class="card-title">Equipos <span class="card-tag">clic en equipo para ver su dashboard completo</span></div>
+      <div id="equipo-tree"><div class="tree-loading">Cargando equipos...</div></div>
     </div>
 
     <div class="two-col">
@@ -667,7 +712,7 @@ function renderDashboard(data) {
   document.getElementById('loading').style.display = 'none';
   document.getElementById('dashboard-content').innerHTML = html;
   document.getElementById('dashboard-content').style.display = 'block';
-  renderEquipo();
+  renderEquipoTree(liderRutActual);
 }
 
 function verDetalle(rut) {
