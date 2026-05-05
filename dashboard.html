@@ -331,10 +331,186 @@ async function cargarGlobal() {
 
 function renderGlobal(data, areaId) {
   areaActiva = areaId;
-  const g = areaId === 'global' ? data.global : data.por_area[areaId];
-  if (!g) return;
   const areas = data.areas || [];
+  const esGlobal = areaId === 'global';
+  const g = esGlobal ? data.global : data.por_area[areaId];
+  if (!g) return;
 
+  const enpsColor2 = v => v===null?'var(--subtle)':v>=50?'#1a8a45':v>=0?'#d69e2e':'#e53e3e';
+
+  const areaTabs = `<div style="margin-bottom:16px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
+    <span style="font-size:10px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:0.4px;margin-right:6px;">Vista:</span>
+    <button class="area-tab ${esGlobal?'active':''}" onclick="renderGlobal(globalData,'global')">🌐 Apprecio</button>
+    ${areas.map(a=>`<button class="area-tab ${areaId===a?'active':''}" onclick="renderGlobal(globalData,'${a}')">${a}</button>`).join('')}
+  </div>`;
+
+  const metricsHTML = `<div class="metrics-row">
+    <div class="metric-card"><div class="metric-label">Check-ins completados</div><div class="metric-val mv-red">${g.pct_checkins||0}<span style="font-size:16px;">%</span></div><div class="metric-sub">${g.checkins_completados} de ${g.total_colaboradores} colaboradores</div></div>
+    <div class="metric-card"><div class="metric-label">Accionables acordados vs cumplidos</div><div class="metric-val mv-purple">${g.accionables_cumplidos}<span style="font-size:14px;color:var(--subtle);font-weight:400;"> / ${g.accionables_total}</span></div><div class="metric-sub">${g.accionables_total>0?Math.round((g.accionables_cumplidos/g.accionables_total)*100):0}% tasa</div></div>
+    <div class="metric-card"><div class="metric-label">Performance promedio</div><div class="metric-val" style="color:${scoreColor(g.performance)};">${g.performance||'—'}</div><div class="metric-sub">escala 1 a 5</div></div>
+    <div class="metric-card"><div class="metric-label">eNPS</div><div class="metric-val" style="color:${enpsColor2(g.enps)};">${g.enps!==null?g.enps:'—'}</div><div class="metric-sub">-100 a +100</div></div>
+  </div>`;
+
+  // Nine Box grande — mismo diseño que el dashboard normal
+  function renderNineBoxG(nb) {
+    const cells = [
+      {label:'Evaluar rol',bg:'#fefce8',color:'#92400e'},
+      {label:'Colaborador clave',bg:'#f0fdf4',color:'#166534'},
+      {label:'Talento',bg:'#dcfce7',color:'#14532d'},
+      {label:'Plan de acción',bg:'#fff7ed',color:'#9a3412'},
+      {label:'En desarrollo',bg:'#fffbeb',color:'#92400e'},
+      {label:'Destacado',bg:'#f0fdf4',color:'#166534'},
+      {label:'En riesgo',bg:'#fef2f2',color:'#991b1b'},
+      {label:'Colaborador efectivo',bg:'#fff7ed',color:'#9a3412'},
+      {label:'Especialista',bg:'#fefce8',color:'#92400e'},
+    ];
+    const cellsHTML = cells.map((cell,i)=>{
+      const ps = nb[i] || [];
+      const psHTML = ps.map(p=>{
+        const ini = p.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
+        const tooltip = p.nombre + (p.area?' ('+p.area+')':'');
+        return `<div class="nb-persona" style="background:white;color:${cell.color};border-color:${cell.color};width:22px;height:22px;font-size:7px;" title="${tooltip}">${ini}</div>`;
+      }).join('');
+      const count = ps.length;
+      return `<div class="nb-cell" style="background:${cell.bg};min-height:120px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%;">
+          <div class="nb-cell-label" style="color:${cell.color};font-size:9px;">${cell.label}</div>
+          ${count>0?`<span style="font-size:9px;font-weight:700;color:${cell.color};background:white;padding:1px 5px;border-radius:10px;flex-shrink:0;">${count}</span>`:''}
+        </div>
+        <div class="nb-personas" style="margin-top:6px;">${psHTML}</div>
+      </div>`;
+    }).join('');
+    return `<div class="nb-wrapper">
+      <div style="display:flex;align-items:center;margin-right:4px;"><div class="nb-y-label-main">Potencial</div></div>
+      <div style="flex:1;">
+        <div style="font-size:9px;color:var(--subtle);text-align:center;margin-bottom:4px;">Alto · Medio · Bajo</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">${cellsHTML}</div>
+        <div class="nb-x-labels"><span>Bajo</span><span>Medio</span><span>Alto</span></div>
+        <div class="nb-axis-title">Performance</div>
+      </div>
+    </div>`;
+  }
+
+  // ── VISTA GLOBAL: comparación entre áreas ──────────────────────────
+  if (esGlobal) {
+    // Performance por área — barras horizontales
+    const perfBarrasHTML = areas.map(a=>{
+      const pa = data.por_area[a];
+      const perf = pa?.performance;
+      const pct = perf ? (perf/5)*100 : 0;
+      return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid #f5f5f5;">
+        <span style="font-size:10px;font-weight:600;width:90px;flex-shrink:0;">${a}</span>
+        <div style="flex:1;height:8px;border-radius:4px;background:var(--gray);overflow:hidden;">
+          <div style="height:100%;width:${pct}%;background:${scoreColor(perf)};border-radius:4px;"></div>
+        </div>
+        <span style="font-size:10px;font-weight:700;color:${scoreColor(perf)};width:28px;text-align:right;">${perf||'—'}</span>
+      </div>`;
+    }).join('');
+
+    // Check-ins por área
+    const checkinAreasHTML = areas.map(a=>{
+      const pa = data.por_area[a];
+      const pct = pa?.pct_checkins || 0;
+      const color = pct>=80?'var(--green)':pct>=50?'#d69e2e':'var(--red)';
+      return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid #f5f5f5;">
+        <span style="font-size:10px;font-weight:600;width:90px;flex-shrink:0;">${a}</span>
+        <div style="flex:1;height:8px;border-radius:4px;background:var(--gray);overflow:hidden;">
+          <div style="height:100%;width:${pct}%;background:${color};border-radius:4px;"></div>
+        </div>
+        <span style="font-size:10px;font-weight:700;color:${color};width:32px;text-align:right;">${pct}%</span>
+      </div>`;
+    }).join('');
+
+    // eNPS por área
+    const enpsAreasHTML = areas.map(a=>{
+      const pa = data.por_area[a];
+      const enps = pa?.enps;
+      const color = enpsColor2(enps);
+      const pct = enps!==null?((enps+100)/200)*100:0;
+      return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid #f5f5f5;">
+        <span style="font-size:10px;font-weight:600;width:90px;flex-shrink:0;">${a}</span>
+        <div style="flex:1;height:8px;border-radius:4px;background:var(--gray);overflow:hidden;">
+          ${enps!==null?`<div style="height:100%;width:${pct}%;background:${color};border-radius:4px;"></div>`:''}
+        </div>
+        <span style="font-size:10px;font-weight:700;color:${color};width:36px;text-align:right;">${enps!==null?enps:'—'}</span>
+      </div>`;
+    }).join('');
+
+    // Pilares por área — comparación
+    function pilaresAreaHTML(pilar, nombre, icono) {
+      return `<div style="margin-bottom:14px;">
+        <div style="font-size:11px;font-weight:700;margin-bottom:6px;">${icono} ${nombre}</div>
+        ${areas.map(a=>{
+          const pa = data.por_area[a];
+          const p = pa?.pilares?.[pilar] || {f:0,o:0};
+          const total = p.f+p.o;
+          const wF = total>0?Math.round((p.f/total)*100):0;
+          const wO = total>0?Math.round((p.o/total)*100):0;
+          if (!total) return '';
+          return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <span style="font-size:9px;color:var(--subtle);width:80px;text-align:right;flex-shrink:0;">${a}</span>
+            <div style="flex:1;height:7px;border-radius:4px;background:var(--gray);overflow:hidden;display:flex;">
+              <div style="background:var(--green);width:${wF}%;"></div>
+              <div style="background:var(--red);width:${wO}%;"></div>
+            </div>
+            <span style="font-size:9px;color:var(--subtle);width:40px;">${p.f}F·${p.o}O</span>
+          </div>`;
+        }).join('')}
+      </div>`;
+    }
+
+    // Riesgo por área — semáforo
+    const riesgoAreasHTML = areas.map(a=>{
+      const pa = data.por_area[a];
+      const riesgos = pa?.riesgo_fuga || [];
+      const bajo = riesgos.filter(r=>r.riesgo==='bajo').length;
+      const medio = riesgos.filter(r=>r.riesgo==='medio').length;
+      const alto = riesgos.filter(r=>r.riesgo==='alto').length;
+      if (!riesgos.length) return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:0.5px solid #f5f5f5;">
+        <span style="font-size:11px;font-weight:600;flex:1;">${a}</span>
+        <span style="font-size:10px;color:var(--subtle);">Sin datos</span>
+      </div>`;
+      return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:0.5px solid #f5f5f5;">
+        <span style="font-size:11px;font-weight:600;flex:1;">${a}</span>
+        ${alto>0?`<span class="badge-sm b-red">🔴 ${alto} alto</span>`:''}
+        ${medio>0?`<span class="badge-sm b-yellow">🟡 ${medio} medio</span>`:''}
+        ${bajo>0?`<span class="badge-sm b-green">🟢 ${bajo} bajo</span>`:''}
+      </div>`;
+    }).join('');
+
+    const html = `
+      ${areaTabs}
+      ${metricsHTML}
+      <div class="two-col">
+        <div class="card"><div class="card-title">Performance promedio por área</div>${perfBarrasHTML}</div>
+        <div class="card"><div class="card-title">Check-ins completados por área</div>${checkinAreasHTML}</div>
+      </div>
+      <div class="two-col">
+        <div class="card"><div class="card-title">eNPS por área</div>${enpsAreasHTML}</div>
+        <div class="card"><div class="card-title">Riesgo de fuga por área</div>${riesgoAreasHTML}</div>
+      </div>
+      <div class="full-col card">
+        <div class="card-title">Pilares por área — distribución comparada</div>
+        ${pilaresAreaHTML('accountability','Accountability','🎯')}
+        ${pilaresAreaHTML('productividad','Productividad','⚡')}
+        ${pilaresAreaHTML('customer_centricity','Customer Centricity','🌟')}
+        <div class="bar-legend">
+          <div class="bar-legend-item"><div class="bar-legend-dot" style="background:var(--green);"></div>Fortaleza</div>
+          <div class="bar-legend-item"><div class="bar-legend-dot" style="background:var(--red);"></div>Oportunidad</div>
+        </div>
+      </div>
+      <div class="full-col card">
+        <div class="card-title">Nine Box — Toda la organización <span class="card-tag">hover para ver nombre y área</span></div>
+        ${renderNineBoxG(g.nine_box||{})}
+      </div>`;
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('global-content').innerHTML = html;
+    document.getElementById('global-content').style.display = 'block';
+    return;
+  }
+
+  // ── VISTA POR ÁREA ────────────────────────────────────────────────
   function pilarBarG(pilar, nombre, icono) {
     const p = g.pilares[pilar] || {f:0,o:0};
     const total = p.f + p.o;
@@ -349,7 +525,7 @@ function renderGlobal(data, areaId) {
     </div>`;
   }
 
-  function renderCurvaG() {
+  function renderCurvaArea() {
     const curva = g.curva_performance || [];
     if (!curva.length) return '<div class="empty">Sin datos aún.</div>';
     const W=400,H=90,pad=28;
@@ -359,53 +535,21 @@ function renderGlobal(data, areaId) {
     const xStep = curva.length>1?(W-pad*2)/(curva.length-1):0;
     const yPos = v => H-pad-((v-minV)/(maxV-minV))*(H-pad*2);
     const points = curva.map((c,i)=>`${pad+i*xStep},${yPos(c.promedio)}`).join(' ');
-    const area = `${pad},${H-pad} ${points} ${pad+(curva.length-1)*xStep},${H-pad}`;
-    const dots = curva.map((c,i)=>`
-      <circle cx="${pad+i*xStep}" cy="${yPos(c.promedio)}" r="4" fill="${scoreColor(c.promedio)}"/>
-      <text x="${pad+i*xStep}" y="${yPos(c.promedio)-8}" text-anchor="middle" font-size="9" font-weight="700" fill="${scoreColor(c.promedio)}">${c.promedio}</text>
-      <text x="${pad+i*xStep}" y="${H-4}" text-anchor="middle" font-size="8" fill="#999">${c.mes.charAt(0).toUpperCase()+c.mes.slice(0,3)}</text>`).join('');
+    const areaPath = `${pad},${H-pad} ${points} ${pad+(curva.length-1)*xStep},${H-pad}`;
+    const dots = curva.map((c,i)=>{
+      // Fix: usar solo los primeros 3 caracteres del mes sin repetir la primera letra
+      const mesAbrev = c.mes.charAt(0).toUpperCase() + c.mes.slice(1,4);
+      return `<circle cx="${pad+i*xStep}" cy="${yPos(c.promedio)}" r="4" fill="${scoreColor(c.promedio)}"/>
+        <text x="${pad+i*xStep}" y="${yPos(c.promedio)-8}" text-anchor="middle" font-size="9" font-weight="700" fill="${scoreColor(c.promedio)}">${c.promedio}</text>
+        <text x="${pad+i*xStep}" y="${H-4}" text-anchor="middle" font-size="8" fill="#999">${mesAbrev}</text>`;
+    }).join('');
     return `<div class="curva-wrap"><svg viewBox="0 0 ${W} ${H}" class="curva-svg" xmlns="http://www.w3.org/2000/svg">
-      <polygon points="${area}" fill="rgba(250,52,94,0.08)"/>
+      <polygon points="${areaPath}" fill="rgba(250,52,94,0.08)"/>
       <polyline points="${points}" fill="none" stroke="var(--red)" stroke-width="2" stroke-linejoin="round"/>
       ${dots}</svg></div>`;
   }
 
-  function renderNineBoxG() {
-    const nb = g.nine_box || {};
-    const cells = [
-      {label:'Evaluar rol',bg:'#fefce8',color:'#92400e'},
-      {label:'Colaborador clave',bg:'#f0fdf4',color:'#166534'},
-      {label:'Talento',bg:'#dcfce7',color:'#14532d'},
-      {label:'Plan de acción',bg:'#fff7ed',color:'#9a3412'},
-      {label:'En desarrollo',bg:'#fffbeb',color:'#92400e'},
-      {label:'Destacado',bg:'#f0fdf4',color:'#166534'},
-      {label:'En riesgo',bg:'#fef2f2',color:'#991b1b'},
-      {label:'Colaborador\nefectivo',bg:'#fff7ed',color:'#9a3412'},
-      {label:'Especialista',bg:'#fefce8',color:'#92400e'},
-    ];
-    const cellsHTML = cells.map((cell,i)=>{
-      const ps = nb[i] || [];
-      const psHTML = ps.map(p=>{
-        const ini = p.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
-        return `<div class="nb-persona" style="background:white;color:${cell.color};border-color:${cell.color};" title="${p.nombre}${p.area?' ('+p.area+')':''}">${ini}</div>`;
-      }).join('');
-      return `<div class="nb-cell" style="background:${cell.bg};">
-        <div class="nb-cell-label" style="color:${cell.color};">${cell.label.replace('\n','<br>')}</div>
-        <div class="nb-personas">${psHTML}</div>
-      </div>`;
-    }).join('');
-    return `<div class="nb-wrapper">
-      <div style="display:flex;align-items:center;margin-right:4px;"><div class="nb-y-label-main">Potencial</div></div>
-      <div style="flex:1;">
-        <div style="font-size:9px;color:var(--subtle);text-align:center;margin-bottom:4px;">Alto · Medio · Bajo</div>
-        <div class="nb-grid">${cellsHTML}</div>
-        <div class="nb-x-labels"><span>Bajo</span><span>Medio</span><span>Alto</span></div>
-        <div class="nb-axis-title">Performance</div>
-      </div>
-    </div>`;
-  }
-
-  function renderRiesgoG() {
+  function renderRiesgoArea() {
     const riesgos = g.riesgo_fuga || [];
     if (!riesgos.length) return '<div class="empty">Sin datos de riesgo aún.</div>';
     return riesgos.map(r=>{
@@ -414,33 +558,20 @@ function renderGlobal(data, areaId) {
       const ini = r.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
       return `<div class="riesgo-row">
         <div style="width:26px;height:26px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:white;flex-shrink:0;">${ini}</div>
-        <span class="riesgo-nombre">${r.nombre}${r.area?` <span style="font-size:9px;color:var(--subtle);">(${r.area})</span>`:''}</span>
+        <span class="riesgo-nombre">${r.nombre}</span>
         <div class="riesgo-dot" style="background:${color};"></div>
         <span style="font-size:10px;font-weight:600;color:${color};">${label}</span>
       </div>`;
     }).join('');
   }
 
-  const enpsColor2 = v => v===null?'var(--subtle)':v>=50?'#1a8a45':v>=0?'#d69e2e':'#e53e3e';
-  const areaTabs = `<div style="margin-bottom:16px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
-    <span style="font-size:10px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:0.4px;margin-right:6px;">Vista:</span>
-    <button class="area-tab ${areaId==='global'?'active':''}" onclick="renderGlobal(globalData,'global')">🌐 Apprecio</button>
-    ${areas.map(a=>`<button class="area-tab ${areaId===a?'active':''}" onclick="renderGlobal(globalData,'${a}')">${a}</button>`).join('')}
-  </div>`;
-
   const html = `
     ${areaTabs}
-    <div class="metrics-row">
-      <div class="metric-card"><div class="metric-label">Check-ins completados</div><div class="metric-val mv-red">${g.pct_checkins||0}<span style="font-size:16px;">%</span></div><div class="metric-sub">${g.checkins_completados} de ${g.total_colaboradores} colaboradores</div></div>
-      <div class="metric-card"><div class="metric-label">Accionables acordados vs cumplidos</div><div class="metric-val mv-purple">${g.accionables_cumplidos}<span style="font-size:14px;color:var(--subtle);font-weight:400;"> / ${g.accionables_total}</span></div><div class="metric-sub">${g.accionables_total>0?Math.round((g.accionables_cumplidos/g.accionables_total)*100):0}% tasa cumplimiento</div></div>
-      <div class="metric-card"><div class="metric-label">Performance promedio</div><div class="metric-val" style="color:${scoreColor(g.performance)};">${g.performance||'—'}</div><div class="metric-sub">escala 1 a 5</div></div>
-      <div class="metric-card"><div class="metric-label">eNPS</div><div class="metric-val" style="color:${enpsColor2(g.enps)};">${g.enps!==null?g.enps:'—'}</div><div class="metric-sub">-100 a +100</div></div>
-    </div>
-
+    ${metricsHTML}
     <div class="two-col">
-      <div class="card"><div class="card-title">Curva de performance</div>${renderCurvaG()}</div>
+      <div class="card"><div class="card-title">Curva de performance — ${areaId}</div>${renderCurvaArea()}</div>
       <div class="card">
-        <div class="card-title">Pilares — distribución acumulada</div>
+        <div class="card-title">Pilares — ${areaId}</div>
         ${pilarBarG('accountability','Accountability','🎯')}
         ${pilarBarG('productividad','Productividad','⚡')}
         ${pilarBarG('customer_centricity','Customer Centricity','🌟')}
@@ -450,10 +581,9 @@ function renderGlobal(data, areaId) {
         </div>
       </div>
     </div>
-
     <div class="two-col">
-      <div class="card"><div class="card-title">Nine Box — Desempeño vs Potencial</div>${renderNineBoxG()}</div>
-      <div class="card"><div class="card-title">Riesgo de fuga</div>${renderRiesgoG()}</div>
+      <div class="card"><div class="card-title">Nine Box — ${areaId}</div>${renderNineBoxG(g.nine_box||{})}</div>
+      <div class="card"><div class="card-title">Riesgo de fuga — ${areaId}</div>${renderRiesgoArea()}</div>
     </div>`;
 
   document.getElementById('loading').style.display = 'none';
@@ -739,7 +869,7 @@ function renderDashboard(data, rutActual) {
     const dots = curvaOrdenada.map((c,i)=>`
       <circle cx="${pad+i*xStep}" cy="${yPos(c.promedio)}" r="4" fill="${scoreColor(c.promedio)}"/>
       <text x="${pad+i*xStep}" y="${yPos(c.promedio)-8}" text-anchor="middle" font-size="9" font-weight="700" fill="${scoreColor(c.promedio)}">${c.promedio}</text>
-      <text x="${pad+i*xStep}" y="${H-4}" text-anchor="middle" font-size="8" fill="#999">${c.mes.charAt(0).toUpperCase()+c.mes.slice(0,3).slice(0,3)}</text>`).join('');
+      <text x="${pad+i*xStep}" y="${H-4}" text-anchor="middle" font-size="8" fill="#999">${c.mes.charAt(0).toUpperCase()+c.mes.slice(1,4)}</text>`).join('');
     return `<div class="curva-wrap"><svg viewBox="0 0 ${W} ${H}" class="curva-svg" xmlns="http://www.w3.org/2000/svg">
       <polygon points="${area}" fill="rgba(250,52,94,0.08)"/>
       <polyline points="${points}" fill="none" stroke="var(--red)" stroke-width="2" stroke-linejoin="round"/>
