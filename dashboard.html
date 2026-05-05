@@ -146,6 +146,17 @@
   .enps-detractores { background:#FA345E; }
   .enps-pasivos { background:#d69e2e; }
   .enps-promotores { background:var(--green); }
+  .tree-node { border-radius:10px;margin-bottom:6px;overflow:hidden;border:0.5px solid var(--border); }
+  .tree-node-header { display:flex;align-items:center;gap:10px;padding:10px 14px;background:white;cursor:pointer; }
+  .tree-node-header:hover { background:#fdf6f8; }
+  .tree-avatar { width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;flex-shrink:0; }
+  .tree-info { flex:1; }
+  .tree-nombre { font-size:12px;font-weight:700;color:var(--dark); }
+  .tree-sub { font-size:10px;color:var(--subtle);margin-top:1px; }
+  .tree-expand { width:22px;height:22px;border-radius:6px;border:0.5px solid var(--border);background:var(--gray);display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;flex-shrink:0;transition:transform 0.2s;font-family:monospace; }
+  .tree-expand.open { transform:rotate(90deg); }
+  .tree-children { padding:6px 0 6px 24px;background:#fafafa;border-top:0.5px solid var(--border); }
+  .tree-loading { padding:10px 14px;font-size:11px;color:var(--subtle);font-style:italic; }
   @media(max-width:768px){.metrics-row{grid-template-columns:1fr 1fr;}.two-col{grid-template-columns:1fr;}}
 </style>
 </head>
@@ -342,27 +353,98 @@ function renderDashboard(data) {
     </div>`;
   }
 
-  function colabRow(c) {
-    const mesesNombres = MESES_ORDEN;
-    const mesesCortos = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-    const dots = mesesCortos.map((mc,i) => {
-      const tiene = (c.meses||[]).some(mes=>mes.toLowerCase().includes(mesesNombres[i]));
-      return `<div class="dot ${tiene?'dot-ok':'dot-empty'}" title="${mc}"></div>`;
-    }).join('');
-    const initials = c.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
-    const sc = scoresPorColab[c.rut];
-    const perf = sc ? avg(sc.notas_perf) : null;
-    return `<tr onclick="verDetalle('${c.rut}')">
-      <td><div style="display:flex;align-items:center;gap:8px;">
-        <div style="width:28px;height:28px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0;">${initials}</div>
-        <div><div style="font-weight:600;font-size:11px;">${c.nombre}</div><div style="font-size:9px;color:var(--subtle);">${c.lider}</div></div>
-      </div></td>
-      <td><div class="checkin-dots">${dots}</div></td>
-      <td style="text-align:center;">${new Set(c.meses||[]).size}</td>
-      <td style="text-align:center;">${perf!==null?`<span class="score-pill" style="background:${scoreBg(perf)};color:${scoreColor(perf)};">${perf}</span>`:'—'}</td>
-      <td style="text-align:center;">${c.accionables_activos||0}</td>
-    </tr>`;
+  function renderEquipo() {
+    const liderRut = document.getElementById('lider-select').value;
+    const cont = document.getElementById('equipo-tree');
+    if (!cont) return;
+    cont.innerHTML = '<div class="tree-loading">Cargando equipo...</div>';
+    cargarNivel(liderRut, cont, 0);
   }
+
+  async function cargarNivel(rutLider, container, nivel) {
+    try {
+      const res = await fetch(`https://n8n.openip.cl/webhook/get-equipo?rut=${rutLider}`);
+      const data = await res.json();
+      const personas = data.colaboradores || [];
+      if (!personas.length) {
+        container.innerHTML = '<div class="tree-loading">Sin reportes directos.</div>';
+        return;
+      }
+      container.innerHTML = personas.map(p => buildTreeNode(p, nivel)).join('');
+    } catch(e) {
+      container.innerHTML = '<div class="tree-loading">Error al cargar.</div>';
+    }
+  }
+
+  function buildTreeNode(p, nivel) {
+    const initials = p.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
+    const sc = scoresPorColab[p.rut];
+    const perf = sc ? avg(sc.notas_perf) : null;
+    const perfBadge = perf!==null ? `<span class="score-pill" style="background:${scoreBg(perf)};color:${scoreColor(perf)};">⭐ ${perf}</span>` : '';
+    const areaLabel = [p.area, p.subarea1].filter(Boolean).join(' · ');
+    const bgColor = nivel===0?'var(--red)':nivel===1?'var(--purple)':'#3182ce';
+
+    if (p.es_lider) {
+      return `<div class="tree-node" id="node-${p.rut}">
+        <div class="tree-node-header" onclick="toggleNodo('${p.rut}', this)">
+          <div class="tree-avatar" style="background:${bgColor};">${initials}</div>
+          <div class="tree-info">
+            <div class="tree-nombre">${p.nombre} <span style="font-size:9px;color:var(--purple);font-weight:600;background:var(--purple-light);padding:1px 6px;border-radius:10px;margin-left:4px;">Líder</span></div>
+            <div class="tree-sub">${p.cargo} · ${areaLabel}</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            ${perfBadge}
+            <div class="tree-expand" id="expand-${p.rut}">▶</div>
+          </div>
+        </div>
+        <div class="tree-children" id="children-${p.rut}" style="display:none;">
+          <div class="tree-loading">Cargando equipo de ${p.nombre}...</div>
+        </div>
+      </div>`;
+    } else {
+      return `<div class="tree-node">
+        <div class="tree-node-header" onclick="verDetalle('${p.rut}')">
+          <div class="tree-avatar" style="background:${bgColor};">${initials}</div>
+          <div class="tree-info">
+            <div class="tree-nombre">${p.nombre}</div>
+            <div class="tree-sub">${p.cargo} · ${areaLabel}</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            ${perfBadge}
+            <span style="font-size:10px;color:var(--subtle);">Ver detalle →</span>
+          </div>
+        </div>
+      </div>`;
+    }
+  }
+
+  window.toggleNodo = async function(rut, headerEl) {
+    const childrenDiv = document.getElementById('children-' + rut);
+    const expandBtn = document.getElementById('expand-' + rut);
+    if (!childrenDiv) return;
+    const isOpen = childrenDiv.style.display !== 'none';
+    if (isOpen) {
+      childrenDiv.style.display = 'none';
+      expandBtn.classList.remove('open');
+    } else {
+      childrenDiv.style.display = 'block';
+      expandBtn.classList.add('open');
+      if (childrenDiv.innerHTML.includes('Cargando')) {
+        try {
+          const res = await fetch(`https://n8n.openip.cl/webhook/get-equipo?rut=${rut}`);
+          const data = await res.json();
+          const personas = data.colaboradores || [];
+          if (!personas.length) {
+            childrenDiv.innerHTML = '<div class="tree-loading">Sin reportes directos.</div>';
+          } else {
+            childrenDiv.innerHTML = '<div style="padding-top:6px;">' + personas.map(p => buildTreeNode(p, 1)).join('') + '</div>';
+          }
+        } catch(e) {
+          childrenDiv.innerHTML = '<div class="tree-loading">Error al cargar.</div>';
+        }
+      }
+    }
+  };
 
   function renderCurva() {
     const curvaOrdenada = sortMeses(curva.map(c=>c.mes)).map(mes=>curva.find(c=>c.mes===mes)).filter(Boolean);
@@ -395,6 +477,42 @@ function renderDashboard(data) {
     const wPas = Math.round((pasivos/total)*100);
     const wD = Math.round((detractores/total)*100);
     const color = enpsColor(enpsEquipo);
+
+    // Evolución mensual del eNPS
+    const bitacoraLista = data.bitacora_lista || [];
+    const enpsporMes = {};
+    bitacoraLista.forEach(b => {
+      if (!b.mes || b.engagement === null) return;
+      if (!enpsporMes[b.mes]) enpsporMes[b.mes] = [];
+      enpsporMes[b.mes].push(b.engagement);
+    });
+    const curvaENPS = sortMeses(Object.keys(enpsporMes)).map(mes => ({
+      mes, enps: calcENPS(enpsporMes[mes])
+    }));
+
+    let curvaHTML = '';
+    if (curvaENPS.length > 1) {
+      const W=300, H=60, pad=20;
+      const vals = curvaENPS.map(c=>c.enps);
+      const minV = Math.min(...vals)-10;
+      const maxV = Math.max(...vals)+10;
+      const xStep = (W-pad*2)/(curvaENPS.length-1);
+      const yPos = v => H-pad-((v-minV)/(maxV-minV))*(H-pad*2);
+      const points = curvaENPS.map((c,i)=>`${pad+i*xStep},${yPos(c.enps)}`).join(' ');
+      const dots = curvaENPS.map((c,i)=>`
+        <circle cx="${pad+i*xStep}" cy="${yPos(c.enps)}" r="3" fill="${enpsColor(c.enps)}"/>
+        <text x="${pad+i*xStep}" y="${yPos(c.enps)-6}" text-anchor="middle" font-size="8" font-weight="700" fill="${enpsColor(c.enps)}">${c.enps}</text>
+        <text x="${pad+i*xStep}" y="${H-2}" text-anchor="middle" font-size="7" fill="#999">${c.mes.substring(0,3)}</text>`).join('');
+      curvaHTML = `<div style="margin-top:12px;border-top:0.5px solid var(--border);padding-top:10px;">
+        <div style="font-size:9px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Evolución mensual eNPS</div>
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:60px;" xmlns="http://www.w3.org/2000/svg">
+          <line x1="${pad}" y1="${yPos(0)}" x2="${W-pad}" y2="${yPos(0)}" stroke="#e2e0e8" stroke-width="1" stroke-dasharray="3,3"/>
+          <polyline points="${points}" fill="none" stroke="var(--purple)" stroke-width="1.5" stroke-linejoin="round"/>
+          ${dots}
+        </svg>
+      </div>`;
+    }
+
     return `
       <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px;">
         <div style="font-size:36px;font-weight:800;color:${color};">${enpsEquipo}</div>
@@ -412,7 +530,8 @@ function renderDashboard(data) {
         <span style="color:#1a8a45;">■ Promotores (9-10): ${wP}%</span>
         <span style="color:#d69e2e;">■ Pasivos (7-8): ${wPas}%</span>
         <span style="color:#e53e3e;">■ Detractores (0-6): ${wD}%</span>
-      </div>`;
+      </div>
+      ${curvaHTML}`;
   }
 
   function renderNineBox() {
@@ -506,12 +625,8 @@ function renderDashboard(data) {
 
     <div class="two-col">
       <div class="card">
-        <div class="card-title">Equipo <span class="card-tag">clic para ver detalle</span></div>
-        ${colabs.length===0?'<div class="empty">No hay check-ins registrados.</div>':`
-        <table class="colab-table">
-          <thead><tr><th>Colaborador</th><th>Check-ins 2026</th><th style="text-align:center;">Meses</th><th style="text-align:center;">Performance</th><th style="text-align:center;">Accionables</th></tr></thead>
-          <tbody>${colabs.map(colabRow).join('')}</tbody>
-        </table>`}
+        <div class="card-title">Equipo <span class="card-tag">expandir líderes · clic colaborador para detalle</span></div>
+        <div id="equipo-tree"><div class="tree-loading">Selecciona un líder para ver el equipo.</div></div>
       </div>
       <div class="card">
         <div class="card-title">Pilares — distribución y score promedio</div>
@@ -552,6 +667,7 @@ function renderDashboard(data) {
   document.getElementById('loading').style.display = 'none';
   document.getElementById('dashboard-content').innerHTML = html;
   document.getElementById('dashboard-content').style.display = 'block';
+  renderEquipo();
 }
 
 function verDetalle(rut) {
@@ -595,18 +711,102 @@ function verDetalle(rut) {
   }
 
   const mesesUnicos = sortMeses([...new Set(colab.meses||[])]);
-  const timelineHTML = mesesUnicos.map(mes=>`
-    <div class="timeline-item">
+  const accionablesPorMes = dashboardData.accionables_por_colab_mes || {};
+  const bitacoraListaColab = (dashboardData.bitacora_lista||[]).filter(b=>b.rut_colaborador===rut);
+  const bitacoraListaOrdenada = sortMeses(bitacoraListaColab.map(b=>b.mes).filter((m,i,a)=>a.indexOf(m)===i)).map(mes=>bitacoraListaColab.find(b=>b.mes===mes)).filter(Boolean);
+
+  // Timeline con accionables por mes
+  const timelineHTML = mesesUnicos.map(mes=>{
+    const key = `${rut}__${mes}`;
+    const acMes = accionablesPorMes[key] || { cumplidos_tiempo:0, atrasados:0, activos:0 };
+    return `<div class="timeline-item">
       <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
       <div class="tl-content">
         <div class="tl-mes">${mes.charAt(0).toUpperCase()+mes.slice(1)}</div>
         <div class="tl-tags">
           ${p.accountability.f>0?'<span class="tl-tag tt-f">Accountability F</span>':''}
           ${p.productividad.o>0?'<span class="tl-tag tt-o">Productividad O</span>':''}
-          ${acColab.length>0?`<span class="tl-tag tt-a">${acColab.length} accionable${acColab.length>1?'s':''}</span>`:''}
+          ${acMes.cumplidos_tiempo>0?`<span class="tl-tag" style="background:#e6f9ee;color:#1a8a45;">✓ ${acMes.cumplidos_tiempo} cumplido${acMes.cumplidos_tiempo>1?'s':''}</span>`:''}
+          ${acMes.atrasados>0?`<span class="tl-tag" style="background:#fff0f3;color:#FA345E;">⚠ ${acMes.atrasados} atrasado${acMes.atrasados>1?'s':''}</span>`:''}
+          ${acMes.activos>0?`<span class="tl-tag tt-a">${acMes.activos} activo${acMes.activos>1?'s':''}</span>`:''}
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
+
+  // Curva mensual riesgo de fuga
+  const riesgoValores = { 'bajo':1, 'medio':2, 'alto':3 };
+  const riesgoColors = { 1:'var(--green)', 2:'#d69e2e', 3:'var(--red)' };
+  let curvaRiesgoHTML = '<div class="empty">Sin datos de riesgo aún.</div>';
+  if (bitacoraListaOrdenada.length > 1) {
+    const W=300, H=60, pad=20;
+    const vals = bitacoraListaOrdenada.map(b=>riesgoValores[b.riesgo]||1);
+    const xStep = (W-pad*2)/(bitacoraListaOrdenada.length-1);
+    const yPos = v => H-pad-((v-1)/(3-1))*(H-pad*2);
+    const points = bitacoraListaOrdenada.map((b,i)=>`${pad+i*xStep},${yPos(riesgoValores[b.riesgo]||1)}`).join(' ');
+    const dots = bitacoraListaOrdenada.map((b,i)=>{
+      const v = riesgoValores[b.riesgo]||1;
+      const lbl = b.riesgo==='bajo'?'Bajo':b.riesgo==='medio'?'Medio':'Alto';
+      return `<circle cx="${pad+i*xStep}" cy="${yPos(v)}" r="4" fill="${riesgoColors[v]}"/>
+        <text x="${pad+i*xStep}" y="${yPos(v)-7}" text-anchor="middle" font-size="8" font-weight="700" fill="${riesgoColors[v]}">${lbl}</text>
+        <text x="${pad+i*xStep}" y="${H-2}" text-anchor="middle" font-size="7" fill="#999">${b.mes.substring(0,3)}</text>`;
+    }).join('');
+    curvaRiesgoHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:60px;" xmlns="http://www.w3.org/2000/svg">
+      <polyline points="${points}" fill="none" stroke="var(--red)" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="4,2"/>
+      ${dots}</svg>`;
+  } else if (bitacoraListaOrdenada.length === 1) {
+    const r = bitacoraListaOrdenada[0].riesgo;
+    const c = r==='bajo'?'var(--green)':r==='medio'?'#d69e2e':'var(--red)';
+    const l = r==='bajo'?'Bajo':r==='medio'?'Medio':'Alto';
+    curvaRiesgoHTML = `<div style="font-size:14px;font-weight:700;color:${c};">● ${l}</div><div style="font-size:9px;color:var(--subtle);margin-top:4px;">Solo 1 registro — se necesitan más meses para ver evolución</div>`;
+  }
+
+  // Evolución eNPS individual
+  let curvaENPSIndHTML = '<div class="empty">Sin suficientes datos aún.</div>';
+  if (bitacoraListaOrdenada.length > 0) {
+    const enpsInd = calcENPS(bt.engagement||[]);
+    const total = bt.engagement?.length||0;
+    const p9 = (bt.engagement||[]).filter(v=>v>=9).length;
+    const p7 = (bt.engagement||[]).filter(v=>v>=7&&v<=8).length;
+    const p0 = (bt.engagement||[]).filter(v=>v<=6).length;
+    const color = enpsColor(enpsInd);
+
+    let curvaLinea = '';
+    if (bitacoraListaOrdenada.length > 1) {
+      const W=300, H=60, pad=20;
+      const vals = bitacoraListaOrdenada.map(b=>b.engagement||0);
+      const minV = Math.max(0,Math.min(...vals)-1);
+      const maxV = Math.min(10,Math.max(...vals)+1);
+      const xStep = (W-pad*2)/(bitacoraListaOrdenada.length-1);
+      const yPos = v => H-pad-((v-minV)/(maxV-minV))*(H-pad*2);
+      const points = bitacoraListaOrdenada.map((b,i)=>`${pad+i*xStep},${yPos(b.engagement||0)}`).join(' ');
+      const dots = bitacoraListaOrdenada.map((b,i)=>`
+        <circle cx="${pad+i*xStep}" cy="${yPos(b.engagement||0)}" r="3" fill="var(--purple)"/>
+        <text x="${pad+i*xStep}" y="${yPos(b.engagement||0)-6}" text-anchor="middle" font-size="8" font-weight="700" fill="var(--purple)">${b.engagement}</text>
+        <text x="${pad+i*xStep}" y="${H-2}" text-anchor="middle" font-size="7" fill="#999">${b.mes.substring(0,3)}</text>`).join('');
+      curvaLinea = `<div style="margin-top:10px;"><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:60px;" xmlns="http://www.w3.org/2000/svg">
+        <polyline points="${points}" fill="none" stroke="var(--purple)" stroke-width="1.5" stroke-linejoin="round"/>
+        ${dots}</svg></div>`;
+    }
+
+    curvaENPSIndHTML = `
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:8px;">
+        <div style="font-size:32px;font-weight:800;color:${color};">${enpsInd}</div>
+        <div><div style="font-size:10px;font-weight:700;color:${color};">eNPS individual</div>
+        <div style="font-size:9px;color:var(--subtle);">Basado en ${total} registro${total!==1?'s':''}</div></div>
+      </div>
+      ${total>0?`<div class="enps-bar">
+        <div class="enps-promotores" style="width:${Math.round(p9/total*100)}%"></div>
+        <div class="enps-pasivos" style="width:${Math.round(p7/total*100)}%"></div>
+        <div class="enps-detractores" style="width:${Math.round(p0/total*100)}%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--subtle);margin-top:4px;">
+        <span style="color:#1a8a45;">■ Promotores: ${p9}</span>
+        <span style="color:#d69e2e;">■ Pasivos: ${p7}</span>
+        <span style="color:#e53e3e;">■ Detractores: ${p0}</span>
+      </div>`:''}
+      ${curvaLinea}`;
+  }
 
   const html = `
     <button class="detail-back" onclick="volverDashboard()">← Volver al equipo</button>
@@ -654,18 +854,15 @@ function verDetalle(rut) {
       </div>
     </div>
 
-    <div class="full-col card">
-      <div class="card-title">Engagement individual — eNPS</div>
-      ${enpsIndividual!==null?`
-        <div style="display:flex;align-items:center;gap:16px;margin-bottom:8px;">
-          <div style="font-size:36px;font-weight:800;color:${enpsColor(enpsIndividual)};">${enpsIndividual}</div>
-          <div style="font-size:10px;color:var(--subtle);">Basado en ${bt.engagement?.length||0} registro${(bt.engagement?.length||0)!==1?'s':''}</div>
-        </div>
-        <div class="enps-bar">
-          ${(()=>{const total=bt.engagement?.length||0;if(!total)return '';const p9=bt.engagement.filter(v=>v>=9).length;const p7=bt.engagement.filter(v=>v>=7&&v<=8).length;const p0=bt.engagement.filter(v=>v<=6).length;return `<div class="enps-promotores" style="width:${Math.round(p9/total*100)}%"></div><div class="enps-pasivos" style="width:${Math.round(p7/total*100)}%"></div><div class="enps-detractores" style="width:${Math.round(p0/total*100)}%"></div>`;})()}
-        </div>
-        <div style="font-size:9px;color:var(--subtle);margin-top:4px;">Promedio engagement: ${avg(bt.engagement)||'—'}/10</div>
-      `:'<div class="empty">Sin datos de engagement aún.</div>'}
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">Engagement individual — eNPS</div>
+        ${curvaENPSIndHTML}
+      </div>
+      <div class="card">
+        <div class="card-title">Evolución del riesgo de fuga</div>
+        ${curvaRiesgoHTML}
+      </div>
     </div>
 
     ${acColab.length>0?`<div class="full-col card"><div class="card-title">Accionables activos</div>
