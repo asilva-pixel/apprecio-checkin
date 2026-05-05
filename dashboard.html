@@ -283,17 +283,61 @@ function handleCredentialResponse(response) {
 function logout() { google.accounts.id.disableAutoSelect(); location.reload(); }
 
 async function iniciarApp() {
+  document.getElementById('loading').style.display = 'flex';
   try {
-    const res = await fetch(WEBHOOK_LIDERES);
-    const data = await res.json();
-    const sel = document.getElementById('lider-select');
-    sel.innerHTML = '<option value="">— Selecciona tu nombre —</option>';
-    (data.lideres||[]).forEach(l => {
-      const opt = document.createElement('option');
-      opt.value = l.rut; opt.textContent = l.nombre;
-      sel.appendChild(opt);
-    });
-    document.getElementById('loading').style.display = 'none';
+    // Obtener rol del usuario logueado
+    const resColab = await fetch(`https://n8n.openip.cl/webhook/get-colaborador?email=${encodeURIComponent(usuarioActual.email)}`);
+    const datosUsuario = await resColab.json();
+
+    if (!datosUsuario.encontrado) {
+      document.getElementById('loading').innerHTML = '<p style="color:var(--red);">Tu usuario no está registrado en el sistema. Contacta a RRHH.</p>';
+      return;
+    }
+
+    const rol = datosUsuario.rol;
+
+    // Colaborador → redirigir al formulario
+    if (rol === 'colaborador') {
+      window.location.href = 'checkin-colaborador.html';
+      return;
+    }
+
+    // Admin → mostrar selector de líder con todos los líderes
+    if (rol === 'admin') {
+      const resLideres = await fetch(WEBHOOK_LIDERES);
+      const dataLideres = await resLideres.json();
+      const sel = document.getElementById('lider-select');
+      sel.innerHTML = '<option value="">— Selecciona un líder —</option>';
+      (dataLideres.lideres||[]).forEach(l => {
+        const opt = document.createElement('option');
+        opt.value = l.rut;
+        opt.textContent = l.nombre;
+        if (l.rut === datosUsuario.rut) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      sel.style.display = 'block';
+      document.getElementById('loading').style.display = 'none';
+      // Auto-cargar el dashboard del admin con su propio RUT
+      if (datosUsuario.rut) {
+        document.getElementById('lider-select').value = datosUsuario.rut;
+        cargarDashboard();
+      }
+      return;
+    }
+
+    // Líder → cargar su propio dashboard directo, ocultar selector
+    if (rol === 'lider') {
+      document.getElementById('lider-select').style.display = 'none';
+      document.getElementById('lider-select').value = datosUsuario.rut;
+      // Agregar label con su nombre en vez del selector
+      const labelLider = document.createElement('span');
+      labelLider.style.cssText = 'font-size:12px;font-weight:600;color:rgba(255,255,255,0.9);';
+      labelLider.textContent = datosUsuario.nombre;
+      document.getElementById('lider-select').parentNode.insertBefore(labelLider, document.getElementById('lider-select'));
+      cargarDashboard();
+      return;
+    }
+
   } catch(e) {
     document.getElementById('loading').innerHTML = '<p>Error al cargar. Recarga la página.</p>';
   }
@@ -302,7 +346,7 @@ async function iniciarApp() {
 async function cargarDashboard() {
   const rut = document.getElementById('lider-select').value;
   if (!rut) { document.getElementById('dashboard-content').style.display='none'; return; }
-  navStack = []; // reset navegación
+  navStack = [];
   const mes = document.getElementById('mes-select').value;
   document.getElementById('loading').style.display = 'flex';
   document.getElementById('dashboard-content').style.display = 'none';
