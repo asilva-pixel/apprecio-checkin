@@ -311,7 +311,7 @@ async function iniciarApp() {
     selMes.appendChild(opt);
   });
 
-  // Buscar datos del colaborador
+  // Buscar datos del colaborador y verificar rol
   try {
     const res = await fetch(`${WEBHOOK_COLABORADOR}?email=${encodeURIComponent(usuarioActual.email)}`);
     const data = await res.json();
@@ -321,6 +321,13 @@ async function iniciarApp() {
       return;
     }
 
+    // Líder o Admin → redirigir al formulario del líder
+    if (data.rol === 'lider' || data.rol === 'admin') {
+      window.location.href = 'index.html';
+      return;
+    }
+
+    // Colaborador → continuar con el formulario normal
     colaboradorData = data;
     document.getElementById('user-name').textContent = data.nombre;
     document.getElementById('user-lider').textContent = 'Líder: ' + data.lider_nombre;
