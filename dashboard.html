@@ -413,38 +413,79 @@ function renderDashboard(data, rutActual) {
 
   async function renderEquipoTree(rutLider) {
     const cont = document.getElementById('equipo-tree');
-    if (!cont) return;
+    const reportesCont = document.getElementById('reportes-directos-table');
+
     try {
       const res = await fetch(`https://n8n.openip.cl/webhook/get-equipo?rut=${rutLider}`);
       const data = await res.json();
       const personas = data.colaboradores || [];
-      const lideres = personas.filter(p=>p.es_lider);
-      if (!lideres.length) {
-        cont.innerHTML = '<div class="tree-loading">Este líder no tiene sub-equipos.</div>';
-        return;
+
+      // Actualizar tabla de reportes directos con TODOS (tengan o no check-ins)
+      if (reportesCont) {
+        if (!personas.length) {
+          reportesCont.innerHTML = '<div class="empty">Sin reportes directos registrados.</div>';
+        } else {
+          const mesesNombres = MESES_ORDEN;
+          const mesesCortos = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+          const rows = personas.map(p => {
+            const colabConCheckin = colabs.find(c => c.rut === p.rut);
+            const mesesColab = colabConCheckin?.meses || [];
+            const dots = mesesCortos.map((mc,i) => {
+              const tiene = mesesColab.some(mes=>mes.toLowerCase().includes(mesesNombres[i]));
+              return `<div class="dot ${tiene?'dot-ok':'dot-empty'}" title="${mc}"></div>`;
+            }).join('');
+            const initials = p.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
+            const sc = scoresPorColab[p.rut];
+            const perf = sc ? avg(sc.notas_perf) : null;
+            const areaLabel = [p.area, p.subarea1].filter(Boolean).join(' · ');
+            return `<tr onclick="verDetalle('${p.rut}')">
+              <td><div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:28px;height:28px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0;">${initials}</div>
+                <div><div style="font-weight:600;font-size:11px;">${p.nombre}</div><div style="font-size:9px;color:var(--subtle);">${p.cargo} · ${areaLabel}</div></div>
+              </div></td>
+              <td><div class="checkin-dots">${dots}</div></td>
+              <td style="text-align:center;">${new Set(mesesColab).size}</td>
+              <td style="text-align:center;">${perf!==null?`<span class="score-pill" style="background:${scoreBg(perf)};color:${scoreColor(perf)};">${perf}</span>`:'—'}</td>
+              <td style="text-align:center;">${colabConCheckin?.accionables_activos||0}</td>
+            </tr>`;
+          }).join('');
+          reportesCont.innerHTML = `<table class="colab-table">
+            <thead><tr><th>Colaborador</th><th>Check-ins 2026</th><th style="text-align:center;">Meses</th><th style="text-align:center;">Performance</th><th style="text-align:center;">Accionables</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+        }
       }
-      cont.innerHTML = lideres.map(p => {
-        const initials = p.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
-        const areaLabel = [p.area, p.subarea1].filter(Boolean).join(' · ');
-        const sc = dashboardData?.scores_por_colab?.[p.rut];
-        const perf = sc ? avg(sc.notas_perf) : null;
-        const perfBadge = perf!==null ? `<span class="score-pill" style="background:${scoreBg(perf)};color:${scoreColor(perf)};">⭐ ${perf}</span>` : '';
-        return `<div class="tree-node">
-          <div class="tree-node-header" onclick="abrirEquipo('${p.rut}','${p.nombre.replace(/'/g,"\\'")}')">
-            <div class="tree-avatar" style="background:var(--purple);">${initials}</div>
-            <div class="tree-info">
-              <div class="tree-nombre">${p.nombre} <span style="font-size:9px;color:var(--purple);font-weight:600;background:var(--purple-light);padding:1px 6px;border-radius:10px;margin-left:4px;">Líder</span></div>
-              <div class="tree-sub">${p.cargo} · ${areaLabel}</div>
-            </div>
-            <div style="display:flex;gap:6px;align-items:center;">
-              ${perfBadge}
-              <span style="font-size:10px;color:var(--red);font-weight:600;">Ver equipo →</span>
-            </div>
-          </div>
-        </div>`;
-      }).join('');
+
+      // Sección Equipos — solo líderes
+      if (cont) {
+        const lideres = personas.filter(p=>p.es_lider);
+        if (!lideres.length) {
+          cont.innerHTML = '<div class="tree-loading">Este líder no tiene sub-equipos.</div>';
+        } else {
+          cont.innerHTML = lideres.map(p => {
+            const initials = p.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
+            const areaLabel = [p.area, p.subarea1].filter(Boolean).join(' · ');
+            const sc = dashboardData?.scores_por_colab?.[p.rut];
+            const perf = sc ? avg(sc.notas_perf) : null;
+            const perfBadge = perf!==null ? `<span class="score-pill" style="background:${scoreBg(perf)};color:${scoreColor(perf)};">⭐ ${perf}</span>` : '';
+            return `<div class="tree-node">
+              <div class="tree-node-header" onclick="abrirEquipo('${p.rut}','${p.nombre.replace(/'/g,"\\'")}')">
+                <div class="tree-avatar" style="background:var(--purple);">${initials}</div>
+                <div class="tree-info">
+                  <div class="tree-nombre">${p.nombre} <span style="font-size:9px;color:var(--purple);font-weight:600;background:var(--purple-light);padding:1px 6px;border-radius:10px;margin-left:4px;">Líder</span></div>
+                  <div class="tree-sub">${p.cargo} · ${areaLabel}</div>
+                </div>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  ${perfBadge}
+                  <span style="font-size:10px;color:var(--red);font-weight:600;">Ver equipo →</span>
+                </div>
+              </div>
+            </div>`;
+          }).join('');
+        }
+      }
     } catch(e) {
-      cont.innerHTML = '<div class="tree-loading">Error al cargar equipos.</div>';
+      if (cont) cont.innerHTML = '<div class="tree-loading">Error al cargar equipos.</div>';
     }
   }
 
@@ -716,11 +757,7 @@ function renderDashboard(data, rutActual) {
     <div class="two-col">
       <div class="card">
         <div class="card-title">Reportes directos <span class="card-tag">clic para ver detalle individual</span></div>
-        ${colabs.length===0?'<div class="empty">No hay check-ins registrados.</div>':`
-        <table class="colab-table">
-          <thead><tr><th>Colaborador</th><th>Check-ins 2026</th><th style="text-align:center;">Meses</th><th style="text-align:center;">Performance</th><th style="text-align:center;">Accionables</th></tr></thead>
-          <tbody>${colabs.map(colabRow).join('')}</tbody>
-        </table>`}
+        <div id="reportes-directos-table"><div class="tree-loading">Cargando reportes directos...</div></div>
       </div>
       <div class="card">
         <div class="card-title">Pilares — distribución y score promedio</div>
