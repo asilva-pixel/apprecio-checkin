@@ -1,1585 +1,280 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard de Desempeño · Apprecio</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<style>
-  :root { --red:#FA345E;--purple:#8B85D4;--purple-light:#f0eef8;--green:#1a8a45;--green-light:#e6f9ee;--yellow:#b07a00;--yellow-light:#fff8e6;--dark:#1a1a1a;--gray:#f7f6f8;--border:#e2e0e8;--subtle:#999; }
-  * { box-sizing:border-box;margin:0;padding:0; }
-  body { font-family:'Montserrat',sans-serif;background:var(--gray);min-height:100vh;color:var(--dark); }
-  .login-screen { display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;padding:20px; }
-  .login-card { background:white;border-radius:16px;border:0.5px solid var(--border);padding:40px 36px;max-width:400px;width:100%;text-align:center; }
-  .login-logo { width:48px;height:48px;border-radius:12px;background:var(--red);margin:0 auto 20px;display:flex;align-items:center;justify-content:center; }
-  .login-logo svg { width:24px;height:24px;fill:white; }
-  .login-title { font-size:18px;font-weight:700;margin-bottom:6px; }
-  .login-sub { font-size:12px;color:var(--subtle);margin-bottom:28px;line-height:1.6; }
-  .login-error { background:#fff0f3;border-radius:8px;padding:10px 14px;font-size:12px;color:var(--red);margin-top:16px;display:none; }
-  .header { background:var(--red);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden; }
-  .header-orn { position:absolute;right:0;top:0;pointer-events:none; }
-  .header-left { position:relative;z-index:1; }
-  .header-label { font-size:10px;font-weight:600;color:rgba(255,255,255,0.7);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px; }
-  .header-title { font-size:16px;font-weight:700;color:white; }
-  .header-right { position:relative;z-index:1;display:flex;align-items:center;gap:10px;flex-wrap:wrap; }
-  .header-select { font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:var(--red);background:white;border:none;border-radius:8px;padding:7px 12px;cursor:pointer; }
-  .user-name { font-size:12px;font-weight:600;color:rgba(255,255,255,0.9); }
-  .logout-btn { font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;color:var(--red);background:white;border:none;border-radius:6px;padding:5px 10px;cursor:pointer; }
-  .spinner { width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin 0.8s linear infinite; }
-  @keyframes spin { to{transform:rotate(360deg);} }
-  .loading-screen { display:flex;align-items:center;justify-content:center;min-height:60vh;flex-direction:column;gap:16px; }
-  .loading-screen p { font-size:13px;color:var(--subtle); }
-  .main { max-width:1100px;margin:0 auto;padding:20px 16px 60px; }
-  .metrics-row { display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px; }
-  .metric-card { background:white;border-radius:12px;border:0.5px solid var(--border);padding:14px 16px; }
-  .metric-label { font-size:9px;font-weight:600;color:var(--subtle);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px; }
-  .metric-val { font-size:28px;font-weight:700;line-height:1; }
-  .metric-sub { font-size:10px;color:var(--subtle);margin-top:4px; }
-  .mv-red{color:var(--red);} .mv-purple{color:var(--purple);} .mv-green{color:var(--green);} .mv-yellow{color:var(--yellow);}
-  .two-col { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px; }
-  .full-col { margin-bottom:14px; }
-  .card { background:white;border-radius:12px;border:0.5px solid var(--border);padding:16px 18px; }
-  .card-title { font-size:12px;font-weight:700;color:var(--dark);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between; }
-  .card-tag { font-size:9px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--purple-light);color:var(--purple); }
-  .pilar-row { margin-bottom:12px; }
-  .pilar-label { display:flex;align-items:center;justify-content:space-between;margin-bottom:5px; }
-  .pilar-name { font-size:11px;font-weight:600;color:var(--dark); }
-  .pilar-counts { font-size:10px;color:var(--subtle); }
-  .pilar-bar { height:8px;border-radius:4px;background:var(--gray);overflow:hidden;display:flex; }
-  .bar-f{background:var(--green);} .bar-o{background:var(--red);}
-  .bar-legend { display:flex;gap:12px;margin-top:8px; }
-  .bar-legend-item { display:flex;align-items:center;gap:4px;font-size:9px;color:var(--subtle); }
-  .bar-legend-dot { width:7px;height:7px;border-radius:2px; }
-  .colab-table { width:100%;border-collapse:collapse; }
-  .colab-table th { padding:7px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:0.4px;border-bottom:0.5px solid var(--border);background:var(--gray); }
-  .colab-table td { padding:9px 8px;border-bottom:0.5px solid #f5f5f5;font-size:11px;color:var(--dark); }
-  .colab-table tr:last-child td { border-bottom:none; }
-  .colab-table tr { cursor:pointer; }
-  .colab-table tr:hover td { background:#fdf6f8; }
-  .checkin-dots { display:flex;gap:3px; }
-  .dot { width:8px;height:8px;border-radius:50%; }
-  .dot-ok{background:var(--green);} .dot-empty{background:var(--border);} .dot-justified{background:var(--yellow);}
-  .badge-sm { display:inline-block;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:600; }
-  .b-green{background:var(--green-light);color:var(--green);}
-  .b-red{background:#fff0f3;color:var(--red);}
-  .b-yellow{background:var(--yellow-light);color:var(--yellow);}
-  .b-purple{background:var(--purple-light);color:var(--purple);}
-  .ac-table { width:100%;border-collapse:collapse; }
-  .ac-table th { padding:7px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:0.4px;border-bottom:0.5px solid var(--border);background:var(--gray); }
-  .ac-table td { padding:9px 8px;border-bottom:0.5px solid #f5f5f5;font-size:11px; }
-  .ac-table tr:last-child td { border-bottom:none; }
-  .empty { text-align:center;padding:20px;font-size:11px;color:var(--subtle);font-style:italic; }
-  .detail-back { display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--red);background:none;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;margin-bottom:14px;padding:0; }
-  .detail-header { display:flex;align-items:center;gap:12px;margin-bottom:16px; }
-  .detail-avatar { width:44px;height:44px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:white;flex-shrink:0; }
-  .detail-name { font-size:15px;font-weight:700; }
-  .detail-sub { font-size:11px;color:var(--subtle);margin-top:2px; }
-  .btn-bitacora { font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;color:var(--purple);background:var(--purple-light);border:0.5px solid var(--purple);border-radius:8px;padding:7px 14px;cursor:pointer; }
-  .btn-ausencia { font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;color:var(--yellow);background:var(--yellow-light);border:0.5px solid var(--yellow);border-radius:8px;padding:7px 14px;cursor:pointer;margin-left:8px; }
-  .timeline-item { display:flex;gap:12px;margin-bottom:14px; }
-  .tl-left { display:flex;flex-direction:column;align-items:center; }
-  .tl-dot { width:9px;height:9px;border-radius:50%;background:var(--red);flex-shrink:0;margin-top:3px; }
-  .tl-line { width:1px;background:var(--border);flex:1;margin-top:3px; }
-  .tl-content { flex:1; }
-  .tl-mes { font-size:11px;font-weight:700;color:var(--red);margin-bottom:3px; }
-  .tl-tags { display:flex;gap:5px;flex-wrap:wrap;margin-top:3px; }
-  .tl-tag { font-size:9px;font-weight:600;padding:2px 7px;border-radius:20px; }
-  .tt-f{background:var(--green-light);color:var(--green);}
-  .tt-o{background:#fff0f3;color:var(--red);}
-  .tt-a{background:var(--purple-light);color:var(--purple);}
-  .curva-wrap { position:relative;height:100px; }
-  .curva-svg { width:100%;height:100%; }
-  .score-pill { display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700; }
-  /* Nine Box */
-  .nb-wrapper { display:flex;gap:6px; }
-  .nb-y-axis { display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:8px 0; }
-  .nb-y-label-main { writing-mode:vertical-rl;transform:rotate(180deg);font-size:9px;color:var(--subtle);font-weight:700;letter-spacing:1px;text-transform:uppercase; }
-  .nb-y-levels { display:flex;flex-direction:column;justify-content:space-around;height:100%;font-size:8px;color:var(--subtle);font-weight:600;text-align:right;gap:0; }
-  .nb-main { flex:1; }
-  .nb-grid { display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,80px);gap:4px; }
-  .nb-cell { border-radius:8px;padding:8px;display:flex;flex-direction:column;position:relative; }
-  .nb-cell-label { font-size:9px;font-weight:700;line-height:1.3;margin-bottom:4px; }
-  .nb-personas { display:flex;flex-wrap:wrap;gap:3px;margin-top:auto; }
-  .nb-persona { width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;cursor:pointer;border:1.5px solid rgba(0,0,0,0.15); }
-  .nb-x-labels { display:flex;justify-content:space-around;margin-top:4px;font-size:9px;color:var(--subtle);font-weight:600; }
-  .nb-x-title { text-align:center;font-size:9px;color:var(--subtle);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px; }
-  /* Riesgo */
-  .riesgo-row { display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid #f5f5f5;cursor:pointer; }
-  .riesgo-row:last-child { border-bottom:none; }
-  .riesgo-nombre { font-size:11px;font-weight:600;flex:1; }
-  .riesgo-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
-  /* Modal */
-  .modal-overlay { position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px; }
-  .modal { background:white;border-radius:16px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;padding:24px; }
-  .modal-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:18px; }
-  .modal-title { font-size:14px;font-weight:700; }
-  .modal-close { background:none;border:none;font-size:20px;cursor:pointer;color:var(--subtle); }
-  .modal-section { margin-bottom:18px; }
-  .modal-label { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;display:block; }
-  .modal-sub { font-size:11px;color:var(--subtle);margin-bottom:8px;line-height:1.6;font-style:italic; }
-  .likert-scale { display:flex;gap:3px;margin-bottom:6px; }
-  .likert-btn { width:30px;height:30px;border-radius:6px;border:0.5px solid var(--border);background:var(--gray);font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;cursor:pointer;color:var(--subtle); }
-  .likert-btn.sel { border-color:var(--purple);background:var(--purple-light);color:var(--purple); }
-  .likert-labels { display:flex;justify-content:space-between;font-size:9px;color:var(--subtle);margin-bottom:10px; }
-  .riesgo-opts { display:flex;gap:8px; }
-  .riesgo-opt { flex:1;border:0.5px solid var(--border);border-radius:8px;padding:9px;text-align:center;cursor:pointer;background:var(--gray);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;color:var(--subtle); }
-  .riesgo-opt.sel-bajo{border-color:var(--green);background:var(--green-light);color:var(--green);}
-  .riesgo-opt.sel-medio{border-color:var(--yellow);background:var(--yellow-light);color:var(--yellow);}
-  .riesgo-opt.sel-alto{border-color:var(--red);background:#fff0f3;color:var(--red);}
-  .potencial-opts { display:flex;gap:8px; }
-  .pot-opt { flex:1;border:0.5px solid var(--border);border-radius:8px;padding:9px;text-align:center;cursor:pointer;background:var(--gray);font-family:'Montserrat',sans-serif; }
-  .pot-opt.sel-1{border-color:#4A90D9;background:#EBF4FF;}
-  .pot-opt.sel-2{border-color:var(--yellow);background:var(--yellow-light);}
-  .pot-opt.sel-3{border-color:var(--purple);background:var(--purple-light);}
-  .pot-num { font-size:15px;font-weight:800;display:block;margin-bottom:2px; }
-  .pot-name { font-size:9px;font-weight:700;display:block;margin-bottom:2px; }
-  .pot-desc { font-size:8px;color:var(--subtle);line-height:1.4; }
-  .modal-textarea { font-family:'Montserrat',sans-serif;font-size:12px;padding:9px 11px;border:0.5px solid var(--border);border-radius:8px;width:100%;resize:none;line-height:1.6; }
-  .modal-input { font-family:'Montserrat',sans-serif;font-size:12px;padding:9px 11px;border:0.5px solid var(--border);border-radius:8px;width:100%; }
-  .radio-opts { display:flex;gap:8px;margin-bottom:10px; }
-  .radio-opt { flex:1;border:0.5px solid var(--border);border-radius:8px;padding:9px;text-align:center;cursor:pointer;background:var(--gray);font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;color:var(--subtle); }
-  .radio-opt.sel { border-color:var(--yellow);background:var(--yellow-light);color:var(--yellow); }
-  .btn-guardar-modal { width:100%;padding:12px;border-radius:10px;border:none;background:var(--purple);font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:white;cursor:pointer;margin-top:6px; }
-  .btn-guardar-modal:disabled{opacity:0.5;cursor:not-allowed;}
-  .enps-bar { height:12px;border-radius:6px;background:var(--gray);overflow:hidden;display:flex;margin:8px 0; }
-  .enps-detractores { background:#FA345E; }
-  .enps-pasivos { background:#d69e2e; }
-  .enps-promotores { background:var(--green); }
-  .tree-node { border-radius:10px;margin-bottom:6px;overflow:hidden;border:0.5px solid var(--border); }
-  .tree-node-header { display:flex;align-items:center;gap:10px;padding:10px 14px;background:white;cursor:pointer; }
-  .tree-node-header:hover { background:#fdf6f8; }
-  .tree-avatar { width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;flex-shrink:0; }
-  .tree-info { flex:1; }
-  .tree-nombre { font-size:12px;font-weight:700;color:var(--dark); }
-  .tree-sub { font-size:10px;color:var(--subtle);margin-top:1px; }
-  .tree-expand { width:22px;height:22px;border-radius:6px;border:0.5px solid var(--border);background:var(--gray);display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;flex-shrink:0;transition:transform 0.2s;font-family:monospace; }
-  .tree-expand.open { transform:rotate(90deg); }
-  .tree-children { padding:6px 0 6px 24px;background:#fafafa;border-top:0.5px solid var(--border); }
-  .tree-loading { padding:10px 14px;font-size:11px;color:var(--subtle);font-style:italic; }
-  .breadcrumb { display:flex;align-items:center;gap:6px;margin-bottom:16px;flex-wrap:wrap; }
-  .breadcrumb-item { font-size:11px;font-weight:600;color:var(--red);cursor:pointer;background:none;border:none;font-family:'Montserrat',sans-serif;padding:0; }
-  .breadcrumb-item:hover { text-decoration:underline; }
-  .breadcrumb-sep { font-size:11px;color:var(--subtle); }
-  .breadcrumb-current { font-size:11px;font-weight:700;color:var(--dark); }
-  .tab-btn { font-family:'Montserrat',sans-serif;font-size:11px;font-weight:600;padding:6px 14px;border-radius:20px;border:0.5px solid rgba(255,255,255,0.4);background:transparent;color:rgba(255,255,255,0.8);cursor:pointer; }
-  .tab-btn.active { background:white;color:var(--red);border-color:white; }
-  .area-tab { display:inline-block;padding:5px 12px;border-radius:20px;border:0.5px solid var(--border);font-size:11px;font-weight:600;cursor:pointer;background:white;font-family:'Montserrat',sans-serif;color:var(--subtle);margin:3px; }
-  .area-tab.active { background:var(--red);color:white;border-color:var(--red); }
-  .area-tab:hover { border-color:var(--red);color:var(--red); }
-  @media(max-width:768px){.metrics-row{grid-template-columns:1fr 1fr;}.two-col{grid-template-columns:1fr;}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>People Analytics Pro - 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #F8F9FA;
+      --card: #FFFFFF;
+      --red: #E30613;
+      --text: #1D1D1B;
+      --subtle: #707070;
+      --border: #E0E0E0;
+      --gray: #F2F2F2;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 80px; }
+
+    /* Header & Selects */
+    .header { background: var(--card); padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top:0; z-index:100; }
+    .header-select { border: none; font-family: 'Montserrat', sans-serif; font-size: 16px; font-weight: 700; color: var(--red); cursor: pointer; outline: none; background: transparent; }
+
+    /* Layout */
+    .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+    .card { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); }
+    .grid-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
+    
+    /* Stats */
+    .stat-val { font-size: 24px; font-weight: 700; color: var(--red); }
+    .stat-label { font-size: 11px; color: var(--subtle); text-transform: uppercase; font-weight: 600; margin-top: 4px; }
+
+    /* Nine Box Unificado */
+    .nb-wrapper { display: flex; gap: 10px; margin-top: 15px; }
+    .nb-axis-y-container { display: flex; gap: 8px; }
+    .nb-y-title { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 10px; font-weight: 700; color: var(--subtle); text-align: center; }
+    .nb-y-labels { display: flex; flex-direction: column; justify-content: space-around; font-size: 9px; color: var(--subtle); font-weight: 600; }
+    
+    .nb-grid-main { flex: 1; }
+    .nb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: var(--border); border: 4px solid var(--border); border-radius: 4px; aspect-ratio: 1.2 / 1; }
+    .nb-cell { background: white; padding: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+    .nb-cell-label { font-size: 7px; text-align: center; color: var(--subtle); font-weight: 600; margin-bottom: 2px; }
+    .nb-cell-val { font-size: 14px; font-weight: 700; color: var(--text); }
+    
+    .nb-x-labels { display: flex; justify-content: space-around; margin-top: 6px; font-size: 9px; color: var(--subtle); font-weight: 600; }
+    .nb-x-title { text-align: center; font-size: 10px; font-weight: 700; color: var(--subtle); margin-top: 4px; text-transform: uppercase; }
+
+    /* Table */
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th { text-align: left; font-size: 10px; color: var(--subtle); text-transform: uppercase; padding: 10px; border-bottom: 1px solid var(--border); }
+    td { padding: 12px 10px; font-size: 13px; border-bottom: 1px solid var(--border); }
+    .btn-ver { color: var(--red); font-weight: 700; cursor: pointer; border: none; background: none; font-family: 'Montserrat'; }
+
+    /* Timeline Detalle Individual */
+    .timeline { margin-top: 20px; }
+    .timeline-item { display: flex; gap: 15px; margin-bottom: 0; }
+    .tl-left { display: flex; flex-direction: column; align-items: center; width: 20px; }
+    .tl-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--border); z-index: 2; }
+    .tl-line { width: 2px; flex: 1; background: var(--border); margin: 4px 0; }
+    .tl-content { padding-bottom: 25px; flex: 1; }
+    .tl-mes { font-weight: 700; font-size: 14px; }
+    .tl-tag { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-top: 5px; background: var(--gray); color: var(--subtle); }
+    .tt-f { background: #E3061320; color: var(--red); }
+
+    /* Nav */
+    .nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid var(--border); padding: 10px 0; }
+    .nav-item { flex: 1; text-align: center; font-size: 10px; font-weight: 700; color: var(--subtle); cursor: pointer; }
+    .nav-item.active { color: var(--red); }
+    
+    #loading { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.9); display:none; justify-content:center; align-items:center; z-index:1000; font-weight:700; }
+  </style>
 </head>
 <body>
 
-<div id="login-screen" class="login-screen">
-  <div class="login-card">
-    <div class="login-logo"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg></div>
-    <div class="login-title">Dashboard de Desempeño</div>
-    <div class="login-sub">Inicia sesión con tu cuenta de Apprecio.</div>
-    <div id="g_id_signin"></div>
-    <div class="login-error" id="login-error">Solo cuentas de Apprecio o Dcanje pueden acceder.</div>
-  </div>
-</div>
+  <div id="loading">CARGANDO...</div>
 
-<div id="app" style="display:none;">
-  <div class="header">
-    <div class="header-orn"><svg width="100" height="70" viewBox="0 0 100 70" fill="none"><rect x="70" width="30" height="35" fill="rgba(255,255,255,0.10)"/><rect x="70" y="35" width="30" height="35" fill="rgba(255,255,255,0.14)"/></svg></div>
-    <div class="header-left">
-      <div class="header-label">Feedback Continuo Apprecio</div>
-      <div class="header-title">Dashboard de Desempeño</div>
+  <div id="view-global">
+    <div class="header">
+      <div id="selector-periodo-global"></div>
+      <select id="selector-area-global" class="header-select" onchange="cambiarArea(this.value)">
+        <option value="TODAS">TODAS LAS ÁREAS</option>
+      </select>
     </div>
-    <div class="header-right">
-      <div id="tabs-admin" style="display:none;gap:6px;display:none;">
-        <button class="tab-btn active" id="tab-mi-equipo" onclick="switchTab('mi-equipo')">Mi Equipo</button>
-        <button class="tab-btn" id="tab-global" onclick="switchTab('global')">Apprecio Global</button>
-      </div>
-      <select class="header-select" id="lider-select" onchange="cargarDashboard()"><option value="">— Selecciona tu nombre —</option></select>
-      <select class="header-select" id="mes-select" onchange="cargarDashboard()" style="display:none;"><option value="">Acumulado</option></select>
-      <span class="user-name" id="user-name"></span>
-      <button class="logout-btn" onclick="logout()">Salir</button>
+    <div class="container" id="global-content"></div>
+  </div>
+
+  <div id="view-equipo" style="display:none;">
+    <div class="header">
+        <span style="font-weight: 700; color: var(--red);">MI EQUIPO</span>
     </div>
+    <div class="container" id="equipo-content"></div>
   </div>
-  <div class="main">
-    <div class="loading-screen" id="loading"><div class="spinner"></div><p>Cargando dashboard...</p></div>
-    <div id="dashboard-content" style="display:none;"></div>
-    <div id="detail-content" style="display:none;"></div>
-    <div id="global-content" style="display:none;"></div>
-  </div>
-</div>
 
-<script>
-const CLIENT_ID = '589779415783-vomns28ralb0efttkj5no91ggo7rtoj3.apps.googleusercontent.com';
-const DOMINIOS = ['apprecio.com','dcanje.com'];
-const WEBHOOK_LIDERES = 'https://n8n.openip.cl/webhook/get-lideres';
-const WEBHOOK_DASHBOARD = 'https://n8n.openip.cl/webhook/get-dashboard';
-const WEBHOOK_GLOBAL = 'https://n8n.openip.cl/webhook/get-global';
-const WEBHOOK_JUSTIFICACION = 'https://n8n.openip.cl/webhook/guardar-justificacion';
-
-const MESES_ORDEN = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-
-const ACCESO_COMPLETO = ['12605423-8','15563184-8','16939271-4']; // Jaime, Seba Rojas, Ana María
-
-let usuarioActual = null;
-let dashboardData = null;
-let reportesDirectosCache = []; // cache de todos los reportes directos del directorio
-
-// Estado de navegación
-let navStack = []; // [{rut, nombre, tipo: 'org'|'equipo'|'detalle'}]
-
-// Escala de colores 1-5: rojo, amarillo, verde, azul, púrpura
-function scoreColor(s) {
-  if (s === null || s === undefined) return 'var(--subtle)';
-  if (s < 1.5) return '#e53e3e';
-  if (s < 2.5) return '#d69e2e';
-  if (s < 3.5) return '#1a8a45';
-  if (s < 4.5) return '#3182ce';
-  return '#8B85D4';
-}
-function scoreBg(s) {
-  if (s === null || s === undefined) return 'var(--gray)';
-  if (s < 1.5) return '#fff0f3';
-  if (s < 2.5) return '#fff8e6';
-  if (s < 3.5) return '#e6f9ee';
-  if (s < 4.5) return '#EBF4FF';
-  return '#f0eef8';
-}
-
-function avg(arr) {
-  if (!arr?.length) return null;
-  return Math.round((arr.reduce((a,b)=>a+b,0)/arr.length)*10)/10;
-}
-
-function calcENPS(engArr) {
-  if (!engArr?.length) return null;
-  const promotores = engArr.filter(v=>v>=9).length;
-  const detractores = engArr.filter(v=>v<=6).length;
-  return Math.round(((promotores - detractores) / engArr.length) * 100);
-}
-
-function enpsColor(v) {
-  if (v === null) return 'var(--subtle)';
-  if (v >= 50) return '#1a8a45';
-  if (v >= 0) return '#d69e2e';
-  return '#e53e3e';
-}
-
-function sortMeses(meses) {
-  return [...meses].sort((a,b) => {
-    const ai = MESES_ORDEN.findIndex(m => a.toLowerCase().includes(m));
-    const bi = MESES_ORDEN.findIndex(m => b.toLowerCase().includes(m));
-    if (ai !== bi) return ai - bi;
-    const ay = parseInt(a.match(/\d{4}/)?.[0]||'0');
-    const by = parseInt(b.match(/\d{4}/)?.[0]||'0');
-    return ay - by;
-  });
-}
-
-window.onload = function() {
-  google.accounts.id.initialize({ client_id: CLIENT_ID, callback: handleCredentialResponse, auto_select: false });
-  google.accounts.id.renderButton(document.getElementById('g_id_signin'), { theme:'outline', size:'large', text:'signin_with', locale:'es', width:280 });
-};
-
-function handleCredentialResponse(response) {
-  const payload = JSON.parse(atob(response.credential.split('.')[1]));
-  const email = payload.email || '';
-  const dominio = email.split('@')[1] || '';
-  if (!DOMINIOS.includes(dominio)) { document.getElementById('login-error').style.display = 'block'; return; }
-  usuarioActual = { email, nombre: payload.name };
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  document.getElementById('user-name').textContent = decodeURIComponent(escape(payload.given_name));
-  iniciarApp();
-}
-
-function logout() { google.accounts.id.disableAutoSelect(); location.reload(); }
-
-let tabActual = 'mi-equipo';
-let globalData = null;
-let areaActiva = 'global';
-let mesGlobalActivo = 'acumulado';
-
-function switchTab(tab) {
-  tabActual = tab;
-  document.getElementById('tab-mi-equipo')?.classList.toggle('active', tab === 'mi-equipo');
-  document.getElementById('tab-global')?.classList.toggle('active', tab === 'global');
-  if (tab === 'mi-equipo') {
-    document.getElementById('dashboard-content').style.display = dashboardData ? 'block' : 'none';
-    document.getElementById('global-content').style.display = 'none';
-    document.getElementById('detail-content').style.display = 'none';
-    document.getElementById('mes-select').style.display = 'block';
-    document.getElementById('lider-select').style.display = '';
-  } else {
-    document.getElementById('dashboard-content').style.display = 'none';
-    document.getElementById('detail-content').style.display = 'none';
-    document.getElementById('mes-select').style.display = 'none';
-    document.getElementById('lider-select').style.display = 'none';
-    // Si ya tenemos datos globales, solo re-renderizar sin recargar
-    if (globalData) {
-      renderGlobal(globalData, areaActiva);
-    } else {
-      cargarGlobal(mesGlobalActivo);
-    }
-  }
-}
-
-async function cargarGlobal(mes) {
-  mesGlobalActivo = mes || 'acumulado';
-  document.getElementById('loading').style.display = 'flex';
-  document.getElementById('global-content').style.display = 'none';
-  try {
-    let url = WEBHOOK_GLOBAL;
-    if (mesGlobalActivo && mesGlobalActivo !== 'acumulado') url += '?mes=' + encodeURIComponent(mesGlobalActivo);
-    const res = await fetch(url);
-    globalData = await res.json();
-    renderGlobal(globalData, areaActiva);
-  } catch(e) {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('global-content').innerHTML = '<div style="text-align:center;padding:40px;font-size:13px;color:var(--subtle);">Error al cargar datos globales. Intenta de nuevo.</div>';
-    document.getElementById('global-content').style.display = 'block';
-  }
-}
-
-function renderGlobal(data, areaId) {
-  areaActiva = areaId;
-  const areas = data.areas || [];
-  const esGlobal = areaId === 'global';
-  const g = esGlobal ? data.global : data.por_area[areaId];
-  if (!g) return;
-
-  const enpsColor2 = v => v===null?'var(--subtle)':v>=50?'#1a8a45':v>=0?'#d69e2e':'#e53e3e';
-
-  const areaTabs = `<div style="margin-bottom:16px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
-    <span style="font-size:10px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:0.4px;margin-right:6px;">Vista:</span>
-    <button class="area-tab ${esGlobal?'active':''}" onclick="renderGlobal(globalData,'global')">🌐 Apprecio</button>
-    ${areas.map(a=>`<button class="area-tab ${areaId===a?'active':''}" onclick="renderGlobal(globalData,'${a}')">${a}</button>`).join('')}
-  </div>
-  <div style="margin-bottom:16px;display:flex;align-items:center;gap:10px;">
-    <span style="font-size:10px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:0.4px;">Período:</span>
-    <select onchange="cargarGlobal(this.value)" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:var(--dark);background:white;border:0.5px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;">
-      <option value="acumulado" ${!data.mes_filtro||data.mes_filtro==='acumulado'?'selected':''}>Acumulado</option>
-      ${(data.meses_disponibles||[]).map(m=>`<option value="${m}" ${data.mes_filtro===m?'selected':''}>${m.charAt(0).toUpperCase()+m.slice(1)}</option>`).join('')}
-    </select>
-    ${data.mes_filtro&&data.mes_filtro!=='acumulado'?`<span class="badge-sm b-purple">Mostrando: ${data.mes_filtro}</span>`:''}
-  </div>`;
-
-  const metricsHTML = `<div class="metrics-row">
-    <div class="metric-card"><div class="metric-label">Check-ins completados</div><div class="metric-val mv-red">${g.pct_checkins||0}<span style="font-size:16px;">%</span></div><div class="metric-sub">${g.checkins_completados} de ${g.total_colaboradores} colaboradores</div></div>
-    <div class="metric-card"><div class="metric-label">Accionables acordados vs cumplidos</div><div class="metric-val mv-purple">${g.accionables_cumplidos}<span style="font-size:14px;color:var(--subtle);font-weight:400;"> / ${g.accionables_total}</span></div><div class="metric-sub">${g.accionables_total>0?Math.round((g.accionables_cumplidos/g.accionables_total)*100):0}% tasa</div></div>
-    <div class="metric-card"><div class="metric-label">Performance promedio</div><div class="metric-val" style="color:${scoreColor(g.performance)};">${g.performance||'—'}</div><div class="metric-sub">escala 1 a 5</div></div>
-    <div class="metric-card"><div class="metric-label">eNPS</div><div class="metric-val" style="color:${enpsColor2(g.enps)};">${g.enps!==null?g.enps:'—'}</div><div class="metric-sub">-100 a +100</div></div>
-  </div>`;
-
-  // Nine Box grande — mismo diseño que el dashboard normal
-  function renderNineBoxG(nb) {
-    const cells = [
-      {label:'Evaluar rol',bg:'#fefce8',color:'#92400e'},
-      {label:'Colaborador clave',bg:'#f0fdf4',color:'#166534'},
-      {label:'Talento',bg:'#dcfce7',color:'#14532d'},
-      {label:'Plan de acción',bg:'#fff7ed',color:'#9a3412'},
-      {label:'En desarrollo',bg:'#fffbeb',color:'#92400e'},
-      {label:'Destacado',bg:'#f0fdf4',color:'#166534'},
-      {label:'En riesgo',bg:'#fef2f2',color:'#991b1b'},
-      {label:'Colaborador efectivo',bg:'#fff7ed',color:'#9a3412'},
-      {label:'Especialista',bg:'#fefce8',color:'#92400e'},
-    ];
-    const cellsHTML = cells.map((cell,i)=>{
-      const ps = nb[i] || [];
-      const psHTML = ps.map(p=>{
-        const ini = p.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
-        const tooltip = p.nombre + (p.area?' ('+p.area+')':'');
-        return `<div class="nb-persona" style="background:white;color:${cell.color};border-color:${cell.color};width:22px;height:22px;font-size:7px;" title="${tooltip}">${ini}</div>`;
-      }).join('');
-      const count = ps.length;
-      return `<div class="nb-cell" style="background:${cell.bg};min-height:120px;">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%;">
-          <div class="nb-cell-label" style="color:${cell.color};font-size:9px;">${cell.label}</div>
-          ${count>0?`<span style="font-size:9px;font-weight:700;color:${cell.color};background:white;padding:1px 5px;border-radius:10px;flex-shrink:0;">${count}</span>`:''}
-        </div>
-        <div class="nb-personas" style="margin-top:6px;">${psHTML}</div>
-      </div>`;
-    }).join('');
-    return `<div class="nb-wrapper">
-      <div style="display:flex;align-items:center;margin-right:4px;"><div class="nb-y-label-main">Potencial</div></div>
-      <div style="flex:1;">
-        <div style="font-size:9px;color:var(--subtle);text-align:center;margin-bottom:4px;">Alto · Medio · Bajo</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">${cellsHTML}</div>
-        <div class="nb-x-labels"><span>Bajo</span><span>Medio</span><span>Alto</span></div>
-        <div class="nb-axis-title">Performance</div>
-      </div>
-    </div>`;
-  }
-
-  // ── VISTA GLOBAL: comparación entre áreas ──────────────────────────
-  if (esGlobal) {
-    // Performance por área — barras horizontales
-    const perfBarrasHTML = areas.map(a=>{
-      const pa = data.por_area[a];
-      const perf = pa?.performance;
-      const pct = perf ? (perf/5)*100 : 0;
-      return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid #f5f5f5;">
-        <span style="font-size:10px;font-weight:600;width:90px;flex-shrink:0;">${a}</span>
-        <div style="flex:1;height:8px;border-radius:4px;background:var(--gray);overflow:hidden;">
-          <div style="height:100%;width:${pct}%;background:${scoreColor(perf)};border-radius:4px;"></div>
-        </div>
-        <span style="font-size:10px;font-weight:700;color:${scoreColor(perf)};width:28px;text-align:right;">${perf||'—'}</span>
-      </div>`;
-    }).join('');
-
-    // Check-ins por área
-    const checkinAreasHTML = areas.map(a=>{
-      const pa = data.por_area[a];
-      const pct = pa?.pct_checkins || 0;
-      const color = pct>=80?'var(--green)':pct>=50?'#d69e2e':'var(--red)';
-      return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid #f5f5f5;">
-        <span style="font-size:10px;font-weight:600;width:90px;flex-shrink:0;">${a}</span>
-        <div style="flex:1;height:8px;border-radius:4px;background:var(--gray);overflow:hidden;">
-          <div style="height:100%;width:${pct}%;background:${color};border-radius:4px;"></div>
-        </div>
-        <span style="font-size:10px;font-weight:700;color:${color};width:32px;text-align:right;">${pct}%</span>
-      </div>`;
-    }).join('');
-
-    // eNPS por área
-    const enpsAreasHTML = areas.map(a=>{
-      const pa = data.por_area[a];
-      const enps = pa?.enps;
-      const color = enpsColor2(enps);
-      const pct = enps!==null?((enps+100)/200)*100:0;
-      return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid #f5f5f5;">
-        <span style="font-size:10px;font-weight:600;width:90px;flex-shrink:0;">${a}</span>
-        <div style="flex:1;height:8px;border-radius:4px;background:var(--gray);overflow:hidden;">
-          ${enps!==null?`<div style="height:100%;width:${pct}%;background:${color};border-radius:4px;"></div>`:''}
-        </div>
-        <span style="font-size:10px;font-weight:700;color:${color};width:36px;text-align:right;">${enps!==null?enps:'—'}</span>
-      </div>`;
-    }).join('');
-
-    // Pilares por área — comparación
-    function pilaresAreaHTML(pilar, nombre, icono) {
-      return `<div style="margin-bottom:14px;">
-        <div style="font-size:11px;font-weight:700;margin-bottom:6px;">${icono} ${nombre}</div>
-        ${areas.map(a=>{
-          const pa = data.por_area[a];
-          const p = pa?.pilares?.[pilar] || {f:0,o:0};
-          const total = p.f+p.o;
-          const wF = total>0?Math.round((p.f/total)*100):0;
-          const wO = total>0?Math.round((p.o/total)*100):0;
-          if (!total) return '';
-          return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-            <span style="font-size:9px;color:var(--subtle);width:80px;text-align:right;flex-shrink:0;">${a}</span>
-            <div style="flex:1;height:7px;border-radius:4px;background:var(--gray);overflow:hidden;display:flex;">
-              <div style="background:var(--green);width:${wF}%;"></div>
-              <div style="background:var(--red);width:${wO}%;"></div>
-            </div>
-            <span style="font-size:9px;color:var(--subtle);width:40px;">${p.f}F·${p.o}O</span>
-          </div>`;
-        }).join('')}
-      </div>`;
-    }
-
-    // Riesgo por área — semáforo
-    const riesgoAreasHTML = areas.map(a=>{
-      const pa = data.por_area[a];
-      const riesgos = pa?.riesgo_fuga || [];
-      const bajo = riesgos.filter(r=>r.riesgo==='bajo').length;
-      const medio = riesgos.filter(r=>r.riesgo==='medio').length;
-      const alto = riesgos.filter(r=>r.riesgo==='alto').length;
-      if (!riesgos.length) return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:0.5px solid #f5f5f5;">
-        <span style="font-size:11px;font-weight:600;flex:1;">${a}</span>
-        <span style="font-size:10px;color:var(--subtle);">Sin datos</span>
-      </div>`;
-      return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:0.5px solid #f5f5f5;">
-        <span style="font-size:11px;font-weight:600;flex:1;">${a}</span>
-        ${alto>0?`<span class="badge-sm b-red">🔴 ${alto} alto</span>`:''}
-        ${medio>0?`<span class="badge-sm b-yellow">🟡 ${medio} medio</span>`:''}
-        ${bajo>0?`<span class="badge-sm b-green">🟢 ${bajo} bajo</span>`:''}
-      </div>`;
-    }).join('');
-
-    const html = `
-      ${areaTabs}
-      ${metricsHTML}
-      <div class="two-col">
-        <div class="card"><div class="card-title">Performance promedio por área</div>${perfBarrasHTML}</div>
-        <div class="card"><div class="card-title">Check-ins completados por área</div>${checkinAreasHTML}</div>
-      </div>
-      <div class="two-col">
-        <div class="card"><div class="card-title">eNPS por área</div>${enpsAreasHTML}</div>
-        <div class="card"><div class="card-title">Riesgo de fuga por área</div>${riesgoAreasHTML}</div>
-      </div>
-      <div class="full-col card">
-        <div class="card-title">Pilares por área — distribución comparada</div>
-        ${pilaresAreaHTML('accountability','Accountability','🎯')}
-        ${pilaresAreaHTML('productividad','Productividad','⚡')}
-        ${pilaresAreaHTML('customer_centricity','Customer Centricity','🌟')}
-        <div class="bar-legend">
-          <div class="bar-legend-item"><div class="bar-legend-dot" style="background:var(--green);"></div>Fortaleza</div>
-          <div class="bar-legend-item"><div class="bar-legend-dot" style="background:var(--red);"></div>Oportunidad</div>
-        </div>
-      </div>
-      <div class="full-col card">
-        <div class="card-title">Nine Box — Toda la organización <span class="card-tag">hover para ver nombre y área</span></div>
-        ${renderNineBoxG(g.nine_box||{})}
-      </div>`;
-
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('global-content').innerHTML = html;
-    document.getElementById('global-content').style.display = 'block';
-    return;
-  }
-
-  // ── VISTA POR ÁREA ────────────────────────────────────────────────
-  function pilarBarG(pilar, nombre, icono) {
-    const p = g.pilares[pilar] || {f:0,o:0};
-    const total = p.f + p.o;
-    const wF = total > 0 ? Math.round((p.f/total)*100) : 0;
-    const wO = total > 0 ? Math.round((p.o/total)*100) : 0;
-    return `<div class="pilar-row">
-      <div class="pilar-label">
-        <span class="pilar-name">${icono} ${nombre}</span>
-        <span class="pilar-counts">${p.f}F · ${p.o}O</span>
-      </div>
-      <div class="pilar-bar"><div class="bar-f" style="width:${wF}%"></div><div class="bar-o" style="width:${wO}%"></div></div>
-    </div>`;
-  }
-
-  function renderCurvaArea() {
-    const curva = g.curva_performance || [];
-    if (!curva.length) return '<div class="empty">Sin datos aún.</div>';
-    const W=400,H=90,pad=28;
-    const vals = curva.map(c=>c.promedio);
-    const minV = Math.max(0,Math.min(...vals)-0.5);
-    const maxV = Math.min(5,Math.max(...vals)+0.5);
-    const xStep = curva.length>1?(W-pad*2)/(curva.length-1):0;
-    const yPos = v => H-pad-((v-minV)/(maxV-minV))*(H-pad*2);
-    const points = curva.map((c,i)=>`${pad+i*xStep},${yPos(c.promedio)}`).join(' ');
-    const areaPath = `${pad},${H-pad} ${points} ${pad+(curva.length-1)*xStep},${H-pad}`;
-    const dots = curva.map((c,i)=>{
-      // Fix: usar solo los primeros 3 caracteres del mes sin repetir la primera letra
-      const mesAbrev = c.mes.charAt(0).toUpperCase() + c.mes.slice(1,4);
-      return `<circle cx="${pad+i*xStep}" cy="${yPos(c.promedio)}" r="4" fill="${scoreColor(c.promedio)}"/>
-        <text x="${pad+i*xStep}" y="${yPos(c.promedio)-8}" text-anchor="middle" font-size="9" font-weight="700" fill="${scoreColor(c.promedio)}">${c.promedio}</text>
-        <text x="${pad+i*xStep}" y="${H-4}" text-anchor="middle" font-size="8" fill="#999">${mesAbrev}</text>`;
-    }).join('');
-    return `<div class="curva-wrap"><svg viewBox="0 0 ${W} ${H}" class="curva-svg" xmlns="http://www.w3.org/2000/svg">
-      <polygon points="${areaPath}" fill="rgba(250,52,94,0.08)"/>
-      <polyline points="${points}" fill="none" stroke="var(--red)" stroke-width="2" stroke-linejoin="round"/>
-      ${dots}</svg></div>`;
-  }
-
-  function renderRiesgoArea() {
-    const riesgos = g.riesgo_fuga || [];
-    if (!riesgos.length) return '<div class="empty">Sin datos de riesgo aún.</div>';
-    return riesgos.map(r=>{
-      const color = r.riesgo==='bajo'?'var(--green)':r.riesgo==='medio'?'#d69e2e':'var(--red)';
-      const label = r.riesgo==='bajo'?'Bajo':r.riesgo==='medio'?'Medio':'Alto';
-      const ini = r.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
-      return `<div class="riesgo-row">
-        <div style="width:26px;height:26px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:white;flex-shrink:0;">${ini}</div>
-        <span class="riesgo-nombre">${r.nombre}</span>
-        <div class="riesgo-dot" style="background:${color};"></div>
-        <span style="font-size:10px;font-weight:600;color:${color};">${label}</span>
-      </div>`;
-    }).join('');
-  }
-
-  const html = `
-    ${areaTabs}
-    ${metricsHTML}
-    <div class="two-col">
-      <div class="card"><div class="card-title">Curva de performance — ${areaId}</div>${renderCurvaArea()}</div>
-      <div class="card">
-        <div class="card-title">Pilares — ${areaId}</div>
-        ${pilarBarG('accountability','Accountability','🎯')}
-        ${pilarBarG('productividad','Productividad','⚡')}
-        ${pilarBarG('customer_centricity','Customer Centricity','🌟')}
-        <div class="bar-legend">
-          <div class="bar-legend-item"><div class="bar-legend-dot" style="background:var(--green);"></div>Fortaleza</div>
-          <div class="bar-legend-item"><div class="bar-legend-dot" style="background:var(--red);"></div>Oportunidad</div>
-        </div>
-      </div>
+  <div id="view-detalle" style="display:none;">
+    <div class="header">
+      <button onclick="irAEquipo()" style="border:none; background:none; font-weight:700; cursor:pointer;">← VOLVER</button>
+      <span id="detalle-nombre" style="font-weight:700; color:var(--red);"></span>
     </div>
-    <div class="two-col">
-      <div class="card"><div class="card-title">Nine Box — ${areaId}</div>${renderNineBoxG(g.nine_box||{})}</div>
-      <div class="card"><div class="card-title">Riesgo de fuga — ${areaId}</div>${renderRiesgoArea()}</div>
-    </div>`;
+    <div class="container" id="detail-content"></div>
+  </div>
 
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('global-content').innerHTML = html;
-  document.getElementById('global-content').style.display = 'block';
-}
+  <nav class="nav">
+    <div class="nav-item active" onclick="showTab('global')">GLOBAL</div>
+    <div class="nav-item" onclick="showTab('equipo')">MI EQUIPO</div>
+  </nav>
 
-async function iniciarApp() {
-  document.getElementById('loading').style.display = 'flex';
-  try {
-    // Obtener rol del usuario logueado
-    const resColab = await fetch(`https://n8n.openip.cl/webhook/get-colaborador?email=${encodeURIComponent(usuarioActual.email)}`);
-    const datosUsuario = await resColab.json();
+  <script>
+    // CONFIGURACIÓN
+    const WEBHOOK_DASHBOARD = "https://script.google.com/macros/s/AKfycbyC0qO6Y_Y1G67rL4hA6D_fV8jE-72a39-Y0MIdL3oE5mX65_H3EaY8mH63M2B3-78/exec"; // Reemplazar con el tuyo
+    const WEBHOOK_GLOBAL = "https://script.google.com/macros/s/AKfycbzL5n82L6N2z_A9Y7_E58J9M3N2_6L_Y8M32B3M2B-Y2M3/exec"; // Reemplazar con el tuyo
+    
+    const MESES_ORDEN = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    
+    let globalData = null;
+    let dashboardData = null;
+    let mesGlobalActivo = "Acumulado";
+    let areaActiva = "TODAS";
 
-    if (!datosUsuario.encontrado) {
-      document.getElementById('loading').innerHTML = '<p style="color:var(--red);">Tu usuario no está registrado en el sistema. Contacta a RRHH.</p>';
-      return;
-    }
-
-    const rol = datosUsuario.rol;
-
-    // Colaborador → redirigir al formulario
-    if (rol === 'colaborador') {
-      window.location.href = 'checkin-colaborador.html';
-      return;
-    }
-
-    // Admin → mostrar selector de líder con todos los líderes
-    if (rol === 'admin') {
-      // Mostrar tabs de navegación
-      const tabsDiv = document.getElementById('tabs-admin');
-      if (tabsDiv) tabsDiv.style.display = 'flex';
-
-      const resLideres = await fetch(WEBHOOK_LIDERES);
-      const dataLideres = await resLideres.json();
-      const sel = document.getElementById('lider-select');
-      sel.innerHTML = '<option value="">— Selecciona un líder —</option>';
-      (dataLideres.lideres||[]).forEach(l => {
-        const opt = document.createElement('option');
-        opt.value = l.rut;
-        opt.textContent = l.nombre;
-        if (l.rut === datosUsuario.rut) opt.selected = true;
-        sel.appendChild(opt);
-      });
-      sel.style.display = 'block';
+    async function cargarGlobal(mes = "Acumulado") {
+      mesGlobalActivo = mes;
+      document.getElementById('loading').style.display = 'flex';
+      try {
+        const resp = await fetch(`${WEBHOOK_GLOBAL}?mes=${encodeURIComponent(mes)}`);
+        globalData = await resp.json();
+        renderGlobal();
+      } catch (e) { console.error(e); }
       document.getElementById('loading').style.display = 'none';
-      // Auto-cargar el dashboard del admin con su propio RUT
-      if (datosUsuario.rut) {
-        document.getElementById('lider-select').value = datosUsuario.rut;
-        cargarDashboard();
+    }
+
+    async function cargarEquipo() {
+      document.getElementById('loading').style.display = 'flex';
+      try {
+        const resp = await fetch(WEBHOOK_DASHBOARD);
+        dashboardData = await resp.json();
+        renderEquipo();
+      } catch (e) { console.error(e); }
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    function renderGlobal() {
+      const container = document.getElementById('global-content');
+      const d = areaActiva === "TODAS" ? globalData.totales : globalData.por_area[areaActiva];
+      
+      // Actualizar Selector Período
+      const mesesSelect = MESES_ORDEN.map(m => `${m} 2026`);
+      document.getElementById('selector-periodo-global').innerHTML = `
+        <select class="header-select" onchange="cargarGlobal(this.value)">
+          <option value="Acumulado" ${mesGlobalActivo === 'Acumulado' ? 'selected' : ''}>ACUMULADO 2026</option>
+          ${mesesSelect.map(m => `<option value="${m}" ${mesGlobalActivo === m ? 'selected' : ''}>${m.toUpperCase()}</option>`).join('')}
+        </select>
+      `;
+
+      // Actualizar Selector Áreas si es la primera carga
+      const selArea = document.getElementById('selector-area-global');
+      if(selArea.options.length <= 1) {
+        Object.keys(globalData.por_area).forEach(a => {
+            const opt = document.createElement('option');
+            opt.value = a; opt.innerText = a;
+            selArea.appendChild(opt);
+        });
       }
-      return;
-    }
 
-    // Líder → cargar su propio dashboard directo, ocultar selector
-    if (rol === 'lider') {
-      document.getElementById('lider-select').style.display = 'none';
-      document.getElementById('lider-select').value = datosUsuario.rut;
-      // Agregar label con su nombre en vez del selector
-      const labelLider = document.createElement('span');
-      labelLider.style.cssText = 'font-size:12px;font-weight:600;color:rgba(255,255,255,0.9);';
-      labelLider.textContent = datosUsuario.nombre;
-      document.getElementById('lider-select').parentNode.insertBefore(labelLider, document.getElementById('lider-select'));
-      cargarDashboard();
-      return;
-    }
-
-  } catch(e) {
-    document.getElementById('loading').innerHTML = '<p>Error al cargar. Recarga la página.</p>';
-  }
-}
-
-async function cargarDashboard() {
-  const rut = document.getElementById('lider-select').value;
-  if (!rut) { document.getElementById('dashboard-content').style.display='none'; return; }
-  navStack = [];
-  const mes = document.getElementById('mes-select').value;
-  document.getElementById('loading').style.display = 'flex';
-  document.getElementById('dashboard-content').style.display = 'none';
-  document.getElementById('detail-content').style.display = 'none';
-  try {
-    let url = WEBHOOK_DASHBOARD + '?rut_lider=' + rut;
-    if (mes) url += '&mes=' + encodeURIComponent(mes);
-    const res = await fetch(url);
-    dashboardData = await res.json();
-    const selMes = document.getElementById('mes-select');
-    const mesActual = selMes.value;
-    selMes.innerHTML = '<option value="">Acumulado</option>';
-    const mesesOrdenados = sortMeses(dashboardData.meses_disponibles||[]);
-    mesesOrdenados.forEach(m => {
-      const opt = document.createElement('option');
-      opt.value = m; opt.textContent = m.charAt(0).toUpperCase()+m.slice(1);
-      if (m === mesActual) opt.selected = true;
-      selMes.appendChild(opt);
-    });
-    selMes.style.display = 'block';
-    renderDashboard(dashboardData, rut);
-  } catch(e) {
-    document.getElementById('loading').innerHTML = '<p>Error al cargar los datos.</p>';
-  }
-}
-
-function renderDashboard(data, rutActual) {
-  rutActual = rutActual || document.getElementById('lider-select').value;
-  const m = data.metricas||{};
-  const colabs = data.colaboradores||[];
-  const pilares = data.pilares||{};
-  const scores = data.scores||{};
-  const acActivos = data.accionables_activos_lista||[];
-  const curva = data.curva_performance||[];
-  const scoresPorColab = data.scores_por_colab||{};
-  const bitacoraPorColab = data.bitacora_por_colab||{};
-
-  // eNPS del equipo
-  const allEngagement = Object.values(bitacoraPorColab).flatMap(b=>b.engagement||[]);
-  const enpsEquipo = calcENPS(allEngagement);
-
-  // eNPS por mes para curva
-  const bitacoraLista = data.bitacora_lista || [];
-
-  function pilarBar(pilar, nombre, icono) {
-    const p = pilares[pilar]||{fortalezas:0,oportunidades:0};
-    const total = p.fortalezas+p.oportunidades;
-    const wF = total>0?Math.round((p.fortalezas/total)*100):0;
-    const wO = total>0?Math.round((p.oportunidades/total)*100):0;
-    const s = scores[pilar];
-    return `<div class="pilar-row">
-      <div class="pilar-label">
-        <span class="pilar-name">${icono} ${nombre}</span>
-        <div style="display:flex;gap:8px;align-items:center;">
-          ${s!==null&&s!==undefined?`<span class="score-pill" style="background:${scoreBg(s)};color:${scoreColor(s)};">⭐ ${s}</span>`:''}
-          <span class="pilar-counts">${p.fortalezas}F · ${p.oportunidades}O</span>
+      container.innerHTML = `
+        <div class="grid-stats">
+          <div class="card"><div class="stat-val">${d.dotacion}</div><div class="stat-label">Dotación</div></div>
+          <div class="card"><div class="stat-val">${d.cobertura}%</div><div class="stat-label">Cobertura</div></div>
         </div>
-      </div>
-      <div class="pilar-bar"><div class="bar-f" style="width:${wF}%"></div><div class="bar-o" style="width:${wO}%"></div></div>
-    </div>`;
-  }
-
-  function renderEquipo() {}  // deprecated
-
-  async function renderEquipoTree(rutLider) {
-    const cont = document.getElementById('equipo-tree');
-    const reportesCont = document.getElementById('reportes-directos-table');
-
-    try {
-      const res = await fetch(`https://n8n.openip.cl/webhook/get-equipo?rut=${rutLider}`);
-      const data = await res.json();
-      const personas = data.colaboradores || [];
-      reportesDirectosCache = personas; // guardar cache
-
-      // Actualizar tabla de reportes directos con TODOS (tengan o no check-ins)
-      if (reportesCont) {
-        if (!personas.length) {
-          reportesCont.innerHTML = '<div class="empty">Sin reportes directos registrados.</div>';
-        } else {
-          const mesesNombres = MESES_ORDEN;
-          const mesesCortos = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-          const rows = personas.map(p => {
-            const colabConCheckin = colabs.find(c => c.rut === p.rut);
-            const mesesColab = colabConCheckin?.meses || [];
-            const dots = mesesCortos.map((mc,i) => {
-              const tiene = mesesColab.some(mes=>mes.toLowerCase().includes(mesesNombres[i]));
-              return `<div class="dot ${tiene?'dot-ok':'dot-empty'}" title="${mc}"></div>`;
-            }).join('');
-            const initials = p.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
-            const sc = scoresPorColab[p.rut];
-            const perf = sc ? avg(sc.notas_perf) : null;
-            const areaLabel = [p.area, p.subarea1].filter(Boolean).join(' · ');
-            return `<tr onclick="verDetalle('${p.rut}')">
-              <td><div style="display:flex;align-items:center;gap:8px;">
-                <div style="width:28px;height:28px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0;">${initials}</div>
-                <div><div style="font-weight:600;font-size:11px;">${p.nombre}</div><div style="font-size:9px;color:var(--subtle);">${p.cargo} · ${areaLabel}</div></div>
-              </div></td>
-              <td><div class="checkin-dots">${dots}</div></td>
-              <td style="text-align:center;">${new Set(mesesColab).size}</td>
-              <td style="text-align:center;">${perf!==null?`<span class="score-pill" style="background:${scoreBg(perf)};color:${scoreColor(perf)};">${perf}</span>`:'—'}</td>
-              <td style="text-align:center;">${colabConCheckin?.accionables_activos||0}</td>
-            </tr>`;
-          }).join('');
-          reportesCont.innerHTML = `<table class="colab-table">
-            <thead><tr><th>Colaborador</th><th>Check-ins 2026</th><th style="text-align:center;">Meses</th><th style="text-align:center;">Performance</th><th style="text-align:center;">Accionables</th></tr></thead>
-            <tbody>${rows}</tbody>
-          </table>`;
-        }
-      }
-
-      // Sección Equipos — solo líderes
-      if (cont) {
-        const lideres = personas.filter(p=>p.es_lider);
-        if (!lideres.length) {
-          cont.innerHTML = '<div class="tree-loading">Este líder no tiene sub-equipos.</div>';
-        } else {
-          cont.innerHTML = lideres.map(p => {
-            const initials = p.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
-            const areaLabel = [p.area, p.subarea1].filter(Boolean).join(' · ');
-            const sc = dashboardData?.scores_por_colab?.[p.rut];
-            const perf = sc ? avg(sc.notas_perf) : null;
-            const perfBadge = perf!==null ? `<span class="score-pill" style="background:${scoreBg(perf)};color:${scoreColor(perf)};">⭐ ${perf}</span>` : '';
-            return `<div class="tree-node">
-              <div class="tree-node-header" onclick="abrirEquipo('${p.rut}','${p.nombre.replace(/'/g,"\\'")}')">
-                <div class="tree-avatar" style="background:var(--purple);">${initials}</div>
-                <div class="tree-info">
-                  <div class="tree-nombre">${p.nombre} <span style="font-size:9px;color:var(--purple);font-weight:600;background:var(--purple-light);padding:1px 6px;border-radius:10px;margin-left:4px;">Líder</span></div>
-                  <div class="tree-sub">${p.cargo} · ${areaLabel}</div>
-                </div>
-                <div style="display:flex;gap:6px;align-items:center;">
-                  ${perfBadge}
-                  <span style="font-size:10px;color:var(--red);font-weight:600;">Ver equipo →</span>
-                </div>
-              </div>
-            </div>`;
-          }).join('');
-        }
-      }
-    } catch(e) {
-      if (cont) cont.innerHTML = '<div class="tree-loading">Error al cargar equipos.</div>';
-    }
-  }
-
-  window.abrirEquipo = async function(rut, nombre) {
-    navStack.push({ rut, nombre });
-    document.getElementById('loading').style.display = 'flex';
-    document.getElementById('dashboard-content').style.display = 'none';
-    document.getElementById('detail-content').style.display = 'none';
-    try {
-      const mes = document.getElementById('mes-select').value;
-      let url = `${WEBHOOK_DASHBOARD}?rut_lider=${rut}`;
-      if (mes) url += '&mes=' + encodeURIComponent(mes);
-      const res = await fetch(url);
-      dashboardData = await res.json();
-      renderDashboard(dashboardData, rut);
-    } catch(e) {
-      document.getElementById('loading').innerHTML = '<p>Error al cargar el equipo.</p>';
-    }
-  };
-
-  window.volverInicio = function() {
-    navStack = [];
-    const rutInicial = document.getElementById('lider-select').value;
-    document.getElementById('loading').style.display = 'flex';
-    document.getElementById('dashboard-content').style.display = 'none';
-    document.getElementById('detail-content').style.display = 'none';
-    const mes = document.getElementById('mes-select').value;
-    let url = `${WEBHOOK_DASHBOARD}?rut_lider=${rutInicial}`;
-    if (mes) url += '&mes=' + encodeURIComponent(mes);
-    fetch(url).then(r=>r.json()).then(data => {
-      dashboardData = data;
-      renderDashboard(data, rutInicial);
-    });
-  };
-
-  window.navBack = async function(idx) {
-    const nodo = navStack[idx];
-    navStack = navStack.slice(0, idx);
-    await window.abrirEquipo(nodo.rut, nodo.nombre);
-  };
-
-  window.toggleNodo = async function(rut, headerEl) {
-    const childrenDiv = document.getElementById('children-' + rut);
-    const expandBtn = document.getElementById('expand-' + rut);
-    if (!childrenDiv) return;
-    const isOpen = childrenDiv.style.display !== 'none';
-    if (isOpen) {
-      childrenDiv.style.display = 'none';
-      if (expandBtn) expandBtn.classList.remove('open');
-    } else {
-      childrenDiv.style.display = 'block';
-      if (expandBtn) expandBtn.classList.add('open');
-    }
-  };
-
-  function renderCurva() {
-    const curvaOrdenada = sortMeses(curva.map(c=>c.mes)).map(mes=>curva.find(c=>c.mes===mes)).filter(Boolean);
-    if (!curvaOrdenada.length) return '<div class="empty">Sin datos de performance aún.</div>';
-    const W=400,H=100,pad=28;
-    const vals = curvaOrdenada.map(c=>c.promedio);
-    const minV = Math.max(0,Math.min(...vals)-0.5);
-    const maxV = Math.min(5,Math.max(...vals)+0.5);
-    const xStep = curvaOrdenada.length>1?(W-pad*2)/(curvaOrdenada.length-1):0;
-    const yPos = v => H-pad-((v-minV)/(maxV-minV))*(H-pad*2);
-    const points = curvaOrdenada.map((c,i)=>`${pad+i*xStep},${yPos(c.promedio)}`).join(' ');
-    const area = `${pad},${H-pad} ${points} ${pad+(curvaOrdenada.length-1)*xStep},${H-pad}`;
-    const dots = curvaOrdenada.map((c,i)=>`
-      <circle cx="${pad+i*xStep}" cy="${yPos(c.promedio)}" r="4" fill="${scoreColor(c.promedio)}"/>
-      <text x="${pad+i*xStep}" y="${yPos(c.promedio)-8}" text-anchor="middle" font-size="9" font-weight="700" fill="${scoreColor(c.promedio)}">${c.promedio}</text>
-      <text x="${pad+i*xStep}" y="${H-4}" text-anchor="middle" font-size="8" fill="#999">${c.mes.charAt(0).toUpperCase()+c.mes.slice(1,4)}</text>`).join('');
-    return `<div class="curva-wrap"><svg viewBox="0 0 ${W} ${H}" class="curva-svg" xmlns="http://www.w3.org/2000/svg">
-      <polygon points="${area}" fill="rgba(250,52,94,0.08)"/>
-      <polyline points="${points}" fill="none" stroke="var(--red)" stroke-width="2" stroke-linejoin="round"/>
-      ${dots}</svg></div>`;
-  }
-
-  function renderENPSEquipo() {
-    const promotores = allEngagement.filter(v=>v>=9).length;
-    const pasivos = allEngagement.filter(v=>v>=7&&v<=8).length;
-    const detractores = allEngagement.filter(v=>v<=6).length;
-    const total = allEngagement.length;
-    if (!total) return '<div class="empty">Sin datos de engagement aún.</div>';
-    const wP = Math.round((promotores/total)*100);
-    const wPas = Math.round((pasivos/total)*100);
-    const wD = Math.round((detractores/total)*100);
-    const color = enpsColor(enpsEquipo);
-
-    // Evolución mensual del eNPS
-    const bitacoraLista = data.bitacora_lista || [];
-    const enpsporMes = {};
-    bitacoraLista.forEach(b => {
-      if (!b.mes || b.engagement === null) return;
-      if (!enpsporMes[b.mes]) enpsporMes[b.mes] = [];
-      enpsporMes[b.mes].push(b.engagement);
-    });
-    const curvaENPS = sortMeses(Object.keys(enpsporMes)).map(mes => ({
-      mes, enps: calcENPS(enpsporMes[mes])
-    }));
-
-    let curvaHTML = '';
-    if (curvaENPS.length > 1) {
-      const W=300, H=60, pad=20;
-      const vals = curvaENPS.map(c=>c.enps);
-      const minV = Math.min(...vals)-10;
-      const maxV = Math.max(...vals)+10;
-      const xStep = (W-pad*2)/(curvaENPS.length-1);
-      const yPos = v => H-pad-((v-minV)/(maxV-minV))*(H-pad*2);
-      const points = curvaENPS.map((c,i)=>`${pad+i*xStep},${yPos(c.enps)}`).join(' ');
-      const dots = curvaENPS.map((c,i)=>`
-        <circle cx="${pad+i*xStep}" cy="${yPos(c.enps)}" r="3" fill="${enpsColor(c.enps)}"/>
-        <text x="${pad+i*xStep}" y="${yPos(c.enps)-6}" text-anchor="middle" font-size="8" font-weight="700" fill="${enpsColor(c.enps)}">${c.enps}</text>
-        <text x="${pad+i*xStep}" y="${H-2}" text-anchor="middle" font-size="7" fill="#999">${c.mes.substring(0,3)}</text>`).join('');
-      curvaHTML = `<div style="margin-top:12px;border-top:0.5px solid var(--border);padding-top:10px;">
-        <div style="font-size:9px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;">Evolución mensual eNPS</div>
-        <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:60px;" xmlns="http://www.w3.org/2000/svg">
-          <line x1="${pad}" y1="${yPos(0)}" x2="${W-pad}" y2="${yPos(0)}" stroke="#e2e0e8" stroke-width="1" stroke-dasharray="3,3"/>
-          <polyline points="${points}" fill="none" stroke="var(--purple)" stroke-width="1.5" stroke-linejoin="round"/>
-          ${dots}
-        </svg>
-      </div>`;
-    }
-
-    return `
-      <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px;">
-        <div style="font-size:36px;font-weight:800;color:${color};">${enpsEquipo}</div>
-        <div>
-          <div style="font-size:10px;font-weight:700;color:${color};">eNPS del equipo</div>
-          <div style="font-size:9px;color:var(--subtle);margin-top:2px;">${promotores} promotores · ${pasivos} pasivos · ${detractores} detractores</div>
+        <div class="card">
+          <div class="stat-label" style="margin-bottom:15px;">Matriz de Talento (Nine Box)</div>
+          ${renderNineBox(d.nineBox)}
         </div>
-      </div>
-      <div class="enps-bar">
-        <div class="enps-promotores" style="width:${wP}%" title="Promotores ${wP}%"></div>
-        <div class="enps-pasivos" style="width:${wPas}%" title="Pasivos ${wPas}%"></div>
-        <div class="enps-detractores" style="width:${wD}%" title="Detractores ${wD}%"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--subtle);margin-top:4px;">
-        <span style="color:#1a8a45;">■ Promotores (9-10): ${wP}%</span>
-        <span style="color:#d69e2e;">■ Pasivos (7-8): ${wPas}%</span>
-        <span style="color:#e53e3e;">■ Detractores (0-6): ${wD}%</span>
-      </div>
-      ${curvaHTML}`;
-  }
+      `;
+    }
 
-  function renderNineBox() {
-    // Etiquetas según imagen compartida
-    const cells = [
-      {label:'Evaluar rol',       bg:'#fefce8',color:'#92400e'},  // alto pot, bajo des
-      {label:'Colaborador clave', bg:'#f0fdf4',color:'#166534'},  // alto pot, medio des
-      {label:'Talento',           bg:'#dcfce7',color:'#14532d'},  // alto pot, alto des
-      {label:'Plan de acción',    bg:'#fff7ed',color:'#9a3412'},  // medio pot, bajo des
-      {label:'En desarrollo',     bg:'#fffbeb',color:'#92400e'},  // medio pot, medio des
-      {label:'Destacado',         bg:'#f0fdf4',color:'#166534'},  // medio pot, alto des
-      {label:'En riesgo',         bg:'#fef2f2',color:'#991b1b'},  // bajo pot, bajo des
-      {label:'Colaborador\nefectivo', bg:'#fff7ed',color:'#9a3412'}, // bajo pot, medio des
-      {label:'Especialista',      bg:'#fefce8',color:'#92400e'},  // bajo pot, alto des
-    ];
+    function renderNineBox(data) {
+      const labels = [
+        {id:"1.1", n:"Bajo"}, {id:"2.1", n:"Medio"}, {id:"3.1", n:"Alto"},
+        {id:"1.2", n:"Medio"}, {id:"2.2", n:"Estrella"}, {id:"3.2", n:"Alto"},
+        {id:"1.3", n:"Bajo"}, {id:"2.3", n:"Bajo"}, {id:"3.3", n:"Medio"}
+      ];
 
-    const personas = {};
-    colabs.forEach(c => {
-      const sc = scoresPorColab[c.rut];
-      const bt = bitacoraPorColab[c.rut];
-      if (!sc?.notas_perf?.length||!bt?.potencial?.length) return;
-      const perf = avg(sc.notas_perf);
-      const pot = avg(bt.potencial);
-      const col = perf<2.5?0:perf<3.5?1:2;
-      const row = pot>=2.5?0:pot>=1.5?1:2;
-      const idx = row*3+col;
-      if (!personas[idx]) personas[idx]=[];
-      personas[idx].push({nombre:c.nombre,rut:c.rut});
-    });
+      const cellsHTML = labels.map(l => `
+        <div class="nb-cell">
+          <div class="nb-cell-label">${l.n}</div>
+          <div class="nb-cell-val">${data[l.id] || 0}</div>
+        </div>
+      `).join('');
 
-    const cellsHTML = cells.map((cell,i)=>{
-      const ps = personas[i]||[];
-      const psHTML = ps.map(p=>{
-        const ini=p.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
-        return `<div class="nb-persona" style="background:white;color:${cell.color};border-color:${cell.color};" title="${p.nombre}" onclick="verDetalle('${p.rut}')">${ini}</div>`;
-      }).join('');
-      return `<div class="nb-cell" style="background:${cell.bg};">
-        <div class="nb-cell-label" style="color:${cell.color};">${cell.label.replace('\n','<br>')}</div>
-        <div class="nb-personas">${psHTML}</div>
-      </div>`;
-    }).join('');
-
-    return `<div class="nb-wrapper">
-      <div style="display:flex;align-items:center;margin-right:4px;">
-        <div class="nb-y-label-main">Potencial</div>
-      </div>
-      <div style="flex:1;">
-        <div style="display:flex;gap:4px;">
-          <div style="display:flex;flex-direction:column;justify-content:space-around;width:52px;text-align:right;padding-right:6px;font-size:8px;color:var(--subtle);font-weight:600;">
-            <span>Alto (3)</span>
-            <span>Medio (2)</span>
-            <span>Bajo (1)</span>
+      return `
+        <div class="nb-wrapper">
+          <div class="nb-axis-y-container">
+            <div class="nb-y-title">POTENCIAL</div>
+            <div class="nb-y-labels"><span>Alto</span><span>Medio</span><span>Bajo</span></div>
           </div>
-          <div style="flex:1;">
+          <div class="nb-grid-main">
             <div class="nb-grid">${cellsHTML}</div>
-            <div class="nb-x-labels" style="margin-left:0;max-width:100%;"><span>Bajo</span><span>Medio</span><span>Alto</span></div>
-            <div class="nb-x-title">Performance</div>
+            <div class="nb-x-labels"><span>Bajo</span><span>Medio</span><span>Alto</span></div>
+            <div class="nb-x-title">PERFORMANCE</div>
           </div>
-        </div>
-      </div>
-    </div>`;
-  }
-
-  function renderRiesgo() {
-    const conDatos = colabs.filter(c=>bitacoraPorColab[c.rut]?.riesgo?.length>0);
-    if (!conDatos.length) return '<div class="empty">Sin datos de riesgo aún.</div>';
-    return conDatos.map(c=>{
-      const r = bitacoraPorColab[c.rut].riesgo;
-      const ultimo = r[r.length-1];
-      const color = ultimo==='bajo'?'var(--green)':ultimo==='medio'?'#d69e2e':'var(--red)';
-      const label = ultimo==='bajo'?'Bajo':ultimo==='medio'?'Medio':'Alto';
-      const ini = c.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
-      return `<div class="riesgo-row" onclick="verDetalle('${c.rut}')">
-        <div style="width:26px;height:26px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:white;flex-shrink:0;">${ini}</div>
-        <span class="riesgo-nombre">${c.nombre}</span>
-        <div class="riesgo-dot" style="background:${color};"></div>
-        <span style="font-size:10px;font-weight:600;color:${color};">${label}</span>
-      </div>`;
-    }).join('');
-  }
-
-  const perfScore = scores.performance;
-  const liderRutActual = rutActual;
-  const esAccesoCompleto = ACCESO_COMPLETO.includes(liderRutActual);
-
-  // Breadcrumb
-  const breadcrumbHTML = navStack.length > 0 ? `
-    <div class="breadcrumb">
-      <button class="breadcrumb-item" onclick="volverInicio()">Apprecio</button>
-      ${navStack.map((n,i) => i < navStack.length-1 ?
-        `<span class="breadcrumb-sep">›</span><button class="breadcrumb-item" onclick="navBack(${i})">${n.nombre}</button>` :
-        `<span class="breadcrumb-sep">›</span><span class="breadcrumb-current">${n.nombre}</span>`
-      ).join('')}
-    </div>` : '';
-
-  // Reportes directos — tabla con puntitos
-  function colabRow(c) {
-    const mesesNombres = MESES_ORDEN;
-    const mesesCortos = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-    const dots = mesesCortos.map((mc,i) => {
-      const tiene = (c.meses||[]).some(mes=>mes.toLowerCase().includes(mesesNombres[i]));
-      return `<div class="dot ${tiene?'dot-ok':'dot-empty'}" title="${mc}"></div>`;
-    }).join('');
-    const initials = c.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
-    const sc = scoresPorColab[c.rut];
-    const perf = sc ? avg(sc.notas_perf) : null;
-    return `<tr onclick="verDetalle('${c.rut}')">
-      <td><div style="display:flex;align-items:center;gap:8px;">
-        <div style="width:28px;height:28px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0;">${initials}</div>
-        <div><div style="font-weight:600;font-size:11px;">${c.nombre}</div><div style="font-size:9px;color:var(--subtle);">${c.lider}</div></div>
-      </div></td>
-      <td><div class="checkin-dots">${dots}</div></td>
-      <td style="text-align:center;">${new Set(c.meses||[]).size}</td>
-      <td style="text-align:center;">${perf!==null?`<span class="score-pill" style="background:${scoreBg(perf)};color:${scoreColor(perf)};">${perf}</span>`:'—'}</td>
-      <td style="text-align:center;">${c.accionables_activos||0}</td>
-    </tr>`;
-  }
-
-  const html = `
-    ${breadcrumbHTML}
-    <div class="metrics-row">
-      <div class="metric-card"><div class="metric-label">Check-ins completados</div><div class="metric-val mv-red">${m.porcentaje_checkins||0}<span style="font-size:16px;">%</span></div><div class="metric-sub">${colabs.filter(c=>new Set(c.meses||[]).size>0).length} de ${m.total_colaboradores||0} colaboradores</div></div>
-      <div class="metric-card"><div class="metric-label">Accionables activos</div><div class="metric-val mv-purple">${m.accionables_activos||0}</div><div class="metric-sub">${m.accionables_cumplidos||0} cumplidos</div></div>
-      <div class="metric-card"><div class="metric-label">Performance promedio</div><div class="metric-val" style="color:${scoreColor(perfScore)};">${perfScore||'—'}</div><div class="metric-sub">escala 1 a 5</div></div>
-      <div class="metric-card"><div class="metric-label">eNPS del equipo</div><div class="metric-val" style="color:${enpsColor(enpsEquipo)};">${enpsEquipo!==null?enpsEquipo:'—'}</div><div class="metric-sub">-100 a +100</div></div>
-    </div>
-
-    <div class="two-col">
-      <div class="card">
-        <div class="card-title">Reportes directos <span class="card-tag">Click para ver detalle individual</span></div>
-        <div id="reportes-directos-table"><div class="tree-loading">Cargando reportes directos...</div></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Pilares — distribución y score promedio</div>
-        ${pilarBar('accountability','Accountability','🎯')}
-        ${pilarBar('productividad','Productividad','⚡')}
-        ${pilarBar('customer_centricity','Customer Centricity','🌟')}
-        <div class="bar-legend">
-          <div class="bar-legend-item"><div class="bar-legend-dot" style="background:var(--green);"></div>Fortaleza</div>
-          <div class="bar-legend-item"><div class="bar-legend-dot" style="background:var(--red);"></div>Oportunidad</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="full-col card">
-      <div class="card-title">Equipos <span class="card-tag">Click en equipo para ver su dashboard completo</span></div>
-      <div id="equipo-tree"><div class="tree-loading">Cargando equipos...</div></div>
-    </div>
-
-    <div class="two-col">
-      <div class="card"><div class="card-title">Curva de performance del equipo</div>${renderCurva()}</div>
-      <div class="card"><div class="card-title">Engagement del equipo — eNPS</div>${renderENPSEquipo()}</div>
-    </div>
-
-    <div class="two-col">
-      <div class="card"><div class="card-title">Nine Box — Desempeño vs Potencial <span class="card-tag">Click en persona para detalle</span></div>${renderNineBox()}</div>
-      <div class="card"><div class="card-title">Riesgo de fuga del equipo</div>${renderRiesgo()}</div>
-    </div>
-
-    ${acActivos.length>0?`<div class="full-col card">
-      <div class="card-title">Accionables activos del equipo</div>
-      <table class="ac-table">
-        <thead><tr><th>Accionable</th><th>Owner</th><th>Colaborador</th><th>Fecha</th><th>Estado</th></tr></thead>
-        <tbody>${acActivos.map(ac=>{
-          const fecha=ac.Fecha_comprometida?ac.Fecha_comprometida.split('-').reverse().join('-'):'—';
-          const hoy=new Date(),vence=new Date(ac.Fecha_comprometida);
-          const diff=Math.ceil((vence-hoy)/(1000*60*60*24));
-          const badge=diff<=3&&diff>=0?`<span class="badge-sm b-red">Vence en ${diff}d</span>`:diff<0?'<span class="badge-sm b-red">Vencido</span>':'<span class="badge-sm b-yellow">En proceso</span>';
-          return `<tr><td>${ac.Descripcion}</td><td>${ac.Owner_nombre_display||ac.Owner_nombre||'—'}</td><td>${ac.Nombre_display_colaborador||ac.Nombre_colaborador||'—'}</td><td>${fecha}</td><td>${badge}</td></tr>`;
-        }).join('')}</tbody>
-      </table>
-    </div>`:''}`;
-
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('dashboard-content').innerHTML = html;
-  document.getElementById('dashboard-content').style.display = 'block';
-  renderEquipoTree(rutActual);
-}
-
-function verDetalle(rut) {
-  if (!dashboardData) return;
-
-  // Buscar en check-ins primero, luego en el cache del directorio
-  let colab = dashboardData.colaboradores.find(c=>c.rut===rut);
-
-  // Si no tiene check-ins, construir objeto básico desde el cache del directorio
-  if (!colab) {
-    const fromCache = reportesDirectosCache.find(p=>p.rut===rut);
-    if (!fromCache) return;
-    colab = {
-      rut: fromCache.rut,
-      nombre: fromCache.nombre,
-      lider: '',
-      checkins: 0,
-      meses: [],
-      accionables_activos: 0,
-      accionables_cumplidos: 0
-    };
-  }
-  const p = (dashboardData.pilares_por_colab||{})[rut]||{accountability:{f:0,o:0},productividad:{f:0,o:0},customer_centricity:{f:0,o:0}};
-  const sc = (dashboardData.scores_por_colab||{})[rut]||{};
-  const bt = (dashboardData.bitacora_por_colab||{})[rut]||{};
-  const acColab = (dashboardData.accionables_activos_lista||[]).filter(a=>a.RUT_colaborador===rut);
-  const initials = colab.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
-  const perfProm = avg(sc.notas_perf);
-  const potProm = avg(bt.potencial);
-  const ultimoRiesgo = bt.riesgo?.length>0?bt.riesgo[bt.riesgo.length-1]:null;
-  const riesgoColor = ultimoRiesgo==='bajo'?'var(--green)':ultimoRiesgo==='medio'?'#d69e2e':'var(--red)';
-  const riesgoLabel = ultimoRiesgo==='bajo'?'Bajo':ultimoRiesgo==='medio'?'Medio':ultimoRiesgo==='alto'?'Alto':'—';
-  const potNum = potProm ? Math.round(potProm*10)/10 : null;
-  const potLabel = potProm>=2.5?'Listo para más':potProm>=1.5?'Potencial en desarrollo':potProm?'Consolidando su rol':'—';
-  const potColor = potProm>=2.5?'var(--purple)':potProm>=1.5?'var(--yellow)':'#4A90D9';
-
-  // eNPS individual
-  const enpsIndividual = calcENPS(bt.engagement||[]);
-
-  function pilarDetalle(pilar, nombre, icono) {
-    const datos = p[pilar]||{f:0,o:0};
-    const total = datos.f+datos.o;
-    const wF = total>0?Math.round((datos.f/total)*100):0;
-    const wO = total>0?Math.round((datos.o/total)*100):0;
-    const arr = pilar==='accountability'?sc.nota_acc:pilar==='productividad'?sc.nota_prod:sc.nota_cc;
-    const s = avg(arr);
-    return `<div class="pilar-row">
-      <div class="pilar-label">
-        <span class="pilar-name">${icono} ${nombre}</span>
-        <div style="display:flex;gap:8px;align-items:center;">
-          ${s!==null?`<span class="score-pill" style="background:${scoreBg(s)};color:${scoreColor(s)};">⭐ ${s}</span>`:''}
-          <span class="pilar-counts">${datos.f}F · ${datos.o}O</span>
-        </div>
-      </div>
-      <div class="pilar-bar"><div class="bar-f" style="width:${wF}%"></div><div class="bar-o" style="width:${wO}%"></div></div>
-    </div>`;
-  }
-
-  const mesesUnicos = sortMeses([...new Set(colab.meses||[])]);
-  const accionablesPorMes = dashboardData.accionables_por_colab_mes || {};
-  const bitacoraListaColab = (dashboardData.bitacora_lista||[]).filter(b=>b.rut_colaborador===rut);
-  const bitacoraListaOrdenada = sortMeses(bitacoraListaColab.map(b=>b.mes).filter((m,i,a)=>a.indexOf(m)===i)).map(mes=>bitacoraListaColab.find(b=>b.mes===mes)).filter(Boolean);
-
-  // Meses con bitácora ya registrada
-  const mesesConBitacora = new Set(bitacoraListaColab.map(b=>b.mes.toLowerCase()));
-
-  // Meses sin bitácora (para el modal)
-  const anio = new Date().getFullYear();
-  const mesesSinBitacora = MESES_ORDEN.map(m=>`${m} ${anio}`).filter(m=>!mesesConBitacora.has(m.toLowerCase()));
-
-  // Timeline — solo muestra resumen de accionables por mes
-  const timelineHTML = mesesUnicos.map(mes=>{
-    const key = `${rut}__${mes}`;
-    const acMes = accionablesPorMes[key] || { cumplidos_tiempo:0, atrasados:0, activos:0 };
-    const totalAc = acMes.cumplidos_tiempo + acMes.atrasados + acMes.activos;
-    return `<div class="timeline-item">
-      <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
-      <div class="tl-content">
-        <div class="tl-mes">${mes.charAt(0).toUpperCase()+mes.slice(1)}</div>
-        <div class="tl-tags">
-          ${acMes.cumplidos_tiempo>0?`<span class="tl-tag" style="background:#e6f9ee;color:#1a8a45;">✓ ${acMes.cumplidos_tiempo} cerrado${acMes.cumplidos_tiempo>1?'s':''} a tiempo</span>`:''}
-          ${acMes.atrasados>0?`<span class="tl-tag" style="background:#fff0f3;color:#FA345E;">⚠ ${acMes.atrasados} pendiente${acMes.atrasados>1?'s':''}</span>`:''}
-          ${totalAc===0?`<span class="tl-tag" style="background:var(--gray);color:var(--subtle);">Sin accionables</span>`:''}
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-
-  // Curva mensual riesgo de fuga
-  const riesgoValores = { 'bajo':1, 'medio':2, 'alto':3 };
-  const riesgoColors = { 1:'var(--green)', 2:'#d69e2e', 3:'var(--red)' };
-  let curvaRiesgoHTML = '<div class="empty">Sin datos de riesgo aún.</div>';
-  if (bitacoraListaOrdenada.length > 1) {
-    const W=300, H=60, pad=20;
-    const vals = bitacoraListaOrdenada.map(b=>riesgoValores[b.riesgo]||1);
-    const xStep = (W-pad*2)/(bitacoraListaOrdenada.length-1);
-    const yPos = v => H-pad-((v-1)/(3-1))*(H-pad*2);
-    const points = bitacoraListaOrdenada.map((b,i)=>`${pad+i*xStep},${yPos(riesgoValores[b.riesgo]||1)}`).join(' ');
-    const dots = bitacoraListaOrdenada.map((b,i)=>{
-      const v = riesgoValores[b.riesgo]||1;
-      const lbl = b.riesgo==='bajo'?'Bajo':b.riesgo==='medio'?'Medio':'Alto';
-      return `<circle cx="${pad+i*xStep}" cy="${yPos(v)}" r="4" fill="${riesgoColors[v]}"/>
-        <text x="${pad+i*xStep}" y="${yPos(v)-7}" text-anchor="middle" font-size="8" font-weight="700" fill="${riesgoColors[v]}">${lbl}</text>
-        <text x="${pad+i*xStep}" y="${H-2}" text-anchor="middle" font-size="7" fill="#999">${b.mes.substring(0,3)}</text>`;
-    }).join('');
-    curvaRiesgoHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:60px;" xmlns="http://www.w3.org/2000/svg">
-      <polyline points="${points}" fill="none" stroke="var(--red)" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="4,2"/>
-      ${dots}</svg>`;
-  } else if (bitacoraListaOrdenada.length === 1) {
-    const r = bitacoraListaOrdenada[0].riesgo;
-    const c = r==='bajo'?'var(--green)':r==='medio'?'#d69e2e':'var(--red)';
-    const l = r==='bajo'?'Bajo':r==='medio'?'Medio':'Alto';
-    curvaRiesgoHTML = `<div style="font-size:14px;font-weight:700;color:${c};">● ${l}</div><div style="font-size:9px;color:var(--subtle);margin-top:4px;">Solo 1 registro — se necesitan más meses para ver evolución</div>`;
-  }
-
-  // Evolución eNPS individual
-  let curvaENPSIndHTML = '<div class="empty">Sin suficientes datos aún.</div>';
-  if (bitacoraListaOrdenada.length > 0) {
-    const enpsInd = calcENPS(bt.engagement||[]);
-    const total = bt.engagement?.length||0;
-    const p9 = (bt.engagement||[]).filter(v=>v>=9).length;
-    const p7 = (bt.engagement||[]).filter(v=>v>=7&&v<=8).length;
-    const p0 = (bt.engagement||[]).filter(v=>v<=6).length;
-    const color = enpsColor(enpsInd);
-
-    let curvaLinea = '';
-    if (bitacoraListaOrdenada.length > 1) {
-      const W=300, H=60, pad=20;
-      const vals = bitacoraListaOrdenada.map(b=>b.engagement||0);
-      const minV = Math.max(0,Math.min(...vals)-1);
-      const maxV = Math.min(10,Math.max(...vals)+1);
-      const xStep = (W-pad*2)/(bitacoraListaOrdenada.length-1);
-      const yPos = v => H-pad-((v-minV)/(maxV-minV))*(H-pad*2);
-      const points = bitacoraListaOrdenada.map((b,i)=>`${pad+i*xStep},${yPos(b.engagement||0)}`).join(' ');
-      const dots = bitacoraListaOrdenada.map((b,i)=>`
-        <circle cx="${pad+i*xStep}" cy="${yPos(b.engagement||0)}" r="3" fill="var(--purple)"/>
-        <text x="${pad+i*xStep}" y="${yPos(b.engagement||0)-6}" text-anchor="middle" font-size="8" font-weight="700" fill="var(--purple)">${b.engagement}</text>
-        <text x="${pad+i*xStep}" y="${H-2}" text-anchor="middle" font-size="7" fill="#999">${b.mes.substring(0,3)}</text>`).join('');
-      curvaLinea = `<div style="margin-top:10px;"><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:60px;" xmlns="http://www.w3.org/2000/svg">
-        <polyline points="${points}" fill="none" stroke="var(--purple)" stroke-width="1.5" stroke-linejoin="round"/>
-        ${dots}</svg></div>`;
+        </div>`;
     }
 
-    curvaENPSIndHTML = `
-      <div style="display:flex;align-items:center;gap:16px;margin-bottom:8px;">
-        <div style="font-size:32px;font-weight:800;color:${color};">${enpsInd}</div>
-        <div><div style="font-size:10px;font-weight:700;color:${color};">eNPS individual</div>
-        <div style="font-size:9px;color:var(--subtle);">Basado en ${total} registro${total!==1?'s':''}</div></div>
-      </div>
-      ${total>0?`<div class="enps-bar">
-        <div class="enps-promotores" style="width:${Math.round(p9/total*100)}%"></div>
-        <div class="enps-pasivos" style="width:${Math.round(p7/total*100)}%"></div>
-        <div class="enps-detractores" style="width:${Math.round(p0/total*100)}%"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--subtle);margin-top:4px;">
-        <span style="color:#1a8a45;">■ Promotores: ${p9}</span>
-        <span style="color:#d69e2e;">■ Pasivos: ${p7}</span>
-        <span style="color:#e53e3e;">■ Detractores: ${p0}</span>
-      </div>`:''}
-      ${curvaLinea}`;
-  }
+    function renderEquipo() {
+      const container = document.getElementById('equipo-content');
+      const tableRows = dashboardData.colaboradores.map(c => `
+        <tr>
+          <td><div style="font-weight:700;">${c.nombre}</div><div style="font-size:10px; color:var(--subtle)">${c.cargo}</div></td>
+          <td style="text-align:center;"><span class="tl-tag ${c.checkin_mes ? 'tt-f' : ''}">${c.checkin_mes ? 'SÍ' : 'NO'}</span></td>
+          <td style="text-align:right;"><button class="btn-ver" onclick="verDetalle('${c.rut}')">VER</button></td>
+        </tr>
+      `).join('');
 
-  // Guardar meses sin bitácora en variable global para el modal
-  window._mesesSinBitacoraActual = mesesSinBitacora;
-
-  const html = `
-    <div class="detail-header">
-      <div class="detail-avatar">${initials}</div>
-      <div style="flex:1;"><div class="detail-name">${colab.nombre}</div><div class="detail-sub">Líder: ${colab.lider} · ${mesesUnicos.length} check-in${mesesUnicos.length!==1?'s':''} registrado${mesesUnicos.length!==1?'s':''}</div></div>
-      <button class="btn-ausencia" onclick="abrirAusencia('${rut}','${colab.nombre.replace(/'/g,"\\'")}')">📅 Registrar ausencia</button>
-      <button class="btn-bitacora" onclick="abrirBitacora('${rut}','${colab.nombre.replace(/'/g,"\\'")}')">📓 Bitácora privada</button>
-    </div>
-
-    <div class="metrics-row">
-      <div class="metric-card">
-        <div class="metric-label">Performance promedio</div>
-        <div class="metric-val" style="color:${scoreColor(perfProm)};">${perfProm||'—'}</div>
-        <div class="metric-sub">escala 1 a 5</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Potencial</div>
-        <div style="margin-top:4px;">
-          ${potNum!==null?`<span style="font-size:22px;font-weight:800;color:${potColor};">${potNum}</span><span style="font-size:11px;color:${potColor};font-weight:600;margin-left:6px;">${potLabel}</span>`:'<span style="font-size:13px;color:var(--subtle);">Sin datos</span>'}
+      container.innerHTML = `
+        <div class="card" style="padding:0;">
+          <table>
+            <thead><tr><th>COLABORADOR</th><th style="text-align:center;">MES</th><th style="text-align:right;">DETALLE</th></tr></thead>
+            <tbody>${tableRows}</tbody>
+          </table>
         </div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Fortalezas / Oportunidades</div>
-        <div class="metric-val mv-green">${p.accountability.f+p.productividad.f+p.customer_centricity.f}<span style="font-size:16px;color:var(--subtle);font-weight:400;"> / </span><span style="font-size:24px;color:var(--yellow);">${p.accountability.o+p.productividad.o+p.customer_centricity.o}</span></div>
-        <div class="metric-sub">en 3 pilares</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Riesgo de fuga</div>
-        <div class="metric-val" style="color:${riesgoColor};font-size:20px;">${riesgoLabel}</div>
-      </div>
-    </div>
+      `;
+    }
 
-    <div class="two-col">
-      <div class="card">
-        <div class="card-title">Historial de check-ins</div>
-        ${mesesUnicos.length>0?`<div>${timelineHTML}</div>`:'<div class="empty">Sin check-ins registrados.</div>'}
-      </div>
-      <div class="card">
-        <div class="card-title">Mapa conductual acumulado</div>
-        ${pilarDetalle('accountability','Accountability','🎯')}
-        ${pilarDetalle('productividad','Productividad','⚡')}
-        ${pilarDetalle('customer_centricity','Customer Centricity','🌟')}
-        <div class="bar-legend"><div class="bar-legend-item"><div class="bar-legend-dot" style="background:var(--green);"></div>Fortaleza</div><div class="bar-legend-item"><div class="bar-legend-dot" style="background:var(--red);"></div>Oportunidad</div></div>
-      </div>
-    </div>
+    function verDetalle(rut) {
+      const c = dashboardData.colaboradores.find(x => x.rut === rut);
+      if(!c) return;
+      
+      document.getElementById('detalle-nombre').innerText = c.nombre.toUpperCase();
+      const mesesAnio = MESES_ORDEN.map(m => `${m} 2026`);
+      
+      const timelineHTML = mesesAnio.map(m => {
+        const realizado = c.meses_checkin && c.meses_checkin.includes(m);
+        return `
+          <div class="timeline-item" style="opacity: ${realizado ? '1' : '0.4'}">
+            <div class="tl-left">
+              <div class="tl-dot" style="background:${realizado ? 'var(--red)' : 'var(--border)'}"></div>
+              <div class="tl-line"></div>
+            </div>
+            <div class="tl-content">
+              <div class="tl-mes">${m}</div>
+              <div class="tl-tag ${realizado ? 'tt-f' : ''}">${realizado ? 'Check-in realizado' : 'Pendiente'}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
 
-    <div class="two-col">
-      <div class="card">
-        <div class="card-title">Engagement individual — eNPS</div>
-        ${curvaENPSIndHTML}
-      </div>
-      <div class="card">
-        <div class="card-title">Evolución del riesgo de fuga</div>
-        ${curvaRiesgoHTML}
-      </div>
-    </div>
+      document.getElementById('detail-content').innerHTML = `
+        <div class="card">
+          <div class="stat-label">Estado de Check-ins</div>
+          <div class="timeline">${timelineHTML}</div>
+        </div>
+      `;
+      
+      showView('view-detalle');
+    }
 
-    ${acColab.length>0?`<div class="full-col card"><div class="card-title">Accionables activos</div>
-    <table class="ac-table"><thead><tr><th>Accionable</th><th>Owner</th><th>Fecha</th><th>Estado</th></tr></thead>
-    <tbody>${acColab.map(ac=>{const fecha=ac.Fecha_comprometida?ac.Fecha_comprometida.split('-').reverse().join('-'):'—';return `<tr><td>${ac.Descripcion}</td><td>${ac.Owner_nombre_display||ac.Owner_nombre}</td><td>${fecha}</td><td><span class="badge-sm b-yellow">En proceso</span></td></tr>`;}).join('')}</tbody></table></div>`:''}`;
+    // NAVEGACIÓN
+    function showTab(tab) {
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      if(tab === 'global') { showView('view-global'); cargarGlobal(mesGlobalActivo); }
+      else { showView('view-equipo'); cargarEquipo(); }
+    }
 
-  document.getElementById('dashboard-content').style.display = 'none';
-  document.getElementById('detail-content').innerHTML = html;
-  document.getElementById('detail-content').style.display = 'block';
-}
+    function showView(viewId) {
+      ['view-global', 'view-equipo', 'view-detalle'].forEach(v => {
+        document.getElementById(v).style.display = (v === viewId) ? 'block' : 'none';
+      });
+    }
 
-function volverDashboard() {
-  document.getElementById('detail-content').style.display = 'none';
-  document.getElementById('dashboard-content').style.display = 'block';
-}
+    function irAEquipo() { showView('view-equipo'); }
+    function cambiarArea(area) { areaActiva = area; renderGlobal(); }
 
-// AUSENCIA
-let ausenciaRut = null, ausenciaNombre = null;
+    // Carga inicial
+    window.onload = () => cargarGlobal();
 
-function abrirAusencia(rut, nombre) {
-  ausenciaRut = rut;
-  ausenciaNombre = nombre;
-
-  // Meses del año actual
-  const anio = new Date().getFullYear();
-  const todosMeses = MESES_ORDEN.map(m => `${m} ${anio}`);
-
-  // Meses que YA tienen check-in para este colaborador
-  const colab = dashboardData?.colaboradores?.find(c => c.rut === rut);
-  const mesesConCheckin = new Set((colab?.meses || []).map(m => m.toLowerCase()));
-
-  // Solo mostrar meses SIN check-in
-  const mesesSinCheckin = todosMeses.filter(m => !mesesConCheckin.has(m.toLowerCase()));
-
-  if (!mesesSinCheckin.length) {
-    alert(`${nombre} tiene check-ins registrados en todos los meses del año. No hay meses pendientes de justificar.`);
-    return;
-  }
-
-  const modal = document.createElement('div');
-  modal.className = 'modal-overlay';
-  modal.id = 'modal-ausencia';
-  modal.innerHTML = `<div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">📅 Registrar ausencia — ${decodeURIComponent(escape(nombre))}</div>
-      <button class="modal-close" onclick="cerrarAusencia()">✕</button>
-    </div>
-    <div class="modal-section">
-      <span class="modal-label">Mes sin check-in</span>
-      <select class="modal-input" id="aus-mes" style="font-family:Montserrat,sans-serif;">
-        ${mesesSinCheckin.map(m=>`<option value="${m}">${m.charAt(0).toUpperCase()+m.slice(1)}</option>`).join('')}
-      </select>
-    </div>
-    <div class="modal-section">
-      <span class="modal-label">Motivo de ausencia</span>
-      <div class="radio-opts">
-        <button class="radio-opt" onclick="setAusencia('vacaciones',this)">🏖️ Vacaciones</button>
-        <button class="radio-opt" onclick="setAusencia('licencia',this)">🏥 Licencia médica</button>
-      </div>
-    </div>
-    <div class="modal-section">
-      <span class="modal-label">Notas adicionales (opcional)</span>
-      <textarea class="modal-textarea" id="aus-notas" rows="2" placeholder="Ej: Licencia 15 días, regresa el 20 de mayo..."></textarea>
-    </div>
-    <button class="btn-guardar-modal" id="btn-guardar-ausencia" onclick="guardarAusencia()" style="background:var(--yellow);">Registrar ausencia</button>
-  </div>`;
-  document.body.appendChild(modal);
-}
-
-let ausenciaTipo = null;
-function setAusencia(tipo, btn) {
-  ausenciaTipo = tipo;
-  document.querySelectorAll('.radio-opt').forEach(b=>{b.className='radio-opt';});
-  btn.classList.add('sel');
-}
-
-function cerrarAusencia() { document.getElementById('modal-ausencia')?.remove(); ausenciaTipo=null; }
-
-async function guardarAusencia() {
-  if (!ausenciaTipo) { alert('Selecciona el motivo de ausencia.'); return; }
-  const btn = document.getElementById('btn-guardar-ausencia');
-  btn.disabled = true;
-  btn.textContent = 'Guardando...';
-  const payload = {
-    rut_lider: document.getElementById('lider-select').value,
-    rut_colaborador: ausenciaRut,
-    nombre_colaborador: ausenciaNombre,
-    mes: document.getElementById('aus-mes').value,
-    tipo: ausenciaTipo,
-    notas: document.getElementById('aus-notas')?.value?.trim()||''
-  };
-  console.log('Payload ausencia:', JSON.stringify(payload));
-  try {
-    const res = await fetch('https://n8n.openip.cl/webhook/guardar-justificacion', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(payload)
-    });
-    console.log('Response status:', res.status);
-    const resData = await res.json().catch(()=>({}));
-    console.log('Response data:', JSON.stringify(resData));
-    cerrarAusencia();
-    alert('✓ Ausencia registrada correctamente.');
-  } catch(e) {
-    console.error('Error:', e);
-    alert('Error al guardar: ' + e.message);
-    btn.disabled = false;
-    btn.textContent = 'Registrar ausencia';
-  }
-}
-
-// BITÁCORA
-let bitacoraData = {rut:null,nombre:null,engagement:null,riesgo:null,potencial:null};
-
-function abrirBitacora(rut, nombre, mesesSinBitacora) {
-  // Usar variable global si no se pasa como parámetro
-  if (!mesesSinBitacora) mesesSinBitacora = window._mesesSinBitacoraActual || [];
-  bitacoraData = {rut, nombre, engagement:null, riesgo:null, potencial:null};
-
-  // Si no hay meses sin bitácora, avisar
-  if (mesesSinBitacora && mesesSinBitacora.length === 0) {
-    alert(`Ya tienes bitácora registrada para todos los meses de ${nombre}. Para actualizar un mes existente, selecciónalo abajo.`);
-  }
-
-  // Usar meses sin bitácora si están disponibles, sino todos los meses
-  const anio = new Date().getFullYear();
-  const todosMeses = MESES_ORDEN.map(m=>`${m} ${anio}`);
-  const mesesOpciones = (mesesSinBitacora && mesesSinBitacora.length > 0) ? mesesSinBitacora : todosMeses;
-
-  const likertBtns = Array.from({length:11},(_,i)=>`<button class="likert-btn" onclick="setEngagement(${i},this)">${i}</button>`).join('');
-  const modal = document.createElement('div');
-  modal.className = 'modal-overlay';
-  modal.id = 'modal-bitacora';
-  modal.innerHTML = `<div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">📓 Bitácora privada — ${decodeURIComponent(escape(nombre))}</div>
-      <button class="modal-close" onclick="cerrarBitacora()">✕</button>
-    </div>
-    <div class="modal-section">
-      <span class="modal-label">Mes</span>
-      <select class="modal-input" id="bt-mes" style="font-family:Montserrat,sans-serif;">
-        ${mesesOpciones.map(m=>`<option value="${m}">${m.charAt(0).toUpperCase()+m.slice(1)}</option>`).join('')}
-      </select>
-      ${mesesSinBitacora && mesesSinBitacora.length > 0 ? `<div style="font-size:9px;color:var(--subtle);margin-top:4px;">Mostrando solo meses sin bitácora registrada</div>` : ''}
-    </div>
-    <div class="modal-section">
-      <span class="modal-label">Engagement</span>
-      <div class="modal-sub">"En una escala del 0 al 10 donde 0 es muy mal y 10 es increíble, ¿cómo te sientes en Apprecio?"</div>
-      <div class="likert-scale">${likertBtns}</div>
-      <div class="likert-labels"><span>0 Muy mal</span><span>10 Increíble</span></div>
-      <textarea class="modal-textarea" id="bt-engagement-comentario" rows="2" placeholder="¿Qué podemos hacer distinto para mejorar?"></textarea>
-    </div>
-    <div class="modal-section">
-      <span class="modal-label">Riesgo de fuga</span>
-      <div class="riesgo-opts" style="margin-bottom:8px;">
-        <button class="riesgo-opt" onclick="setRiesgo('bajo',this)">🟢 Bajo</button>
-        <button class="riesgo-opt" onclick="setRiesgo('medio',this)">🟡 Medio</button>
-        <button class="riesgo-opt" onclick="setRiesgo('alto',this)">🔴 Alto</button>
-      </div>
-      <textarea class="modal-textarea" id="bt-riesgo-comentario" rows="2" placeholder="¿Qué señales observas?"></textarea>
-    </div>
-    <div class="modal-section">
-      <span class="modal-label">Percepción de potencial</span>
-      <div class="potencial-opts" style="margin-bottom:8px;">
-        <button class="pot-opt" onclick="setPotencialBt(1,this)"><span class="pot-num" style="color:#4A90D9;">1</span><span class="pot-name">Consolidando</span><span class="pot-desc">Enfocado en dominar su rol actual</span></button>
-        <button class="pot-opt" onclick="setPotencialBt(2,this)"><span class="pot-num" style="color:var(--yellow);">2</span><span class="pot-name">En desarrollo</span><span class="pot-desc">Señales de crecimiento en 1-2 años</span></button>
-        <button class="pot-opt" onclick="setPotencialBt(3,this)"><span class="pot-num" style="color:var(--purple);">3</span><span class="pot-name">Listo para más</span><span class="pot-desc">Preparado hoy o en menos de 12 meses</span></button>
-      </div>
-      <textarea class="modal-textarea" id="bt-potencial-comentario" rows="2" placeholder="Comentarios adicionales..."></textarea>
-    </div>
-    <div class="modal-section">
-      <span class="modal-label">Notas adicionales</span>
-      <textarea class="modal-textarea" id="bt-notas" rows="3" placeholder="Contexto adicional relevante..."></textarea>
-    </div>
-    <button class="btn-guardar-modal" id="btn-guardar-bitacora" onclick="guardarBitacora()">Guardar bitácora privada</button>
-  </div>`;
-  document.body.appendChild(modal);
-}
-
-function cerrarBitacora() { document.getElementById('modal-bitacora')?.remove(); }
-
-function setEngagement(valor, btn) {
-  bitacoraData.engagement = valor;
-  document.querySelectorAll('.likert-btn').forEach(b=>b.classList.remove('sel'));
-  btn.classList.add('sel');
-}
-function setRiesgo(valor, btn) {
-  bitacoraData.riesgo = valor;
-  document.querySelectorAll('.riesgo-opt').forEach(b=>{b.className='riesgo-opt';});
-  btn.classList.add('sel-'+valor);
-}
-function setPotencialBt(valor, btn) {
-  bitacoraData.potencial = valor;
-  document.querySelectorAll('.pot-opt').forEach(b=>{b.className='pot-opt';});
-  btn.classList.add('sel-'+valor);
-}
-
-async function guardarBitacora() {
-  const btn = document.getElementById('btn-guardar-bitacora');
-  btn.disabled = true; btn.textContent = 'Guardando...';
-  const liderRut = document.getElementById('lider-select').value;
-  const mes = document.getElementById('bt-mes')?.value || document.getElementById('mes-select').value || new Date().toLocaleString('es-CL',{month:'long',year:'numeric'});
-  const payload = {
-    rut_lider: liderRut,
-    rut_colaborador: bitacoraData.rut,
-    nombre_colaborador: bitacoraData.nombre,
-    mes,
-    engagement_nota: bitacoraData.engagement,
-    engagement_comentario: document.getElementById('bt-engagement-comentario')?.value?.trim()||'',
-    riesgo_fuga: bitacoraData.riesgo,
-    riesgo_comentario: document.getElementById('bt-riesgo-comentario')?.value?.trim()||'',
-    potencial: bitacoraData.potencial,
-    potencial_comentario: document.getElementById('bt-potencial-comentario')?.value?.trim()||'',
-    notas_adicionales: document.getElementById('bt-notas')?.value?.trim()||''
-  };
-  try {
-    await fetch('https://n8n.openip.cl/webhook/guardar-bitacora',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    cerrarBitacora();
-    alert('✓ Bitácora guardada correctamente.');
-  } catch(e) {
-    alert('Error al guardar. Intenta de nuevo.');
-    btn.disabled = false; btn.textContent = 'Guardar bitácora privada';
-  }
-}
-</script>
+  </script>
 </body>
 </html>
