@@ -1447,12 +1447,21 @@ async function guardarAusencia() {
     tipo: ausenciaTipo,
     notas: document.getElementById('aus-notas')?.value?.trim()||''
   };
+  console.log('Payload ausencia:', JSON.stringify(payload));
   try {
-    await fetch('https://n8n.openip.cl/webhook/guardar-justificacion', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+    const res = await fetch('https://n8n.openip.cl/webhook/guardar-justificacion', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    console.log('Response status:', res.status);
+    const resData = await res.json().catch(()=>({}));
+    console.log('Response data:', JSON.stringify(resData));
     cerrarAusencia();
     alert('✓ Ausencia registrada correctamente.');
   } catch(e) {
-    alert('Error al guardar. Intenta de nuevo.');
+    console.error('Error:', e);
+    alert('Error al guardar: ' + e.message);
     btn.disabled = false;
     btn.textContent = 'Registrar ausencia';
   }
