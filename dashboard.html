@@ -984,6 +984,23 @@ let ausenciaRut = null, ausenciaNombre = null;
 function abrirAusencia(rut, nombre) {
   ausenciaRut = rut;
   ausenciaNombre = nombre;
+
+  // Meses del año actual
+  const anio = new Date().getFullYear();
+  const todosMeses = MESES_ORDEN.map(m => `${m} ${anio}`);
+
+  // Meses que YA tienen check-in para este colaborador
+  const colab = dashboardData?.colaboradores?.find(c => c.rut === rut);
+  const mesesConCheckin = new Set((colab?.meses || []).map(m => m.toLowerCase()));
+
+  // Solo mostrar meses SIN check-in
+  const mesesSinCheckin = todosMeses.filter(m => !mesesConCheckin.has(m.toLowerCase()));
+
+  if (!mesesSinCheckin.length) {
+    alert(`${nombre} tiene check-ins registrados en todos los meses del año. No hay meses pendientes de justificar.`);
+    return;
+  }
+
   const modal = document.createElement('div');
   modal.className = 'modal-overlay';
   modal.id = 'modal-ausencia';
@@ -993,9 +1010,9 @@ function abrirAusencia(rut, nombre) {
       <button class="modal-close" onclick="cerrarAusencia()">✕</button>
     </div>
     <div class="modal-section">
-      <span class="modal-label">Mes</span>
+      <span class="modal-label">Mes sin check-in</span>
       <select class="modal-input" id="aus-mes" style="font-family:Montserrat,sans-serif;">
-        ${(sortMeses(dashboardData?.meses_disponibles||[])).map(m=>`<option value="${m}">${m.charAt(0).toUpperCase()+m.slice(1)}</option>`).join('')}
+        ${mesesSinCheckin.map(m=>`<option value="${m}">${m.charAt(0).toUpperCase()+m.slice(1)}</option>`).join('')}
       </select>
     </div>
     <div class="modal-section">
