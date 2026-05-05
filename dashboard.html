@@ -211,6 +211,7 @@ const ACCESO_COMPLETO = ['12605423-8','15563184-8','16939271-4']; // Jaime, Seba
 
 let usuarioActual = null;
 let dashboardData = null;
+let reportesDirectosCache = []; // cache de todos los reportes directos del directorio
 
 // Estado de navegación
 let navStack = []; // [{rut, nombre, tipo: 'org'|'equipo'|'detalle'}]
@@ -419,6 +420,7 @@ function renderDashboard(data, rutActual) {
       const res = await fetch(`https://n8n.openip.cl/webhook/get-equipo?rut=${rutLider}`);
       const data = await res.json();
       const personas = data.colaboradores || [];
+      reportesDirectosCache = personas; // guardar cache
 
       // Actualizar tabla de reportes directos con TODOS (tengan o no check-ins)
       if (reportesCont) {
@@ -808,8 +810,24 @@ function renderDashboard(data, rutActual) {
 
 function verDetalle(rut) {
   if (!dashboardData) return;
-  const colab = dashboardData.colaboradores.find(c=>c.rut===rut);
-  if (!colab) return;
+
+  // Buscar en check-ins primero, luego en el cache del directorio
+  let colab = dashboardData.colaboradores.find(c=>c.rut===rut);
+
+  // Si no tiene check-ins, construir objeto básico desde el cache del directorio
+  if (!colab) {
+    const fromCache = reportesDirectosCache.find(p=>p.rut===rut);
+    if (!fromCache) return;
+    colab = {
+      rut: fromCache.rut,
+      nombre: fromCache.nombre,
+      lider: '',
+      checkins: 0,
+      meses: [],
+      accionables_activos: 0,
+      accionables_cumplidos: 0
+    };
+  }
   const p = (dashboardData.pilares_por_colab||{})[rut]||{accountability:{f:0,o:0},productividad:{f:0,o:0},customer_centricity:{f:0,o:0}};
   const sc = (dashboardData.scores_por_colab||{})[rut]||{};
   const bt = (dashboardData.bitacora_por_colab||{})[rut]||{};
