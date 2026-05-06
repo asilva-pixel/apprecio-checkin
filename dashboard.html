@@ -1155,7 +1155,12 @@ function renderDashboard(data, rutActual) {
 }
 
 function verDetalleSeguro(rut) {
-  if (!dashboardData) return;
+  // Si dashboardData no existe o no tiene colaboradores, inicializarlo
+  if (!dashboardData) {
+    dashboardData = { colaboradores: [], pilares_por_colab: {}, scores_por_colab: {}, bitacora_por_colab: {}, bitacora_lista: [], accionables_por_colab_mes: {}, accionables_activos_lista: [] };
+  }
+  if (!dashboardData.colaboradores) dashboardData.colaboradores = [];
+
   // Si no está en colaboradores, lo agrega desde el mapa global
   if (!dashboardData.colaboradores.find(c=>c.rut===rut)) {
     const datos = window._colabCache?.[rut];
