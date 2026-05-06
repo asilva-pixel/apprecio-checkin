@@ -704,8 +704,9 @@ async function cargarDashboard() {
     const selMes = document.getElementById('mes-select');
     const mesActual = selMes.value;
     selMes.innerHTML = '<option value="">Acumulado</option>';
-    const mesesOrdenados = sortMeses(dashboardData.meses_disponibles||[]);
-    mesesOrdenados.forEach(m => {
+    const anioActual = new Date().getFullYear();
+    const todosMesesAnio = MESES_ORDEN.map(m => `${m} ${anioActual}`);
+    todosMesesAnio.forEach(m => {
       const opt = document.createElement('option');
       opt.value = m; opt.textContent = m.charAt(0).toUpperCase()+m.slice(1);
       if (m === mesActual) opt.selected = true;
@@ -785,7 +786,7 @@ function renderDashboard(data, rutActual) {
             const areaLabel = [p.area, p.subarea1].filter(Boolean).join(' · ');
             // Guardar en mapa global para onclick seguro
             window._colabCache = window._colabCache || {};
-            window._colabCache[p.rut] = {rut:p.rut, nombre:p.nombre, cargo:p.cargo||'', area:p.area||''};
+            window._colabCache[p.rut] = {rut:p.rut, nombre:p.nombre, cargo:p.cargo||'', area:p.area||'', lider_rut: rutLider};
             return `<tr onclick="verDetalleSeguro('${p.rut}')">
               <td><div style="display:flex;align-items:center;gap:8px;">
                 <div style="width:28px;height:28px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0;">${initials}</div>
@@ -1155,26 +1156,47 @@ function renderDashboard(data, rutActual) {
 }
 
 function verDetalleSeguro(rut) {
-  // Si dashboardData no existe o no tiene colaboradores, inicializarlo
   if (!dashboardData) {
-    dashboardData = { colaboradores: [], pilares_por_colab: {}, scores_por_colab: {}, bitacora_por_colab: {}, bitacora_lista: [], accionables_por_colab_mes: {}, accionables_activos_lista: [] };
+    dashboardData = { colaboradores:[], pilares_por_colab:{}, scores_por_colab:{}, bitacora_por_colab:{}, bitacora_lista:[], accionables_por_colab_mes:{}, accionables_activos_lista:[] };
   }
   if (!dashboardData.colaboradores) dashboardData.colaboradores = [];
 
-  // Si no está en colaboradores, lo agrega desde el mapa global
   if (!dashboardData.colaboradores.find(c=>c.rut===rut)) {
     const datos = window._colabCache?.[rut];
     if (datos) {
       dashboardData.colaboradores.push({
-        rut: datos.rut,
-        nombre: datos.nombre,
-        lider: datos.cargo || '',
-        checkins: 0,
-        meses: [],
-        accionables_activos: 0,
-        accionables_cumplidos: 0
+        rut: datos.rut, nombre: datos.nombre, lider: '',
+        checkins:0, meses:[], accionables_activos:0, accionables_cumplidos:0
       });
     }
+  }
+
+  // Si no hay scores ni bitácora, cargar el dashboard del líder de este colaborador
+  const tieneScores = dashboardData.scores_por_colab?.[rut];
+  const tieneBitacora = dashboardData.bitacora_por_colab?.[rut];
+  if (!tieneScores && !tieneBitacora) {
+    const datos = window._colabCache?.[rut];
+    const liderRut = datos?.lider_rut || document.getElementById('lider-select').value;
+    const mes = document.getElementById('mes-select').value;
+    let url = `${WEBHOOK_DASHBOARD}?rut_lider=${liderRut}`;
+    if (mes) url += '&mes=' + encodeURIComponent(mes);
+    document.getElementById('loading').style.display = 'flex';
+    fetch(url).then(r=>r.json()).then(data => {
+      // Merge datos en dashboardData
+      dashboardData.colaboradores = [...(dashboardData.colaboradores||[]), ...(data.colaboradores||[])].filter((c,i,a)=>a.findIndex(x=>x.rut===c.rut)===i);
+      dashboardData.scores_por_colab = {...(dashboardData.scores_por_colab||{}), ...(data.scores_por_colab||{})};
+      dashboardData.bitacora_por_colab = {...(dashboardData.bitacora_por_colab||{}), ...(data.bitacora_por_colab||{})};
+      dashboardData.pilares_por_colab = {...(dashboardData.pilares_por_colab||{}), ...(data.pilares_por_colab||{})};
+      dashboardData.bitacora_lista = [...(dashboardData.bitacora_lista||[]), ...(data.bitacora_lista||[])];
+      dashboardData.accionables_por_colab_mes = {...(dashboardData.accionables_por_colab_mes||{}), ...(data.accionables_por_colab_mes||{})};
+      dashboardData.accionables_activos_lista = [...(dashboardData.accionables_activos_lista||[]), ...(data.accionables_activos_lista||[])];
+      document.getElementById('loading').style.display = 'none';
+      verDetalle(rut);
+    }).catch(()=>{
+      document.getElementById('loading').style.display = 'none';
+      verDetalle(rut);
+    });
+    return;
   }
   verDetalle(rut);
 }
@@ -1352,9 +1374,10 @@ function verDetalle(rut) {
   window._mesesSinBitacoraActual = mesesSinBitacora;
 
   const html = `
+    <button class="detail-back" onclick="volverDashboard()">← Volver al equipo</button>
     <div class="detail-header">
       <div class="detail-avatar">${initials}</div>
-      <div style="flex:1;"><div class="detail-name">${colab.nombre}</div><div class="detail-sub">Líder: ${colab.lider} · ${mesesUnicos.length} check-in${mesesUnicos.length!==1?'s':''} registrado${mesesUnicos.length!==1?'s':''}</div></div>
+      <div style="flex:1;"><div class="detail-name">${colab.nombre}</div><div class="detail-sub">Líder: ${colab.lider} · ${mesesConCheckin.length} check-in${mesesConCheckin.length!==1?'s':''} registrado${mesesConCheckin.length!==1?'s':''}</div></div>
       <button class="btn-ausencia" onclick="abrirAusencia('${rut}','${colab.nombre.replace(/'/g,"\\'")}')">📅 Registrar ausencia</button>
       <button class="btn-bitacora" onclick="abrirBitacora('${rut}','${colab.nombre.replace(/'/g,"\\'")}')">📓 Bitácora privada</button>
     </div>
