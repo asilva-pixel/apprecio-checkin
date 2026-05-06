@@ -776,9 +776,13 @@ function renderDashboard(data, rutActual) {
           const rows = personas.map(p => {
             const colabConCheckin = colabs.find(c => c.rut === p.rut);
             const mesesColab = colabConCheckin?.meses || [];
+            const justColab = (dashboardData?.justificaciones_por_colab||{})[p.rut] || [];
+            const mesesJustColab = new Set(justColab.map(j=>j.mes.toLowerCase()));
             const dots = mesesCortos.map((mc,i) => {
-              const tiene = mesesColab.some(mes=>mes.toLowerCase().includes(MESES_ORDEN[i]));
-              return `<div class="dot ${tiene?'dot-ok':'dot-empty'}" title="${mc}"></div>`;
+              const tieneCheckin = mesesColab.some(mes=>mes.toLowerCase().includes(MESES_ORDEN[i]));
+              const tieneJust = mesesJustColab.has(`${MESES_ORDEN[i]} ${new Date().getFullYear()}`);
+              const clase = tieneCheckin ? 'dot-ok' : tieneJust ? 'dot-justified' : 'dot-empty';
+              return `<div class="dot ${clase}" title="${mc}"></div>`;
             }).join('');
             const initials = p.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
             const sc = scoresPorColab[p.rut];
