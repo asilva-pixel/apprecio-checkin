@@ -349,6 +349,9 @@ function renderGlobal(data, areaId) {
 
   const enpsColor2 = v => v===null?'var(--subtle)':v>=50?'#1a8a45':v>=0?'#d69e2e':'#e53e3e';
 
+  const TODOS_MESES_ANIO = MESES_ORDEN.map(m => `${m} ${new Date().getFullYear()}`);
+  const mesesSelector = TODOS_MESES_ANIO;
+
   const areaTabs = `<div style="margin-bottom:16px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
     <span style="font-size:10px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:0.4px;margin-right:6px;">Vista:</span>
     <button class="area-tab ${esGlobal?'active':''}" onclick="renderGlobal(globalData,'global')">🌐 Apprecio</button>
@@ -356,11 +359,11 @@ function renderGlobal(data, areaId) {
   </div>
   <div style="margin-bottom:16px;display:flex;align-items:center;gap:10px;">
     <span style="font-size:10px;font-weight:700;color:var(--subtle);text-transform:uppercase;letter-spacing:0.4px;">Período:</span>
-    <select onchange="cargarGlobal(this.value)" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:var(--dark);background:white;border:0.5px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;">
-      <option value="acumulado" ${!data.mes_filtro||data.mes_filtro==='acumulado'?'selected':''}>Acumulado</option>
-      ${(data.meses_disponibles||[]).map(m=>`<option value="${m}" ${data.mes_filtro===m?'selected':''}>${m.charAt(0).toUpperCase()+m.slice(1)}</option>`).join('')}
+    <select id="global-mes-select" onchange="cargarGlobal(this.value)" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:var(--dark);background:white;border:0.5px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;">
+      <option value="acumulado" ${mesGlobalActivo==='acumulado'?'selected':''}>Acumulado</option>
+      ${mesesSelector.map(m=>`<option value="${m}" ${mesGlobalActivo===m?'selected':''}>${m.charAt(0).toUpperCase()+m.slice(1)}</option>`).join('')}
     </select>
-    ${data.mes_filtro&&data.mes_filtro!=='acumulado'?`<span class="badge-sm b-purple">Mostrando: ${data.mes_filtro}</span>`:''}
+    ${mesGlobalActivo&&mesGlobalActivo!=='acumulado'?`<span class="badge-sm b-purple">Mostrando: ${mesGlobalActivo}</span>`:''}
   </div>`;
 
   const metricsHTML = `<div class="metrics-row">
@@ -393,19 +396,29 @@ function renderGlobal(data, areaId) {
       const count = ps.length;
       return `<div class="nb-cell" style="background:${cell.bg};min-height:120px;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%;">
-          <div class="nb-cell-label" style="color:${cell.color};font-size:9px;">${cell.label}</div>
-          ${count>0?`<span style="font-size:9px;font-weight:700;color:${cell.color};background:white;padding:1px 5px;border-radius:10px;flex-shrink:0;">${count}</span>`:''}
+          <div class="nb-cell-label" style="color:${cell.color};font-size:9px;font-family:'Montserrat',sans-serif;font-weight:700;">${cell.label}</div>
+          ${count>0?`<span style="font-size:9px;font-weight:700;font-family:'Montserrat',sans-serif;color:${cell.color};background:white;padding:1px 5px;border-radius:10px;flex-shrink:0;">${count}</span>`:''}
         </div>
         <div class="nb-personas" style="margin-top:6px;">${psHTML}</div>
       </div>`;
     }).join('');
     return `<div class="nb-wrapper">
-      <div style="display:flex;align-items:center;margin-right:4px;"><div class="nb-y-label-main">Potencial</div></div>
+      <div style="display:flex;align-items:center;margin-right:6px;">
+        <div style="writing-mode:vertical-rl;transform:rotate(180deg);font-size:9px;font-weight:700;font-family:'Montserrat',sans-serif;color:var(--subtle);letter-spacing:1px;text-transform:uppercase;">Potencial</div>
+      </div>
       <div style="flex:1;">
-        <div style="font-size:9px;color:var(--subtle);text-align:center;margin-bottom:4px;">Alto · Medio · Bajo</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">${cellsHTML}</div>
-        <div class="nb-x-labels"><span>Bajo</span><span>Medio</span><span>Alto</span></div>
-        <div class="nb-axis-title">Performance</div>
+        <div style="display:flex;gap:4px;margin-bottom:2px;">
+          <div style="display:flex;flex-direction:column;justify-content:space-around;width:44px;text-align:right;padding-right:6px;font-size:8px;font-weight:600;font-family:'Montserrat',sans-serif;color:var(--subtle);">
+            <span>Alto (3)</span><span>Medio (2)</span><span>Bajo (1)</span>
+          </div>
+          <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">${cellsHTML}</div>
+        </div>
+        <div style="display:flex;margin-left:50px;">
+          <div style="flex:1;display:flex;justify-content:space-around;font-size:8px;font-weight:600;font-family:'Montserrat',sans-serif;color:var(--subtle);padding-top:4px;">
+            <span>Bajo</span><span>Medio</span><span>Alto</span>
+          </div>
+        </div>
+        <div style="text-align:center;margin-left:50px;font-size:9px;font-weight:700;font-family:'Montserrat',sans-serif;color:var(--subtle);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">Performance</div>
       </div>
     </div>`;
   }
@@ -758,20 +771,22 @@ function renderDashboard(data, rutActual) {
         if (!personas.length) {
           reportesCont.innerHTML = '<div class="empty">Sin reportes directos registrados.</div>';
         } else {
-          const mesesNombres = MESES_ORDEN;
           const mesesCortos = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
           const rows = personas.map(p => {
             const colabConCheckin = colabs.find(c => c.rut === p.rut);
             const mesesColab = colabConCheckin?.meses || [];
+            // Mostrar los 12 meses del año siempre
             const dots = mesesCortos.map((mc,i) => {
-              const tiene = mesesColab.some(mes=>mes.toLowerCase().includes(mesesNombres[i]));
+              const tiene = mesesColab.some(mes=>mes.toLowerCase().includes(MESES_ORDEN[i]));
               return `<div class="dot ${tiene?'dot-ok':'dot-empty'}" title="${mc}"></div>`;
             }).join('');
             const initials = p.nombre.split(' ').slice(0,2).map(n=>n[0]).join('');
             const sc = scoresPorColab[p.rut];
             const perf = sc ? avg(sc.notas_perf) : null;
             const areaLabel = [p.area, p.subarea1].filter(Boolean).join(' · ');
-            return `<tr onclick="verDetalle('${p.rut}')">
+            // Guardar datos mínimos en el cache antes del onclick
+            const datosMinimos = JSON.stringify({rut:p.rut,nombre:p.nombre,cargo:p.cargo||'',area:p.area||''}).replace(/'/g,'&apos;');
+            return `<tr onclick="verDetalleConDatos('${p.rut}', '${datosMinimos}')">
               <td><div style="display:flex;align-items:center;gap:8px;">
                 <div style="width:28px;height:28px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0;">${initials}</div>
                 <div><div style="font-weight:600;font-size:11px;">${p.nombre}</div><div style="font-size:9px;color:var(--subtle);">${p.cargo} · ${areaLabel}</div></div>
@@ -1139,6 +1154,25 @@ function renderDashboard(data, rutActual) {
   renderEquipoTree(rutActual);
 }
 
+function verDetalleConDatos(rut, datosMinimosStr) {
+  // Asegurar que el colaborador exista en dashboardData.colaboradores
+  if (dashboardData && !dashboardData.colaboradores.find(c=>c.rut===rut)) {
+    try {
+      const datos = JSON.parse(datosMinimosStr.replace(/&apos;/g,"'"));
+      dashboardData.colaboradores.push({
+        rut: datos.rut,
+        nombre: datos.nombre,
+        lider: datos.cargo || '',
+        checkins: 0,
+        meses: [],
+        accionables_activos: 0,
+        accionables_cumplidos: 0
+      });
+    } catch(e) {}
+  }
+  verDetalle(rut);
+}
+
 function verDetalle(rut) {
   if (!dashboardData) return;
 
@@ -1195,7 +1229,10 @@ function verDetalle(rut) {
     </div>`;
   }
 
-  const mesesUnicos = sortMeses([...new Set(colab.meses||[])]);
+  const mesesConCheckin = sortMeses([...new Set(colab.meses||[])]);
+  const anioActual = new Date().getFullYear();
+  const todosMeses12 = MESES_ORDEN.map(m=>`${m} ${anioActual}`);
+  const mesesUnicos = todosMeses12; // mostrar siempre los 12 meses
   const accionablesPorMes = dashboardData.accionables_por_colab_mes || {};
   const bitacoraListaColab = (dashboardData.bitacora_lista||[]).filter(b=>b.rut_colaborador===rut);
   const bitacoraListaOrdenada = sortMeses(bitacoraListaColab.map(b=>b.mes).filter((m,i,a)=>a.indexOf(m)===i)).map(mes=>bitacoraListaColab.find(b=>b.mes===mes)).filter(Boolean);
@@ -1209,18 +1246,20 @@ function verDetalle(rut) {
 
   // Timeline — solo muestra resumen de accionables por mes
   const timelineHTML = mesesUnicos.map(mes=>{
+    const tieneCheckin = mesesConCheckin.includes(mes);
     const key = `${rut}__${mes}`;
     const acMes = accionablesPorMes[key] || { cumplidos_tiempo:0, atrasados:0, activos:0 };
     const totalAc = acMes.cumplidos_tiempo + acMes.atrasados + acMes.activos;
+    const dotColor = tieneCheckin ? 'var(--red)' : 'var(--border)';
     return `<div class="timeline-item">
-      <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+      <div class="tl-left"><div class="tl-dot" style="background:${dotColor};"></div><div class="tl-line"></div></div>
       <div class="tl-content">
-        <div class="tl-mes">${mes.charAt(0).toUpperCase()+mes.slice(1)}</div>
-        <div class="tl-tags">
+        <div class="tl-mes" style="color:${tieneCheckin?'var(--red)':'var(--subtle)'};">${mes.charAt(0).toUpperCase()+mes.slice(1)}</div>
+        ${tieneCheckin ? `<div class="tl-tags">
           ${acMes.cumplidos_tiempo>0?`<span class="tl-tag" style="background:#e6f9ee;color:#1a8a45;">✓ ${acMes.cumplidos_tiempo} cerrado${acMes.cumplidos_tiempo>1?'s':''} a tiempo</span>`:''}
           ${acMes.atrasados>0?`<span class="tl-tag" style="background:#fff0f3;color:#FA345E;">⚠ ${acMes.atrasados} pendiente${acMes.atrasados>1?'s':''}</span>`:''}
           ${totalAc===0?`<span class="tl-tag" style="background:var(--gray);color:var(--subtle);">Sin accionables</span>`:''}
-        </div>
+        </div>` : `<div style="font-size:9px;color:var(--subtle);font-style:italic;">Sin check-in</div>`}
       </div>
     </div>`;
   }).join('');
