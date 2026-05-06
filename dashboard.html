@@ -775,7 +775,6 @@ function renderDashboard(data, rutActual) {
           const rows = personas.map(p => {
             const colabConCheckin = colabs.find(c => c.rut === p.rut);
             const mesesColab = colabConCheckin?.meses || [];
-            // Mostrar los 12 meses del año siempre
             const dots = mesesCortos.map((mc,i) => {
               const tiene = mesesColab.some(mes=>mes.toLowerCase().includes(MESES_ORDEN[i]));
               return `<div class="dot ${tiene?'dot-ok':'dot-empty'}" title="${mc}"></div>`;
@@ -784,9 +783,10 @@ function renderDashboard(data, rutActual) {
             const sc = scoresPorColab[p.rut];
             const perf = sc ? avg(sc.notas_perf) : null;
             const areaLabel = [p.area, p.subarea1].filter(Boolean).join(' · ');
-            // Guardar datos mínimos en el cache antes del onclick
-            const datosMinimos = JSON.stringify({rut:p.rut,nombre:p.nombre,cargo:p.cargo||'',area:p.area||''}).replace(/'/g,'&apos;');
-            return `<tr onclick="verDetalleConDatos('${p.rut}', '${datosMinimos}')">
+            // Guardar en mapa global para onclick seguro
+            window._colabCache = window._colabCache || {};
+            window._colabCache[p.rut] = {rut:p.rut, nombre:p.nombre, cargo:p.cargo||'', area:p.area||''};
+            return `<tr onclick="verDetalleSeguro('${p.rut}')">
               <td><div style="display:flex;align-items:center;gap:8px;">
                 <div style="width:28px;height:28px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0;">${initials}</div>
                 <div><div style="font-weight:600;font-size:11px;">${p.nombre}</div><div style="font-size:9px;color:var(--subtle);">${p.cargo} · ${areaLabel}</div></div>
@@ -1154,11 +1154,12 @@ function renderDashboard(data, rutActual) {
   renderEquipoTree(rutActual);
 }
 
-function verDetalleConDatos(rut, datosMinimosStr) {
-  // Asegurar que el colaborador exista en dashboardData.colaboradores
-  if (dashboardData && !dashboardData.colaboradores.find(c=>c.rut===rut)) {
-    try {
-      const datos = JSON.parse(datosMinimosStr.replace(/&apos;/g,"'"));
+function verDetalleSeguro(rut) {
+  if (!dashboardData) return;
+  // Si no está en colaboradores, lo agrega desde el mapa global
+  if (!dashboardData.colaboradores.find(c=>c.rut===rut)) {
+    const datos = window._colabCache?.[rut];
+    if (datos) {
       dashboardData.colaboradores.push({
         rut: datos.rut,
         nombre: datos.nombre,
@@ -1168,9 +1169,13 @@ function verDetalleConDatos(rut, datosMinimosStr) {
         accionables_activos: 0,
         accionables_cumplidos: 0
       });
-    } catch(e) {}
+    }
   }
   verDetalle(rut);
+}
+
+function verDetalleConDatos(rut, datosMinimosStr) {
+  verDetalleSeguro(rut);
 }
 
 function verDetalle(rut) {
