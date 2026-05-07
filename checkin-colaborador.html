@@ -321,8 +321,9 @@ async function iniciarApp() {
       return;
     }
 
-    // Líder o Admin → redirigir al formulario del líder
-    if (data.rol === 'lider' || data.rol === 'admin') {
+    // Solo Jaime Villatoro no puede llenar el formulario del colaborador
+    const SOLO_LIDER = ['jvillatoro@apprecio.com'];
+    if (SOLO_LIDER.includes(usuarioActual.email.toLowerCase())) {
       window.location.href = 'index.html';
       return;
     }
