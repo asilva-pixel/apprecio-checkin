@@ -200,6 +200,7 @@
     </div>
     <div class="header-user">
       <select class="mes-select" id="mes-select"></select>
+      <button class="logout-btn" id="btn-mi-checkin" onclick="window.location.href='checkin-colaborador.html'" style="display:none;background:rgba(255,255,255,0.2);color:white;border:0.5px solid rgba(255,255,255,0.4);">📝 Mi check-in</button>
       <span class="user-name" id="user-name"></span>
       <button class="logout-btn" onclick="logout()">Salir</button>
     </div>
@@ -608,12 +609,17 @@ async function iniciarApp() {
 
     // Admin → carga todos los líderes con selector
     if (rol === 'admin') {
+      // Mostrar botón Mi check-in si no es Jaime
+      if (!['jvillatoro@apprecio.com'].includes(usuarioActual.email.toLowerCase())) {
+        document.getElementById('btn-mi-checkin').style.display = 'block';
+      }
       await cargarLideres();
       return;
     }
 
     // Líder → precarga su nombre y oculta el selector
     if (rol === 'lider') {
+      document.getElementById('btn-mi-checkin').style.display = 'block';
       // Ocultar selector de líder y precargarlo con el RUT del usuario
       const selLider = document.getElementById('lider-select');
       selLider.style.display = 'none';
